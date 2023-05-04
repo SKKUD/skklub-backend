@@ -1,0 +1,33 @@
+package com.skklub.admin.service.dto;
+
+import com.skklub.admin.domain.ActivityImage;
+import com.skklub.admin.domain.Logo;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class FileNames {
+    private String originalName;
+    private String savedName;
+
+
+    public Logo toLogoEntity() {
+        return new Logo(originalName, savedName);
+    }
+
+    public ActivityImage toActivityImageEntity() {
+        return new ActivityImage(originalName, savedName);
+    }
+
+    public FileNames(Logo logo) {
+        this.originalName = logo.getOriginalName();
+        this.savedName = logo.getUploadedName();
+    }
+    public FileNames(ActivityImage activityImage) {
+        this.originalName = activityImage.getOriginalName();
+        this.savedName = activityImage.getUploadedName();
+    }
+}
