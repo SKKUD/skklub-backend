@@ -18,6 +18,10 @@ repositories {
 	mavenCentral()
 }
 
+jar {
+	enabled = false
+}
+
 dependencies {
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.420'
 	implementation 'com.amazonaws:aws-java-sdk-core:1.12.420'
