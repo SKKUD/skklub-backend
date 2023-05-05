@@ -42,9 +42,9 @@ jobs:
   
     - name: Docker build & push
       run: |
-        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-        docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }} .
-        docker push ${{ secrets.DOCKER_REPO }}
+        sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        sudo docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }} .
+        sudo docker push ${{ secrets.DOCKER_REPO }}
         
     - name: Deploy
       uses: appleboy/ssh-action@master
