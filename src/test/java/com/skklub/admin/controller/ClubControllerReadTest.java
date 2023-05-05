@@ -4,15 +4,12 @@ import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.*;
-import com.skklub.admin.domain.enums.ActivityType;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
-import com.skklub.admin.domain.enums.College;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,11 +19,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.io.FileInputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +29,6 @@ import java.util.stream.Collectors;
 
 import static java.time.LocalTime.now;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -72,8 +66,8 @@ class ClubControllerReadTest {
         fileNames.add(new FileNames("originalAc2.png", "uploadedAc2.png"));
         fileNames.add(new FileNames("originalAc3.png", "uploadedAc3.png"));
         fileNames.add(new FileNames("originalAc4.png", "uploadedAc4.png"));
-        Club club = new Club("name","activity_description", ActivityType.취미교양, ClubType.중앙동아리,"brief_activity_description",
-                Campus.명륜, "club_description", College.경영대학,  "1234", "head_line", "mandatory_activate_period", 60,
+        Club club = new Club("name","activity_description", "취미교양", ClubType.중앙동아리,"brief_activity_description",
+                Campus.명륜, "club_description",  "1234", "head_line", "mandatory_activate_period", 60,
                  "regular_meeting_time", "room_location", "web_link1", "web_link2");
         Logo logo = new Logo(fileName.getOriginalName(), fileName.getSavedName());
         List<ActivityImage> activityImages = fileNames.stream().map(f -> new ActivityImage(f.getOriginalName(), f.getSavedName())).collect(Collectors.toList());
@@ -116,8 +110,7 @@ class ClubControllerReadTest {
                                         fieldWithPath("name").type(WireFormat.FieldType.STRING).description("동아리 이름"),
                                         fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("캠퍼스"),
                                         fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("동아리 종류"),
-                                        fieldWithPath("college").type(WireFormat.FieldType.STRING).description("소속 대학 종류"),
-                                        fieldWithPath("activityType").type(WireFormat.FieldType.STRING).description("동아리 활동 종류"),
+                                        fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("동아리 분과"),
                                         fieldWithPath("briefActivityDescription").type(WireFormat.FieldType.STRING).description("동아리 활동 종류 - 세분화"),
                                         fieldWithPath("headLine").type(WireFormat.FieldType.STRING).description("페이지 헤드라인"),
                                         fieldWithPath("establishAt").type(WireFormat.FieldType.STRING).description("설립연도"),

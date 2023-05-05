@@ -19,8 +19,7 @@ public class ClubDetailInfoDto {
     //분류
     private Campus campus;
     private String clubType;
-    private String college;
-    private String activityType;
+    private String belongs;
     private String briefActivityDescription;
 
     //Outlines
@@ -63,8 +62,7 @@ public class ClubDetailInfoDto {
         this.id = club.getId();
         this.campus = club.getCampus();
         this.clubType = club.getClubType().toString();
-        this.college = club.getCollege().toString();
-        this.activityType = club.getActivityType().toString();
+        this.belongs = club.getBelongs();
         this.briefActivityDescription = club.getBriefActivityDescription();
         this.name = club.getName();
         this.headLine = club.getHeadLine();

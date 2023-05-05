@@ -95,13 +95,13 @@ class ClubControllerCreateTest {
         given(s3Transferer.uploadOne(any(MockMultipartFile.class))).willReturn(new FileNames("test.png", "saved-test.png"));
         //when
         ResultActions actions = mockMvc.perform(
-                multipart("/club/creation")
+                multipart("/club")
                         .file(mockLogo)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .queryParam("clubName", "정상적인 클럽 SKKULOL")
                         .queryParam("campus", "명륜")
-                        .queryParam("college", "경영대학")
-                        .queryParam("activityType", "취미교양")
+                        .queryParam("clubType", "중앙동아리")
+                        .queryParam("belongs", "취미교양")
                         .queryParam("briefActivityDescription", "E-SPORTS")
                         .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
                         .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
@@ -120,13 +120,13 @@ class ClubControllerCreateTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.id", 0L).exists())
                 .andExpect(jsonPath("$.name", "정상적인 클럽 SKKULOL").exists())
-                .andDo(document("/club",
+                .andDo(document("/club/creation",
                         queryParameters(
                                 parameterWithName("clubName").description("동아리 이름"),
                                 parameterWithName("campus").description("분류 - 캠퍼스"),
-                                parameterWithName("college").description("분류 - 대학"),
-                                parameterWithName("activityType").description("분류 - 활동 타입"),
-                                parameterWithName("briefActivityDescription").description(" 분류 - 활동"),
+                                parameterWithName("clubType").description("분류 - 동아리 종류"),
+                                parameterWithName("belongs").description("분류 - 동아리 분과"),
+                                parameterWithName("briefActivityDescription").description(" 분류 - 활동 설명"),
                                 parameterWithName("activityDescription").description("자세한 활동 설명"),
                                 parameterWithName("clubDescription").description("자세한 동아리 설명"),
                                 parameterWithName("establishDate").description("설립 연도"),

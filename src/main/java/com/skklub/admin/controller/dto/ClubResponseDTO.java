@@ -1,22 +1,14 @@
 package com.skklub.admin.controller.dto;
 
-import com.skklub.admin.domain.*;
-import com.skklub.admin.domain.enums.ActivityType;
 import com.skklub.admin.domain.enums.Campus;
-import com.skklub.admin.domain.enums.ClubType;
-import com.skklub.admin.domain.enums.College;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
-import com.skklub.admin.service.dto.FileNames;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -28,8 +20,7 @@ public class ClubResponseDTO {
     //분류
     private Campus campus;
     private String clubType;
-    private String college;
-    private String activityType;
+    private String belongs;
     private String briefActivityDescription;
 
     //Outlines
@@ -72,8 +63,7 @@ public class ClubResponseDTO {
         this.id = clubDetailInfoDto.getId();
         this.campus = clubDetailInfoDto.getCampus();
         this.clubType = clubDetailInfoDto.getClubType().toString();
-        this.college = clubDetailInfoDto.getCollege().toString();
-        this.activityType = clubDetailInfoDto.getActivityType().toString();
+        this.belongs = clubDetailInfoDto.getBelongs();
         this.briefActivityDescription = clubDetailInfoDto.getBriefActivityDescription();
         this.name = clubDetailInfoDto.getName();
         this.headLine = clubDetailInfoDto.getHeadLine();
