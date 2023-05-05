@@ -9,10 +9,10 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
   servlet:
     multipart:
       max-request-size: 1000MB

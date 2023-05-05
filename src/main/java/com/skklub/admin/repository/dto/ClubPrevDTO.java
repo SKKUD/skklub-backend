@@ -1,9 +1,8 @@
-package com.skklub.admin.controller.dto;
+package com.skklub.admin.repository.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
@@ -11,8 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class ClubPrevDTO {
     private Long id;
     private String name;
-    private MultipartFile logo;
     private String belongs;
     private String briefActivityDescription;
-
+    private String logoOriginalName;
+    private String logoUploadedName;
 }

@@ -2,11 +2,16 @@ package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.enums.Campus;
+import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.repository.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,7 +49,7 @@ public class ClubController {
 //=====READ=====//
 
     //세부 정보 조회 by ID
-    @GetMapping(value = "/club/{clubId}")
+    @GetMapping( "/club/{clubId}")
     public ClubResponseDTO getClubById(@PathVariable Long clubId) {
         log.info("request CLUB Id : {}", clubId);
         ClubDetailInfoDto clubDetailInfoDto = clubService.getClubDetailInfo(clubId);
@@ -52,31 +57,12 @@ public class ClubController {
         List<S3DownloadDto> activityImages = s3Transferer.downloadAll(clubDetailInfoDto.getActivityImages());
         return new ClubResponseDTO(clubDetailInfoDto, logo, activityImages);
     }
-//
-//    //간소화(Preview) 조회
-//    @GetMapping("/club/prev")
-//    public Page<ClubPrevDTO> getClubPrev(Pageable pageable) {
-//        return null;
-//    }
-//
-//    //간소화(Preview) 조회 by Name(부분 일치)
-//    @GetMapping("/club/prev/{clubName}")
-//    public Page<ClubPrevDTO> getClubPrevByName(@PathVariable String clubName, Pageable pageable) {
-//        return null;
-//    }
-//
-//    //간소화(Preview) 조회 by Campus
-//    @GetMapping("/club/prev/{campus}")
-//    public Page<ClubPrevDTO> getClubPrevByCampus(@PathVariable Campus campus, Pageable pageable) {
-//        return null;
-//    }
-//
-//    //간소화(Preview) 조회 by
-//    @GetMapping("/club/prev/{activityType}")
-//    public Page<ClubPrevDTO> getClubPrevByActivityType(@PathVariable String activityType, Pageable pageable) {
-//        return null;
-//    }
 
+    //간소화(Preview) 조회
+    @GetMapping("/club/prev/{campus}/{clubType}/{belongs}")
+    public Page<ClubPrevDTO> getClubPrev(@PathVariable Campus campus, @PathVariable ClubType clubType, @PathVariable String belongs, Pageable pageable) {
+        return clubService.getClubPrevs(campus, clubType, belongs, pageable);
+    }
 
 //=====UPDATE=====//
 

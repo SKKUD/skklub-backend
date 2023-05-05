@@ -3,12 +3,16 @@ package com.skklub.admin.repository;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.repository.dto.ClubPrevDTO;
 import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -26,7 +30,46 @@ class ClubRepositoryTest {
 
     @BeforeEach
     public void beforeEach() {
+        for(int t = 0; t < 10; t++) {
+            Club club = new Club(
+                    "정상적인 클럽 SKKULOL" + t
+                    , "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다."
+                    , "취미교양"
+                    , ClubType.중앙동아리
+                    , "E-SPORTS"
+                    , Campus.명륜
+                    , "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^"
+                    , "2023"
+                    , "명륜 게임 동아리입니다"
+                    , "4학기"
+                    , 60
+                    , "Thursday 19:00"
+                    , "학생회관 80210"
+                    , "www.skklol.com"
+                    , "www.skkulol.edu");
+            Recruit recruit = new Recruit(LocalDateTime.now(), LocalDateTime.now(), "20명", "1차 서류, 2차 면접", "010 - 0000 - 0000", "www.example.com");
+            User user = new User("exampleId", "examplePw", 3, "Lee", "010 - 1234 - 5678");
+            Logo logo = new Logo("logoFile.png" + t, "uploadedLogo.png");
+            List<ActivityImage> activityImages = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                ActivityImage a = new ActivityImage("activityImages" + i + ".png", "uploadedActivityImage" + i + ".png");
+                em.persist(a);
+                activityImages.add(a);
+            }
 
+            club.appendActivityImages(activityImages);
+            club.matchLogo(logo);
+            club.startRecruit(recruit);
+            club.setUser(user);
+
+            em.persist(recruit);
+            em.persist(user);
+            em.persist(club);
+            em.persist(logo);
+        }
+
+        em.flush();
+        em.clear();
     }
 
     @Test
@@ -135,4 +178,34 @@ class ClubRepositoryTest {
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> findedClub.getRecruit().getId());
         Assertions.assertThat(findedClub.getPresident().getId()).isEqualTo(userId);
     }
+
+    @Test
+    public void findClubPrevs_FullData_Success() throws Exception{
+        //given
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.Direction.ASC, "id");
+
+        //when
+        Page<ClubPrevDTO> clubPrevs = clubRepository.findClubPrevs(Campus.명륜, ClubType.중앙동아리, "취미교양", pageRequest);
+
+        //then
+        Assertions.assertThat(clubPrevs.getTotalElements()).isEqualTo(10);
+        Assertions.assertThat(clubPrevs.getTotalPages()).isEqualTo(4);
+        Assertions.assertThat(clubPrevs.getNumber()).isEqualTo(0);
+        Assertions.assertThat(clubPrevs.getSize()).isEqualTo(3);
+        Assertions.assertThat(clubPrevs.isFirst()).isTrue();
+        Assertions.assertThat(clubPrevs.hasNext()).isTrue();
+     }
+
+     @Test
+     public void findClubPrevs_withNullParameters_NoResult() throws Exception{
+         //given
+         PageRequest pageRequest = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
+
+         //when
+         Page<ClubPrevDTO> clubPrevs = clubRepository.findClubPrevs(Campus.명륜, null, "취미교양", pageRequest);
+         //then
+         Assertions.assertThat(clubPrevs.getContent().size()).isZero();
+         Assertions.assertThat(clubPrevs.isFirst()).isTrue();
+         Assertions.assertThat(clubPrevs.hasNext()).isFalse();
+      }
 }

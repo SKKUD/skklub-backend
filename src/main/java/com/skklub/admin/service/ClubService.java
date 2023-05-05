@@ -3,13 +3,18 @@ package com.skklub.admin.service;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.enums.Campus;
+import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.LogoRepository;
+import com.skklub.admin.repository.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,5 +53,11 @@ public class ClubService {
         Club club = clubRepository.findDetailClubById(clubId).get();
         log.info("=========================================");
         return new ClubDetailInfoDto(club, club.getLogo(), club.getActivityImages(), club.getRecruit(), club.getPresident());
+    }
+
+    public Page<ClubPrevDTO> getClubPrevs(Campus campus, ClubType clubType, String belongs, Pageable pageable) {
+        if(belongs.equals("전체")) return clubRepository.findClubPrevs(campus, clubType, pageable);
+        if(clubType.equals("전체")) return clubRepository.findClubPrevs(campus, pageable);
+        return clubRepository.findClubPrevs(campus, clubType, belongs, pageable);
     }
 }

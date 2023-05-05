@@ -3,6 +3,7 @@ package com.skklub.admin.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
@@ -53,7 +54,6 @@ class ClubControllerCreateTest {
     private MockMvc mockMvc;
     @MockBean
     private ClubService clubService;
-
     @MockBean
     private S3Transferer s3Transferer;
 
