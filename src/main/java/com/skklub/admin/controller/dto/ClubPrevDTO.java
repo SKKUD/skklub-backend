@@ -1,6 +1,5 @@
 package com.skklub.admin.controller.dto;
 
-import com.skklub.admin.domain.enums.ActivityType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,7 @@ public class ClubPrevDTO {
     private Long id;
     private String name;
     private MultipartFile logo;
-    private ActivityType activityType;
+    private String belongs;
     private String briefActivityDescription;
 
 }

@@ -1,12 +1,9 @@
 package com.skklub.admin.domain;
 
-import com.skklub.admin.domain.enums.ActivityType;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
-import com.skklub.admin.domain.enums.College;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,10 +26,7 @@ public class Club extends BaseEntity {
     private Campus campus;
     @Enumerated(EnumType.STRING)
     private ClubType clubType;
-    @Enumerated(EnumType.STRING)
-    private College college;
-    @Enumerated(EnumType.STRING)
-    private ActivityType activityType;
+    private String belongs;
     private String briefActivityDescription;
 
     //Outlines
@@ -70,12 +64,11 @@ public class Club extends BaseEntity {
 
     public Club(String name,
                 String activityDescription,
-                ActivityType activityType,
+                String belongs,
                 ClubType clubType,
                 String briefActivityDescription,
                 Campus campus,
                 String clubDescription,
-                College college,
                 String establishAt,
                 String headLine,
                 String mandatoryActivatePeriod,
@@ -86,12 +79,11 @@ public class Club extends BaseEntity {
                 String webLink2) {
         this.name = name;
         this.activityDescription = activityDescription;
-        this.activityType = activityType;
+        this.belongs = belongs;
         this.clubType = clubType;
         this.briefActivityDescription = briefActivityDescription;
         this.campus = campus;
         this.clubDescription = clubDescription;
-        this.college = college;
         this.establishAt = establishAt;
         this.headLine = headLine;
         this.mandatoryActivatePeriod = mandatoryActivatePeriod;
