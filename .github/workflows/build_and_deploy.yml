@@ -28,7 +28,21 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        
+    
+    - name: Gradle Caching
+      uses: actions/cache@v3
+      with:
+        path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+            ${{ runner.os }}-gradle-
+            
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
+      shell: bash
+      
     - name: Create application.yml
       run: |
         mkdir -p ./src/main/resources
@@ -36,15 +50,15 @@ jobs:
         touch ./application.yml
         echo "${{ secrets.PROPERTIES }}" > ./application.yml
       shell: bash
-      
+    
     - name: Build with Gradle
       run: ./gradlew build -x test
   
     - name: Docker build & push
       run: |
-        sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-        sudo docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }} .
-        sudo docker push ${{ secrets.DOCKER_REPO }}
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }} .
+        docker push ${{ secrets.DOCKER_REPO }}
         
     - name: Deploy
       uses: appleboy/ssh-action@master
