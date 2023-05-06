@@ -52,8 +52,15 @@ jobs:
       shell: bash
     
     - name: Build with Gradle
-      run: ./gradlew build -x test
-  
+      run: ./gradlew build
+      
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: |
+          **/build/test-results/test/TEST-*.xml
+
     - name: Docker build & push
       run: |
         docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
