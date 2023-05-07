@@ -3,7 +3,6 @@ package com.skklub.admin.repository;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
-import com.skklub.admin.repository.dto.ClubPrevDTO;
 import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -185,7 +184,7 @@ class ClubRepositoryTest {
         PageRequest pageRequest = PageRequest.of(0, 3, Sort.Direction.ASC, "id");
 
         //when
-        Page<ClubPrevDTO> clubPrevs = clubRepository.findClubPrevs(Campus.명륜, ClubType.중앙동아리, "취미교양", pageRequest);
+        Page<Club> clubPrevs = clubRepository.findClubPrevByCampusAndClubTypeAndBelongsOrderByName(Campus.명륜, ClubType.중앙동아리, "취미교양", pageRequest);
 
         //then
         Assertions.assertThat(clubPrevs.getTotalElements()).isEqualTo(10);
@@ -202,7 +201,7 @@ class ClubRepositoryTest {
          PageRequest pageRequest = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
 
          //when
-         Page<ClubPrevDTO> clubPrevs = clubRepository.findClubPrevs(Campus.명륜, null, "취미교양", pageRequest);
+         Page<Club> clubPrevs = clubRepository.findClubPrevByCampusAndClubTypeAndBelongsOrderByName(Campus.명륜, null, "취미교양", pageRequest);
          //then
          Assertions.assertThat(clubPrevs.getContent().size()).isZero();
          Assertions.assertThat(clubPrevs.isFirst()).isTrue();

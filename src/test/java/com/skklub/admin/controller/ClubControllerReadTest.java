@@ -6,6 +6,7 @@ import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
@@ -18,6 +19,9 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -34,8 +38,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
@@ -91,7 +94,7 @@ class ClubControllerReadTest {
         s3DownloadDtos.add(new S3DownloadDto(4L, "Ac4.png", "testBytes"));
 
 
-        given(clubService.getClubDetailInfo(eq(0L))).willReturn(clubDetailInfoDto);
+        given(clubService.getClubDetailInfoById(eq(0L))).willReturn(clubDetailInfoDto);
         given(s3Transferer.downloadOne(fileName)).willReturn(s3DownloadDto);
         given(s3Transferer.downloadAll(fileNames)).willReturn(s3DownloadDtos);
 
@@ -140,6 +143,90 @@ class ClubControllerReadTest {
                         )
 
                 );
-
     }
+
+    @Test
+    public void getClubPrev_SelectToEnd_Success() throws Exception{
+        //given
+        Page<ClubPrevDTO> page = Page.empty();
+        PageRequest request = PageRequest.of(2, 3, Sort.Direction.ASC, "name");
+        given(clubService.getClubPrevsByCategories(Campus.명륜, ClubType.중앙동아리, "취미교양", request)).willReturn(page);
+        
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/club/prev/{campus}/{clubType}/{belongs}", "명륜", "중앙동아리", "취미교양")
+                        .queryParam("size", "3")
+                        .queryParam("page", "2")
+                        .queryParam("sortBy", "name-asc")
+        );
+
+        //then
+//        actions.andExpect(status().isOk())
+//                .andDo(
+//                        document("/club/Prev",
+//                                pathParameters(
+//                                        parameterWithName("").description(),
+//                                        parameterWithName().description(),
+//                                        parameterWithName().description()
+//                                ),
+//                                queryParameters(
+//                                        parameterWithName().description(),
+//                                        parameterWithName().description(),
+//                                        parameterWithName().description()
+//                                ),
+//                                responseFields(
+//
+//                                )
+//                        )
+//                );
+
+     }
+
+     @Test
+     public void getClubPrev_noSortParam_Success() throws Exception{
+         //given
+
+         //when
+         ResultActions actions = mockMvc.perform(
+                 get("/club/prev/{campus}/{clubType}/{belongs}", "명륜", "중앙동아리", "취미교양")
+                         .queryParam("size", "3")
+                         .queryParam("page", "2")
+         );
+
+         //then
+
+      }
+
+     @Test
+     public void getClubPrev_belongsEq전체_Success() throws Exception{
+         //given
+
+         //when
+         ResultActions actions = mockMvc.perform(
+                 get("/club/prev/{campus}/{clubType}/{belongs}", "명륜", "중앙동아리", "전체")
+                         .queryParam("size", "3")
+                         .queryParam("page", "2")
+                         .queryParam("sortBy", "name-asc")
+         );
+
+         //then
+
+      }
+
+      @Test
+      public void getClubPrev_ClubTypeEq전체_Success() throws Exception{
+          //given
+
+          //when
+          ResultActions actions = mockMvc.perform(
+                  get("/club/prev/{campus}/{clubType}/{belongs}", "명륜", "전체", "ㅁㄴㅇ")
+                          .queryParam("size", "3")
+                          .queryParam("page", "2")
+                          .queryParam("sortBy", "name-asc")
+          );
+
+          //then
+
+       }
+    
 }
