@@ -94,4 +94,4 @@ jobs:
       run: |
         mkdir -p ./src/main/resources/static/docs
         touch ./src/main/resources/static/docs/index.html
-        aws s3 cp ./index.html ${{ secrets.AWS_S3_API_DOCS }} --acl public-read
+        aws s3 cp ./src/main/resources/static/docs/index.html ${{ secrets.AWS_S3_API_DOCS }} --acl public-read
