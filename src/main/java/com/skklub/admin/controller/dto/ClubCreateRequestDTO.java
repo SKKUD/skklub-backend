@@ -18,8 +18,8 @@ public class ClubCreateRequestDTO {
 
     //enums
     private String belongs;
-    private String campus;
-    private String clubType;
+    private Campus campus;
+    private ClubType clubType;
 
     //Can be NULL;
     private String establishDate;
@@ -33,7 +33,7 @@ public class ClubCreateRequestDTO {
 
     public Club toEntity() {
         return new Club(clubName, activityDescription, belongs,
-                ClubType.valueOf(clubType), briefActivityDescription, Campus.valueOf(campus),
+                clubType, briefActivityDescription, campus,
                 clubDescription,  establishDate, headLine,
                 mandatoryActivatePeriod, memberAmount, regularMeetingTime, roomLocation, webLink1, webLink2);
     }

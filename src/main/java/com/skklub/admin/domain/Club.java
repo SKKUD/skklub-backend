@@ -76,7 +76,8 @@ public class Club extends BaseEntity {
                 String regularMeetingTime,
                 String roomLocation,
                 String webLink1,
-                String webLink2) {
+                String webLink2
+    ) {
         this.name = name;
         this.activityDescription = activityDescription;
         this.belongs = belongs;
@@ -94,8 +95,26 @@ public class Club extends BaseEntity {
         this.webLink2 = webLink2;
     }
 
-    //Must be Removed
-    public void matchLogo(Logo logo) {
+    public void update(Club updateInfo
+    ) {
+        this.name = updateInfo.name;
+        this.activityDescription = updateInfo.activityDescription;
+        this.belongs = updateInfo.belongs;
+        this.clubType = updateInfo.clubType;
+        this.briefActivityDescription = updateInfo.briefActivityDescription;
+        this.campus = updateInfo.campus;
+        this.clubDescription = updateInfo.clubDescription;
+        this.establishAt = updateInfo.establishAt;
+        this.headLine = updateInfo.headLine;
+        this.mandatoryActivatePeriod = updateInfo.mandatoryActivatePeriod;
+        this.memberAmount = updateInfo.memberAmount;
+        this.regularMeetingTime = updateInfo.regularMeetingTime;
+        this.roomLocation = updateInfo.roomLocation;
+        this.webLink1 = updateInfo.webLink1;
+        this.webLink2 = updateInfo.webLink2;
+    }
+
+    public void changeLogo(Logo logo) {
         this.logo = logo;
     }
 
@@ -106,8 +125,14 @@ public class Club extends BaseEntity {
         }
     }
 
+    public void removeActivityImages(ActivityImage activityImage) {
+    }
+
     public void startRecruit(Recruit recruit) {
         this.recruit = recruit;
+    }
+    public void endRecruit(Recruit recruit){
+        this.recruit = null;
     }
 
     //Must be Removed
