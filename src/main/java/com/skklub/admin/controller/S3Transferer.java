@@ -73,4 +73,8 @@ public class S3Transferer {
         }
         return new S3DownloadDto(bytes);
     }
+
+    public void deleteOne(String key) {
+        amazonS3.deleteObject(bucket, key);
+    }
 }

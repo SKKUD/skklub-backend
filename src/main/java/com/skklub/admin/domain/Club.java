@@ -126,6 +126,7 @@ public class Club extends BaseEntity {
     }
 
     public void removeActivityImages(ActivityImage activityImage) {
+        this.activityImages.remove(activityImage);
     }
 
     public void startRecruit(Recruit recruit) {
@@ -133,6 +134,22 @@ public class Club extends BaseEntity {
     }
     public void endRecruit(Recruit recruit){
         this.recruit = null;
+    }
+
+    public boolean remove() {
+        if(alive) {
+            alive = false;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean revive() {
+        if (alive) {
+            return false;
+        }
+        alive = true;
+        return true;
     }
 
     //Must be Removed

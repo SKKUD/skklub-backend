@@ -1,5 +1,6 @@
 package com.skklub.admin.service;
 
+import com.querydsl.core.group.GroupBy;
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
@@ -93,5 +94,34 @@ public class ClubService {
 
     private List<ClubPrevDTO> convertEntityToPrevDTO(List<Club> clubRepository) {
         return clubRepository.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
+    }
+
+    public Optional<String> deleteClub(Long clubId) {
+        return clubRepository.findById(clubId)
+                .map(club -> {
+                    if(club.remove()) return club.getName();
+                    return null;
+                });
+    }
+
+    public Optional<String> reviveClub(Long clubId) {
+        return clubRepository.findById(clubId)
+                .map(club -> {
+                    if(club.revive()) return club.getName();
+                    return null;
+                });
+    }
+
+    public Optional<String> deleteActivityImage(Long clubId, String activityImageName) {
+        Optional<ActivityImage> activityImage = activityImageRepository.findByOriginalName(activityImageName);
+        if(activityImage.isEmpty()) return Optional.empty();
+
+        Optional<Club> club = clubRepository.findById(clubId);
+        return club.map(c -> {
+            c.removeActivityImages(activityImage.get());
+            activityImageRepository.delete(activityImage.get());
+            return activityImage.get().getUploadedName();
+        });
+
     }
 }

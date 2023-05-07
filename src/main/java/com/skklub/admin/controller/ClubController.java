@@ -124,20 +124,32 @@ public class ClubController {
 
     //특정 활동 사진 삭제
     @DeleteMapping("/club/{clubId}/{activityImageName}")
-    public ActivityImageDeletionDTO deleteActivityImage(@PathVariable Long clubId, @PathVariable String activityImageName) {
-        return null;
+    public ResponseEntity<ActivityImageDeletionDTO> deleteActivityImage(@PathVariable Long clubId, @PathVariable String activityImageName) {
+        return clubService.deleteActivityImage(clubId, activityImageName)
+                .map(uploadedName -> {
+                    s3Transferer.deleteOne(uploadedName);
+                    return new ActivityImageDeletionDTO(clubId, activityImageName);
+                })
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
     }
 
     //삭제
     @DeleteMapping("/club/{clubId}")
-    public ClubNameAndIdDTO deleteClubById(@PathVariable Long clubId) {
-        return new ClubNameAndIdDTO();
+    public ResponseEntity<ClubNameAndIdDTO> deleteClubById(@PathVariable Long clubId) {
+        return clubService.deleteClub(clubId)
+                .map(name -> new ClubNameAndIdDTO(clubId, name))
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
     }
 
     //삭제 취소 (복구)
     @DeleteMapping("/club/{clubId}/cancel")
-    public ClubNameAndIdDTO cancelClubDeletionById(@PathVariable Long clubId) {
-        return new ClubNameAndIdDTO();
+    public ResponseEntity<ClubNameAndIdDTO> cancelClubDeletionById(@PathVariable Long clubId) {
+        return clubService.reviveClub(clubId)
+                .map(name -> new ClubNameAndIdDTO(clubId, name))
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
     }
 
 }

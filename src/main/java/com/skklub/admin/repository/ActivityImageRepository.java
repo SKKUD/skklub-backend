@@ -5,7 +5,8 @@ import com.skklub.admin.domain.Club;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ActivityImageRepository extends JpaRepository<ActivityImage, Long> {
-    public List<ActivityImage> findAllByClub(Club club);
+    Optional<ActivityImage> findByOriginalName(String originalName);
 }
