@@ -82,3 +82,13 @@ jobs:
           sudo docker pull ${{ secrets.DOCKER_REPO }}
           sudo docker compose up -d
           sudo docker image prune -f
+    
+    - name: Overwrite Api Document in S3
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+          touch ./index.html
+          echo "Hello Test!" > ./index.html
+          aws s3 cp ./index.html ${{ secrets.AWS_S3_API_DOCS }} --acl public-read
+          
