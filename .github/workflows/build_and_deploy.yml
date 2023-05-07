@@ -48,7 +48,7 @@ jobs:
     - name: Create application.yml
       run: |
         touch ./index.html
-        echo "Hello Test!" > ./index.html
+        echo Hello Test! > ./index.html
         mkdir -p ./src/main/resources
         cd ./src/main/resources
         touch ./application.yml
