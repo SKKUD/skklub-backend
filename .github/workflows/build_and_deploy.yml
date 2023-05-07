@@ -47,8 +47,6 @@ jobs:
       
     - name: Create application.yml
       run: |
-        touch ./index.html
-        echo Hello Test! > ./index.html
         mkdir -p ./src/main/resources
         cd ./src/main/resources
         touch ./application.yml
@@ -93,4 +91,7 @@ jobs:
         aws-region: ap-northeast-2
 
     - name: Overwrite Api Document in S3
-      run: aws s3 cp ./index.html ${{ secrets.AWS_S3_API_DOCS }} --acl public-read
+      run: |
+        mkdir -p ./src/main/resources/static/docs
+        touch ./src/main/resources/static/docs/index.html
+        aws s3 cp ./index.html ${{ secrets.AWS_S3_API_DOCS }} --acl public-read
