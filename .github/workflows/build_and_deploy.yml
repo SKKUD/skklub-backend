@@ -93,7 +93,4 @@ jobs:
         aws-region: ap-northeast-2
 
     - name: Overwrite Api Document in S3
-      uses: aws-actions/aws-cli@v1
-      with:
-        args: s3 cp ./index.html {{ secrets.AWS_S3_API_DOCS }} --acl public-read
-          
+      run: aws s3 cp ./index.html ${{ secrets.AWS_S3_API_DOCS }} --acl public-read
