@@ -195,7 +195,7 @@ class ClubControllerCreateTest {
         List<MultipartFile> multipartFiles = new ArrayList<>();
         List<FileNames> activityImageDtos = new ArrayList<>();
         given(s3Transferer.uploadAll(multipartFiles)).willReturn(activityImageDtos);
-        given(clubService.appendActivityImages(0L, activityImageDtos)).willReturn("ClubName");
+//        given(clubService.appendActivityImages(0L, activityImageDtos)).willReturn("ClubName");
 
         //when
         ResultActions actions = mockMvc.perform(

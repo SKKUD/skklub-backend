@@ -94,7 +94,7 @@ class ClubControllerReadTest {
         s3DownloadDtos.add(new S3DownloadDto(4L, "Ac4.png", "testBytes"));
 
 
-        given(clubService.getClubDetailInfoById(eq(0L))).willReturn(clubDetailInfoDto);
+//        given(clubService.getClubDetailInfoById(eq(0L))).willReturn(clubDetailInfoDto);
         given(s3Transferer.downloadOne(fileName)).willReturn(s3DownloadDto);
         given(s3Transferer.downloadAll(fileNames)).willReturn(s3DownloadDtos);
 
@@ -150,7 +150,7 @@ class ClubControllerReadTest {
         //given
         Page<ClubPrevDTO> page = Page.empty();
         PageRequest request = PageRequest.of(2, 3, Sort.Direction.ASC, "name");
-        given(clubService.getClubPrevsByCategories(Campus.명륜, ClubType.중앙동아리, "취미교양", request)).willReturn(page);
+//        given(clubService.getClubPrevsByCategories(Campus.명륜, ClubType.중앙동아리, "취미교양", request)).willReturn(page);
         
         //when
         ResultActions actions = mockMvc.perform(

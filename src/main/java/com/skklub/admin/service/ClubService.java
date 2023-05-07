@@ -84,4 +84,14 @@ public class ClubService {
                     return club.getName();
                 });
     }
+
+    public List<ClubPrevDTO> getRandomClubsByCategories(Campus campus, Optional<ClubType> clubType, Optional<String> belongs) {
+        if(belongs.isPresent()) return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString(), clubType.get().toString(), belongs.get()));
+        if(clubType.isPresent()) return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString(), clubType.get().toString()));
+        return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString()));
+    }
+
+    private List<ClubPrevDTO> convertEntityToPrevDTO(List<Club> clubRepository) {
+        return clubRepository.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
+    }
 }

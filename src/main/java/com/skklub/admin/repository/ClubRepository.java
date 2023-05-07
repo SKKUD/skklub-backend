@@ -7,7 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ClubRepository extends JpaRepository<Club, Long> {
@@ -28,4 +31,13 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
 
     @EntityGraph(attributePaths = {"logo"})
     Page<Club> findClubPrevByNameContainingOrderByName(String name, Pageable pageable);
+
+    @Query(value = "Select * from club where campus = :campus and club_type = :clubType and belongs = :belongs order by rand() limit 3", nativeQuery = true)
+    List<Club> findClubRandomByCategories(@Param("campus") String campus, @Param("clubType") String clubType, @Param("belongs") String belongs);
+
+    @Query(value = "Select * from club where campus = :campus and clubType = :clubType order by rand() limit 3", nativeQuery = true)
+    List<Club> findClubRandomByCategories(@Param("campus") String campus, @Param("clubType") String clubType);
+
+    @Query(value = "Select * from club where campus = :campus order by rand() limit 3", nativeQuery = true)
+    List<Club> findClubRandomByCategories(@Param("campus") String campus);
 }

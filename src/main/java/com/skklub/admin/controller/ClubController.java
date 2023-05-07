@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -83,6 +84,14 @@ public class ClubController {
     public Page<ClubPrevResponseDTO> getClubPrevByKeyword(@PathVariable String keyword, Pageable pageable) {
         Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByKeyword(keyword, pageable);
         return convertClubPrevsLogoToFile(clubPrevs);
+    }
+
+    //오늘의 추천 동아리
+    @GetMapping("/club/random/{campus}/{clubType}/{belongs}")
+    public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@PathVariable Campus campus, @PathVariable Optional<ClubType> clubType, @PathVariable Optional<String> belongs) {
+        return clubService.getRandomClubsByCategories(campus, clubType, belongs).stream()
+                .map(dto -> new ClubNameAndIdDTO(dto.getId(), dto.getName()))
+                .collect(Collectors.toList());
     }
 
     private Page<ClubPrevResponseDTO> convertClubPrevsLogoToFile(Page<ClubPrevDTO> clubPrevs) {

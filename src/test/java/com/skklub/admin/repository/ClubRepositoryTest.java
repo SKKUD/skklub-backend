@@ -4,6 +4,7 @@ import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Transactional
 @SpringBootTest
+@Slf4j
 class ClubRepositoryTest {
     @Autowired
     private ClubRepository clubRepository;
@@ -29,7 +31,7 @@ class ClubRepositoryTest {
 
     @BeforeEach
     public void beforeEach() {
-        for(int t = 0; t < 10; t++) {
+        for(int t = 0; t < 100; t++) {
             Club club = new Club(
                     "정상적인 클럽 SKKULOL" + t
                     , "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다."
@@ -57,7 +59,7 @@ class ClubRepositoryTest {
             }
 
             club.appendActivityImages(activityImages);
-            club.matchLogo(logo);
+            club.changeLogo(logo);
             club.startRecruit(recruit);
             club.setUser(user);
 
@@ -101,7 +103,7 @@ class ClubRepositoryTest {
         }
 
         club.appendActivityImages(activityImages);
-        club.matchLogo(logo);
+        club.changeLogo(logo);
         club.startRecruit(recruit);
         club.setUser(user);
 
@@ -206,5 +208,30 @@ class ClubRepositoryTest {
          Assertions.assertThat(clubPrevs.getContent().size()).isZero();
          Assertions.assertThat(clubPrevs.isFirst()).isTrue();
          Assertions.assertThat(clubPrevs.hasNext()).isFalse();
+      }
+      
+      @Test
+      public void findClubRandomByCategories_try3TimesWithFullData_DifferentContent() throws Exception {
+          //given
+          String campus ="명륜";
+          String clubType = "중앙동아리";
+          String belongs = "취미교양";
+          //when
+          List<Club> randoms1 = clubRepository.findClubRandomByCategories(campus, clubType, belongs);
+          List<Club> randoms2 = clubRepository.findClubRandomByCategories(campus, clubType, belongs);
+          List<Club> randoms3 = clubRepository.findClubRandomByCategories(campus, clubType, belongs);
+          //then
+          Assertions.assertThat(randoms1.size()).isEqualTo(3);
+          Assertions.assertThat(randoms2.size()).isEqualTo(3);
+          Assertions.assertThat(randoms3.size()).isEqualTo(3);
+          for (int i = 0; i < 3; i++) {
+              log.info("random1 : {} {}", randoms1.get(i).getId(), randoms1.get(i).getName());
+              log.info("random2 : {} {}", randoms2.get(i).getId(), randoms2.get(i).getName());
+              log.info("random3 : {} {}", randoms3.get(i).getId(), randoms3.get(i).getName());
+              Assertions.assertThat(randoms1.get(i)).isNotEqualTo(randoms2.get(i));
+              Assertions.assertThat(randoms2.get(i)).isNotEqualTo(randoms3.get(i));
+              Assertions.assertThat(randoms3.get(i)).isNotEqualTo(randoms1.get(i));
+          }
+
       }
 }
