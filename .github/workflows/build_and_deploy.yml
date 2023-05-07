@@ -47,6 +47,8 @@ jobs:
       
     - name: Create application.yml
       run: |
+        touch ./index.html
+        echo "Hello Test!" > ./index.html
         mkdir -p ./src/main/resources
         cd ./src/main/resources
         touch ./application.yml
@@ -68,7 +70,7 @@ jobs:
         docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
         docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }} .
         docker push ${{ secrets.DOCKER_REPO }}
-        
+
     - name: Deploy
       uses: appleboy/ssh-action@master
       with:
@@ -82,13 +84,16 @@ jobs:
           sudo docker pull ${{ secrets.DOCKER_REPO }}
           sudo docker compose up -d
           sudo docker image prune -f
-    
+          
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-2
+
     - name: Overwrite Api Document in S3
-      env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: |
-          touch ./index.html
-          echo "Hello Test!" > ./index.html
-          aws s3 cp ./index.html ${{ secrets.AWS_S3_API_DOCS }} --acl public-read
+      uses: aws-actions/aws-cli@v1
+      with:
+        args: s3 cp ./index.html {{ secrets.AWS_S3_API_DOCS }} --acl public-read
           
