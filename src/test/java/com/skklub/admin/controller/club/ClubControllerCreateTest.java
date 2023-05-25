@@ -1,6 +1,9 @@
-package com.skklub.admin.controller;
+package com.skklub.admin.controller.club;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skklub.admin.controller.ApiDocumentUtils;
+import com.skklub.admin.controller.ClubController;
+import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.repository.ClubRepository;
@@ -20,6 +23,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.restdocs.snippet.Attributes;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -56,9 +60,6 @@ class ClubControllerCreateTest {
     private ClubService clubService;
     @MockBean
     private S3Transferer s3Transferer;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private MockMultipartFile mockLogo;
     private List<MockMultipartFile> mockActivityImages = new ArrayList<>();
@@ -123,20 +124,20 @@ class ClubControllerCreateTest {
                 .andDo(document("/club/creation",
                         queryParameters(
                                 parameterWithName("clubName").description("동아리 이름"),
-                                parameterWithName("campus").description("분류 - 캠퍼스"),
-                                parameterWithName("clubType").description("분류 - 동아리 종류"),
-                                parameterWithName("belongs").description("분류 - 동아리 분과"),
+                                parameterWithName("campus").attributes(ApiDocumentUtils.getCampusFormat()).description("분류 - 캠퍼스"),
+                                parameterWithName("clubType").attributes(ApiDocumentUtils.getClubTypeFormat()).description("분류 - 동아리 종류"),
+                                parameterWithName("belongs").attributes(ApiDocumentUtils.getBelongsFormat()).description("분류 - 동아리 분과"),
                                 parameterWithName("briefActivityDescription").description(" 분류 - 활동 설명"),
                                 parameterWithName("activityDescription").description("자세한 활동 설명"),
                                 parameterWithName("clubDescription").description("자세한 동아리 설명"),
-                                parameterWithName("establishDate").description("설립 연도"),
-                                parameterWithName("headLine").description("한줄 소개"),
-                                parameterWithName("mandatoryActivatePeriod").description("의무 활동 기간"),
-                                parameterWithName("memberAmount").description("동아리 인원"),
-                                parameterWithName("regularMeetingTime").description("정규 모임 시간"),
-                                parameterWithName("roomLocation").description("동아리 방 위치"),
-                                parameterWithName("webLink1").description("관련 사이트 주소 1"),
-                                parameterWithName("webLink2").description("관련 사이트 주소 2")
+                                parameterWithName("establishDate").description("설립 연도").optional(),
+                                parameterWithName("headLine").description("한줄 소개").optional(),
+                                parameterWithName("mandatoryActivatePeriod").description("의무 활동 기간").optional(),
+                                parameterWithName("memberAmount").description("동아리 인원").optional(),
+                                parameterWithName("regularMeetingTime").description("정규 모임 시간").optional(),
+                                parameterWithName("roomLocation").description("동아리 방 위치").optional(),
+                                parameterWithName("webLink1").description("관련 사이트 주소 1").optional(),
+                                parameterWithName("webLink2").description("관련 사이트 주소 2").optional()
                         ),
                         requestParts(
                                 partWithName("logo").description("동아리 로고")
@@ -233,13 +234,21 @@ class ClubControllerCreateTest {
     }
 
     @Test
-    public void uploadActivityImages_EmptyList_Success() throws Exception {
+    public void uploadActivityImages_EmptyList_Fail() throws Exception {
         //given
+        List<MultipartFile> multipartFiles = new ArrayList<>();
+        List<FileNames> activityImageDtos = new ArrayList<>();
+        given(s3Transferer.uploadAll(multipartFiles)).willReturn(activityImageDtos);
 
         //when
+        ResultActions actions = mockMvc.perform(
+                multipart("/club/{clubId}/activityImage", 0L)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+        );
 
         //then
 
+        actions.andExpect(status().is4xxClientError());
     }
 
 }

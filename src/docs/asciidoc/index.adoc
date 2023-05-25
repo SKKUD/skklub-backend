@@ -11,9 +11,8 @@
 
 ==== HTTP request
 
-include::{snippets}/club/query-parameters.adoc[]
-include::{snippets}/club/request-parts.adoc[]
+include::{snippets}/club/creation/query-parameters.adoc[]
 
 ==== HTTP response
 
-include::{snippets}/club/response-fields.adoc[]
+include::{snippets}/club/creation/response-fields.adoc[]

@@ -8,6 +8,7 @@ import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,7 +33,7 @@ public class ClubController {
 
     //추가
     @PostMapping(value = "/club")
-    public ClubNameAndIdDTO createClub(@ModelAttribute ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam MultipartFile logo) {
+    public ClubNameAndIdDTO createClub(@Valid @ModelAttribute ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam MultipartFile logo) {
         log.info("club name : {}, logo size : {}", clubCreateRequestDTO.getClubName(), logo.getSize());
         FileNames uploadedLogo = s3Transferer.uploadOne(logo);
         Club club = clubCreateRequestDTO.toEntity();
@@ -138,7 +139,10 @@ public class ClubController {
     @DeleteMapping("/club/{clubId}")
     public ResponseEntity<ClubNameAndIdDTO> deleteClubById(@PathVariable Long clubId) {
         return clubService.deleteClub(clubId)
-                .map(name -> new ClubNameAndIdDTO(clubId, name))
+                .map(name -> {
+                    log.info("name : {}", name);
+                    return new ClubNameAndIdDTO(clubId, name);
+                })
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
     }

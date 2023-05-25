@@ -1,7 +1,9 @@
-package com.skklub.admin.controller;
+package com.skklub.admin.controller.club;
 
 import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skklub.admin.controller.ClubController;
+import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
@@ -55,9 +57,6 @@ class ClubControllerReadTest {
     @MockBean
     private S3Transferer s3Transferer;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     private FileNames fileName;
     private List<FileNames> fileNames = new ArrayList<>();
     private ClubDetailInfoDto clubDetailInfoDto;
@@ -70,7 +69,8 @@ class ClubControllerReadTest {
         fileNames.add(new FileNames("originalAc3.png", "uploadedAc3.png"));
         fileNames.add(new FileNames("originalAc4.png", "uploadedAc4.png"));
         Club club = new Club("name","activity_description", "취미교양", ClubType.중앙동아리,"brief_activity_description",
-                Campus.명륜, "club_description",  "1234", "head_line", "mandatory_activate_period", 60,
+                Campus.명륜, "club_description",  "1234", "head_line",
+                "mandatory_activate_period", 60,
                  "regular_meeting_time", "room_location", "web_link1", "web_link2");
         Logo logo = new Logo(fileName.getOriginalName(), fileName.getSavedName());
         List<ActivityImage> activityImages = fileNames.stream().map(f -> new ActivityImage(f.getOriginalName(), f.getSavedName())).collect(Collectors.toList());
@@ -84,7 +84,7 @@ class ClubControllerReadTest {
     }
 
     @Test
-    public void getClubById_FullData_Success() throws Exception{
+    public void getClubById_Default_Success() throws Exception{
         //given
         S3DownloadDto s3DownloadDto = new S3DownloadDto(0L, "logo.png", "testBytes");
         List<S3DownloadDto> s3DownloadDtos = new ArrayList<>();
