@@ -33,7 +33,7 @@ public class ClubController {
 
     //추가
     @PostMapping(value = "/club")
-    public ClubNameAndIdDTO createClub(@Valid @ModelAttribute ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam MultipartFile logo) {
+    public ClubNameAndIdDTO createClub(@ModelAttribute ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam MultipartFile logo) {
         log.info("club name : {}, logo size : {}", clubCreateRequestDTO.getClubName(), logo.getSize());
         FileNames uploadedLogo = s3Transferer.uploadOne(logo);
         Club club = clubCreateRequestDTO.toEntity();

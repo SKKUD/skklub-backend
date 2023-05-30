@@ -57,7 +57,7 @@ class ClubControllerDeleteTest {
                 .andExpect(jsonPath("$.id").value(0L))
                 .andExpect(jsonPath("$.name").value("Test Club Name"))
                 .andDo(
-                        document("club/deletion",
+                        document("club/delete/club",
                                 pathParameters(
                                         parameterWithName("clubId").description("동아리 ID")
                                 ),
@@ -84,7 +84,7 @@ class ClubControllerDeleteTest {
                  .andExpect(jsonPath("$.id").value(0L))
                  .andExpect(jsonPath("$.name").value("Test Club Name"))
                  .andDo(
-                         document("/club/revive"
+                         document("club/revive/club"
                                  , pathParameters(
                                          parameterWithName("clubId").description("살리려는 동아리 ID")
                                  ),
@@ -113,7 +113,7 @@ class ClubControllerDeleteTest {
                   .andExpect(jsonPath("$.clubId").value(clubId))
                   .andExpect(jsonPath("$.deletedActivityImageName").value(testImageName))
                   .andDo(
-                          document("/club/revive"
+                          document("club/delete/activityImage"
                                   , pathParameters(
                                           parameterWithName("clubId").description("대상 동아리 ID")
                                           ,parameterWithName("activityImageName").description("지우려는 활동 이미지 파일명")

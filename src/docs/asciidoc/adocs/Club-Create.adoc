@@ -1,0 +1,2 @@
+===== Post - /club
+operation::club/create/club[snippets='request-parts,query-parameters,response-fields']

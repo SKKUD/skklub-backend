@@ -1,18 +1,52 @@
-= Spring REST Docs
+= SKklub API
+// backtony.github.io(부제)
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
 :toc: left
 :toclevels: 2
 :sectlinks:
+:docinfo: shared-head
 
-[[resources-post]]
-== Post
+= Club API
 
-[[resources-post-create]]
-=== Post 생성
+== Create
 
-==== HTTP request
+=== 동아리 생성
+include::adocs/Club-Create.adoc[]
 
-include::{snippets}/club/creation/query-parameters.adoc[]
+=== 활동 사진 추가
+include::adocs/Activity-Append.adoc[]
 
-==== HTTP response
+== Read
 
-include::{snippets}/club/creation/response-fields.adoc[]
+=== 동아리 세부 조회
+include::adocs/Club-Read-Detail.adoc[]
+
+=== 동아리 프리뷰 조회
+include::adocs/Club-Read-Prev.adoc[]
+
+=== 이름 검색(완전 일치)
+include::adocs/Search-Exactly.adoc[]
+
+=== 이름 검색(부분 일치)
+include::adocs/Search-Part.adoc[]
+
+=== 오늘의 추천 동아리
+include::adocs/Today-Club.adoc[]
+
+== Update
+
+=== 동아리 정보 수정
+include::adocs/Club-Update.adoc[]
+
+== Delete
+
+=== 동아리 삭제
+include::adocs/Club-Delete.adoc[]
+
+=== 동아리 삭제 취소(복구)
+include::adocs/Club-Revive.adoc[]
+
+=== 특정 활동 사진 삭제
+include::adocs/Activity-Delete.adoc[]

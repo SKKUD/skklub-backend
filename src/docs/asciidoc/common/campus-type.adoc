@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[campus-type]]
+include::{snippets}/club/code/campus-type.adoc[]
