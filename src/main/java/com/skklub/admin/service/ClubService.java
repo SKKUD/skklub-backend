@@ -1,6 +1,5 @@
 package com.skklub.admin.service;
 
-import com.querydsl.core.group.GroupBy;
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
@@ -57,19 +56,19 @@ public class ClubService {
 
     public Optional<ClubDetailInfoDto> getClubDetailInfoById(Long clubId) {
         return clubRepository.findDetailClubById(clubId)
-                .map(c -> new ClubDetailInfoDto(c, c.getLogo(), c.getActivityImages(), c.getRecruit(), c.getPresident()));
+                .map(c -> new ClubDetailInfoDto(c));
     }
 
     public Optional<ClubDetailInfoDto> getClubDetailInfoByName(String name) {
         return clubRepository.findDetailClubByName(name)
-                .map(c -> new ClubDetailInfoDto(c, c.getLogo(), c.getActivityImages(), c.getRecruit(), c.getPresident()));
+                .map(c -> new ClubDetailInfoDto(c));
     }
 
-    public Page<ClubPrevDTO> getClubPrevsByCategories(Campus campus, Optional<ClubType> clubType, Optional<String> belongs, Pageable pageable) {
-        if (belongs.isPresent())
-            return clubRepository.findClubPrevByCampusAndClubTypeAndBelongsOrderByName(campus, clubType.get(), belongs.get(), pageable).map(ClubPrevDTO::fromEntity);
-        if (clubType.isPresent())
-            return clubRepository.findClubPrevByCampusAndClubTypeOrderByName(campus, clubType.get(), pageable).map(ClubPrevDTO::fromEntity);
+    public Page<ClubPrevDTO> getClubPrevsByCategories(Campus campus, ClubType clubType, String belongs, Pageable pageable) {
+        if (!belongs.equals("전체"))
+            return clubRepository.findClubPrevByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, pageable).map(ClubPrevDTO::fromEntity);
+        if (!clubType.equals(ClubType.전체))
+            return clubRepository.findClubPrevByCampusAndClubTypeOrderByName(campus, clubType, pageable).map(ClubPrevDTO::fromEntity);
         return clubRepository.findClubPrevByCampusOrderByName(campus, pageable).map(ClubPrevDTO::fromEntity);
     }
 
@@ -86,14 +85,14 @@ public class ClubService {
                 });
     }
 
-    public List<ClubPrevDTO> getRandomClubsByCategories(Campus campus, Optional<ClubType> clubType, Optional<String> belongs) {
-        if(belongs.isPresent()) return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString(), clubType.get().toString(), belongs.get()));
-        if(clubType.isPresent()) return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString(), clubType.get().toString()));
+    public List<ClubPrevDTO> getRandomClubsByCategories(Campus campus, ClubType clubType, String belongs) {
+        if(belongs.equals("전체")) return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString(), belongs));
+        if(!clubType.equals(ClubType.전체)) return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString()));
         return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString()));
     }
 
-    private List<ClubPrevDTO> convertEntityToPrevDTO(List<Club> clubRepository) {
-        return clubRepository.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
+    private List<ClubPrevDTO> convertEntityToPrevDTO(List<Club> clubEntitys) {
+        return clubEntitys.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
     }
 
     public Optional<String> deleteClub(Long clubId) {

@@ -189,7 +189,7 @@ class ClubRepositoryTest {
         Page<Club> clubPrevs = clubRepository.findClubPrevByCampusAndClubTypeAndBelongsOrderByName(Campus.명륜, ClubType.중앙동아리, "취미교양", pageRequest);
 
         //then
-        Assertions.assertThat(clubPrevs.getTotalElements()).isEqualTo(10);
+        Assertions.assertThat(clubPrevs.getTotalElements()).isEqualTo(100);
         Assertions.assertThat(clubPrevs.getTotalPages()).isEqualTo(4);
         Assertions.assertThat(clubPrevs.getNumber()).isEqualTo(0);
         Assertions.assertThat(clubPrevs.getSize()).isEqualTo(3);

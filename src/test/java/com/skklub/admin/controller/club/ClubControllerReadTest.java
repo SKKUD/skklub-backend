@@ -1,11 +1,11 @@
 package com.skklub.admin.controller.club;
 
 import akka.protobuf.WireFormat;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.controller.ClubController;
+import com.skklub.admin.controller.ClubTestDataRepository;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.S3DownloadDto;
-import com.skklub.admin.domain.*;
+import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.service.dto.ClubPrevDTO;
@@ -13,8 +13,6 @@ import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -22,17 +20,20 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultMatcher;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.skklub.admin.controller.RestDocsUtils.example;
 import static java.time.LocalTime.now;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -41,9 +42,11 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
+@ContextConfiguration(classes = ClubTestDataRepository.class)
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 @WebMvcTest(controllers = ClubController.class)
@@ -57,46 +60,21 @@ class ClubControllerReadTest {
     @MockBean
     private S3Transferer s3Transferer;
 
-    private FileNames fileName;
-    private List<FileNames> fileNames = new ArrayList<>();
-    private ClubDetailInfoDto clubDetailInfoDto;
-
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        fileName = new FileNames("originalLogo.png", "savedLogo.png");
-        fileNames.add(new FileNames("originalAc1.png", "uploadedAc1.png"));
-        fileNames.add(new FileNames("originalAc2.png", "uploadedAc2.png"));
-        fileNames.add(new FileNames("originalAc3.png", "uploadedAc3.png"));
-        fileNames.add(new FileNames("originalAc4.png", "uploadedAc4.png"));
-        Club club = new Club("name","activity_description", "취미교양", ClubType.중앙동아리,"brief_activity_description",
-                Campus.명륜, "club_description",  "1234", "head_line",
-                "mandatory_activate_period", 60,
-                 "regular_meeting_time", "room_location", "web_link1", "web_link2");
-        Logo logo = new Logo(fileName.getOriginalName(), fileName.getSavedName());
-        List<ActivityImage> activityImages = fileNames.stream().map(f -> new ActivityImage(f.getOriginalName(), f.getSavedName())).collect(Collectors.toList());
-        Recruit recruit = new Recruit(LocalDateTime.now(), LocalDateTime.now(), "quota","process_description","contact", "web_link");
-        User user = new User("testId","testPw" ,3, "test_man","010-1234-1234");
-        clubDetailInfoDto = new ClubDetailInfoDto(club, logo, activityImages, recruit, user);
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-    }
+    @Autowired
+    private ClubTestDataRepository clubTestDataRepository;
 
     @Test
     public void getClubById_Default_Success() throws Exception{
         //given
-        S3DownloadDto s3DownloadDto = new S3DownloadDto(0L, "logo.png", "testBytes");
-        List<S3DownloadDto> s3DownloadDtos = new ArrayList<>();
-        s3DownloadDtos.add(new S3DownloadDto(1L, "Ac1.png", "testBytes"));
-        s3DownloadDtos.add(new S3DownloadDto(2L, "Ac2.png", "testBytes"));
-        s3DownloadDtos.add(new S3DownloadDto(3L, "Ac3.png", "testBytes"));
-        s3DownloadDtos.add(new S3DownloadDto(4L, "Ac4.png", "testBytes"));
+        int clubId = 0;
+        S3DownloadDto s3DownloadDto = clubTestDataRepository.getLogoS3DownloadDto(clubId);
+        List<S3DownloadDto> s3DownloadDtos = clubTestDataRepository.getActivityImgS3DownloadDtos(clubId);
 
 
-//        given(clubService.getClubDetailInfoById(eq(0L))).willReturn(clubDetailInfoDto);
-        given(s3Transferer.downloadOne(fileName)).willReturn(s3DownloadDto);
-        given(s3Transferer.downloadAll(fileNames)).willReturn(s3DownloadDtos);
+        ClubDetailInfoDto clubDetailInfoDto = new ClubDetailInfoDto(clubTestDataRepository.getClubs().get(clubId));
+        given(clubService.getClubDetailInfoById(eq(0L))).willReturn(Optional.of(clubDetailInfoDto));
+        given(s3Transferer.downloadOne(clubTestDataRepository.getLogoFileName(clubId))).willReturn(s3DownloadDto);
+        given(s3Transferer.downloadAll(clubTestDataRepository.getActivityImgFileNames(clubId))).willReturn(s3DownloadDtos);
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -115,7 +93,7 @@ class ClubControllerReadTest {
                                         fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("동아리 종류"),
                                         fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("동아리 분과"),
                                         fieldWithPath("briefActivityDescription").type(WireFormat.FieldType.STRING).description("동아리 활동 종류 - 세분화"),
-                                        fieldWithPath("headLine").type(WireFormat.FieldType.STRING).description("페이지 헤드라인"),
+                                        fieldWithPath("headLine").type(WireFormat.FieldType.STRING).description("한줄 소개"),
                                         fieldWithPath("establishAt").type(WireFormat.FieldType.STRING).description("설립연도"),
                                         fieldWithPath("roomLocation").type(WireFormat.FieldType.STRING).description("동아리 방 위치"),
                                         fieldWithPath("memberAmount").type(WireFormat.FieldType.INT32).description("활동 인원"),
@@ -151,7 +129,7 @@ class ClubControllerReadTest {
         Page<ClubPrevDTO> page = Page.empty();
         PageRequest request = PageRequest.of(2, 3, Sort.Direction.ASC, "name");
 //        given(clubService.getClubPrevsByCategories(Campus.명륜, ClubType.중앙동아리, "취미교양", request)).willReturn(page);
-        
+
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/prev/{campus}/{clubType}/{belongs}", "명륜", "중앙동아리", "취미교양")
@@ -183,18 +161,70 @@ class ClubControllerReadTest {
      }
 
      @Test
-     public void getClubPrev_noSortParam_Success() throws Exception{
+     public void getClubPrev_FullCategory_Success() throws Exception{
          //given
+         Campus campus = Campus.명륜;
+         ClubType clubType = ClubType.중앙동아리;
+         String belongs = "취미교양";
+         int clubCnt = clubTestDataRepository.getClubCnt();
+         PageRequest request = PageRequest.of(0, clubCnt, Sort.Direction.ASC, "name");
+         List<ClubPrevDTO> clubPrevs = clubTestDataRepository.getClubPrevDTOs();
+         PageImpl<ClubPrevDTO> clubPrevDTOPage = new PageImpl<>(clubPrevs, request, clubPrevs.size());
 
+         given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPrevDTOPage);
+         clubPrevs.stream()
+                 .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(clubTestDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
          //when
          ResultActions actions = mockMvc.perform(
-                 get("/club/prev/{campus}/{clubType}/{belongs}", "명륜", "중앙동아리", "취미교양")
-                         .queryParam("size", "3")
-                         .queryParam("page", "2")
+                 get("/club/prev/{campus}/{clubType}/{belongs}", campus.toString(), clubType.toString(), belongs)
+                         .queryParam("size", "5")
+                         .queryParam("page", "0")
+                         .queryParam("sortBy", "name,ASC")
          );
 
          //then
+         for(int i = 0; i < clubCnt; i++) {
+             actions = buildPageableResponse(actions.andExpect(status().isOk())
+                     .andExpect(jsonPath("$.size").value(5))
+                     .andExpect(jsonPath("$.totalPages").value(1))
+                     .andExpect(jsonPath("$.pageable.sort.sorted").value("true")), i);
+         }
+         actions.andDo(
+                 document("/club/get/prevs/category",
+                         pathParameters(
+                                 parameterWithName("campus").description("분류 - 캠퍼스").attributes(example("link:common/campus-type.html[캠퍼스 종류,role=\"popup\"]")),
+                                 parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example("link:common/club-type-null.html[동아리 종류,role=\"popup\"]")),
+                                 parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example("link:common/belongs-null.html[분과 종류,role=\"popup\"]"))
+                         ),
+                         queryParameters(
+                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기"),
+                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)"),
+                                 parameterWithName("sortBy").optional().description("페이지 정보 - 정렬").attributes(example("link:common/sorting.html[정렬,role=\"popup\"]"))
+                         ),
+                         responseFields(
+                                 fieldWithPath("content[].id").type(WireFormat.FieldType.INT64).description("동아리 아이디"),
+                                 fieldWithPath("content[].name").type(WireFormat.FieldType.STRING).description("동아리 이름"),
+                                 fieldWithPath("content[].belongs").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명"),
+                                 fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("클럽 "),
+                                 fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디"),
+                                 fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명"),
+                                 fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트")
+                         )
+                         )
+         );
+      }
 
+      private ResultActions buildPageableResponse(ResultActions actions, int index) throws Exception {
+          Club club = clubTestDataRepository.getClubs().get(index);
+          S3DownloadDto s3Dto = clubTestDataRepository.getLogoS3DownloadDto(index);
+          return actions
+                  .andExpect(jsonPath("$.content[" + index + "].id").value(club.getId()))
+                  .andExpect(jsonPath("$.content[" + index + "].name").value(club.getName()))
+                  .andExpect(jsonPath("$.content[" + index + "].belongs").value(club.getBelongs()))
+                  .andExpect(jsonPath("$.content[" + index + "].briefActivityDescription").value(club.getBriefActivityDescription()))
+                  .andExpect(jsonPath("$.content[" + index + "].logo.id").value(s3Dto.getId()))
+                  .andExpect(jsonPath("$.content[" + index + "].logo.fileName").value(s3Dto.getFileName()))
+                  .andExpect(jsonPath("$.content[" + index + "].logo.bytes").value(s3Dto.getBytes()));
       }
 
      @Test

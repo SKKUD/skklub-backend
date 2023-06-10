@@ -58,7 +58,11 @@ public class ClubDetailInfoDto {
     private String presidentName;
     private String presidentContact;
 
-    public ClubDetailInfoDto(Club club, Logo logo, List<ActivityImage> activityImage, Recruit recruit, User user) {
+    public ClubDetailInfoDto(Club club) {
+        Logo logo = club.getLogo();
+        List<ActivityImage> activityImages = club.getActivityImages();
+        Recruit recruit = club.getRecruit();
+        User user = club.getPresident();
         this.id = club.getId();
         this.campus = club.getCampus();
         this.clubType = club.getClubType().toString();
@@ -74,7 +78,7 @@ public class ClubDetailInfoDto {
         this.clubDescription = club.getClubDescription();
         this.activityDescription = club.getActivityDescription();
         this.logo = new FileNames(logo);
-        this.activityImages = activityImage.stream()
+        this.activityImages = activityImages.stream()
                 .map(FileNames::new)
                 .collect(Collectors.toList());
         this.webLink1 = club.getWebLink1();

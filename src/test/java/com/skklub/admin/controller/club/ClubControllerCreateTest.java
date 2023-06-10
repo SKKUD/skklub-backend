@@ -125,7 +125,7 @@ class ClubControllerCreateTest {
                                 parameterWithName("campus").description("분류 - 캠퍼스").attributes(example("link:common/campus-type.html[캠퍼스 종류,role=\"popup\"]")),
                                 parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example("link:common/club-type.html[동아리 종류,role=\"popup\"]")),
                                 parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example("link:common/belongs.html[분과 종류,role=\"popup\"]")),
-                                parameterWithName("briefActivityDescription").description(" 분류 - 활동 설명").attributes(example("E-SPORTS")),
+                                parameterWithName("briefActivityDescription").description("분류 - 활동 설명").attributes(example("E-SPORTS")),
                                 parameterWithName("activityDescription").description("자세한 활동 설명").attributes(example("1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")),
                                 parameterWithName("clubDescription").description("자세한 동아리 설명").attributes(example("여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")),
                                 parameterWithName("establishDate").description("설립 연도").optional().attributes(example("2023")),

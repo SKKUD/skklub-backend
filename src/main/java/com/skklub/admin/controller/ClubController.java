@@ -57,7 +57,6 @@ public class ClubController {
     //세부 정보 조회 by ID
     @GetMapping( "/club/{clubId}")
     public ResponseEntity<ClubResponseDTO> getClubById(@PathVariable Long clubId) {
-        log.info("request CLUB Id : {}", clubId);
         return clubService.getClubDetailInfoById(clubId)
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
@@ -66,7 +65,8 @@ public class ClubController {
 
     //간소화(Preview) 조회
     @GetMapping("/club/prev/{campus}/{clubType}/{belongs}")
-    public Page<ClubPrevResponseDTO> getClubPrevByCategories(@PathVariable Campus campus, @PathVariable Optional<ClubType> clubType, @PathVariable Optional<String> belongs, Pageable pageable) {
+    public Page<ClubPrevResponseDTO> getClubPrevByCategories(@PathVariable Campus campus, @PathVariable ClubType clubType, @PathVariable String belongs, Pageable pageable) {
+        log.info("campus : {}, clubType : {}, belongs : {}", campus, clubType, belongs);
         Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
@@ -89,7 +89,7 @@ public class ClubController {
 
     //오늘의 추천 동아리
     @GetMapping("/club/random/{campus}/{clubType}/{belongs}")
-    public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@PathVariable Campus campus, @PathVariable Optional<ClubType> clubType, @PathVariable Optional<String> belongs) {
+    public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@PathVariable Campus campus, @PathVariable ClubType clubType, @PathVariable String belongs) {
         return clubService.getRandomClubsByCategories(campus, clubType, belongs).stream()
                 .map(dto -> new ClubNameAndIdDTO(dto.getId(), dto.getName()))
                 .collect(Collectors.toList());

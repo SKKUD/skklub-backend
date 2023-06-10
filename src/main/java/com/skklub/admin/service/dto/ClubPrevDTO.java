@@ -19,13 +19,12 @@ public class ClubPrevDTO {
     private FileNames logo;
 
     public static ClubPrevDTO fromEntity(Club club) {
-        Logo logo = club.getLogo();
         return ClubPrevDTO.builder()
                 .id(club.getId())
                 .name(club.getName())
                 .belongs(club.getBelongs())
                 .briefActivityDescription(club.getBriefActivityDescription())
-                .logo(new FileNames(logo.getOriginalName(), logo.getUploadedName()))
+                .logo(new FileNames(club.getLogo()))
                 .build();
     }
 }
