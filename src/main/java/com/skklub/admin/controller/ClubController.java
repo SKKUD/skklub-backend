@@ -69,9 +69,7 @@ public class ClubController {
                                                              @RequestParam(required = false, defaultValue = "전체") ClubType clubType,
                                                              @RequestParam(required = false, defaultValue = "전체") String belongs,
                                                              Pageable pageable) {
-        log.info("campus : {}, clubType : {}, belongs : {}", campus, clubType, belongs);
         Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
-        log.info("clubPrevs : {}", clubPrevs);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
 
@@ -85,7 +83,7 @@ public class ClubController {
     }
 
     //이름 검색 부분 일치
-    @GetMapping("/club/search/prev")
+    @GetMapping("/club/search/prevs")
     public Page<ClubPrevResponseDTO> getClubPrevByKeyword(@RequestParam String keyword, Pageable pageable) {
         Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByKeyword(keyword, pageable);
         return convertClubPrevsLogoToFile(clubPrevs);

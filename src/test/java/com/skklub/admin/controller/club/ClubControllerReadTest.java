@@ -66,8 +66,8 @@ class ClubControllerReadTest {
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
         String belongs = "취미교양";
-        int clubCnt = clubTestDataRepository.getClubCnt();
-        PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
+        int clubPerPage = 5;
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
         List<ClubPrevDTO> clubPrevs = clubTestDataRepository.getClubPrevDTOs();
         Page<ClubPrevDTO> clubPrevDTOPage = new PageImpl<>(clubPrevs, request, clubPrevs.size());
 
@@ -80,18 +80,18 @@ class ClubControllerReadTest {
                         .queryParam("campus", campus.toString())
                         .queryParam("clubType", clubType.toString())
                         .queryParam("belongs", belongs)
-                        .queryParam("size", "5")
+                        .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
                         .queryParam("sort", "name,ASC")
         );
 
         //then
-        actions = actions.andExpect(status().isOk());
-        for(int i = 0; i < clubCnt; i++) {
-            actions = buildPageableResponseContentChecker(actions, i)
-                    .andExpect(jsonPath("$.size").value(5))
-                    .andExpect(jsonPath("$.totalPages").value(2))
-                    .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(clubPerPage))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        for(int i = 0; i < clubPerPage; i++) {
+            actions = buildPageableResponseContentChecker(actions, i);
         }
         List<FieldDescriptor> pageableResponseFields = new ArrayList<>();
         pageableResponseFields.add(fieldWithPath("content[].id").type(WireFormat.FieldType.INT64).description("동아리 아이디"));
@@ -133,15 +133,14 @@ class ClubControllerReadTest {
                 .andExpect(jsonPath("$.content[" + index + "].logo.bytes").value(s3Dto.getBytes()));
     }
 
-
     @Test
     public void getClubPrev_NoBelongs_Success() throws Exception{
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
         String belongs = "전체";
-        int clubCnt = clubTestDataRepository.getClubCnt();
-        PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
+        int clubPerPage = 5;
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
         List<ClubPrevDTO> clubPrevs = clubTestDataRepository.getClubPrevDTOs();
         Page<ClubPrevDTO> clubPrevDTOPage = new PageImpl<>(clubPrevs, request, clubPrevs.size());
 
@@ -153,18 +152,18 @@ class ClubControllerReadTest {
                 get("/club/prev")
                         .queryParam("campus", campus.toString())
                         .queryParam("clubType", clubType.toString())
-                        .queryParam("size", "5")
+                        .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
                         .queryParam("sort", "name,ASC")
         );
 
         //then
-        actions = actions.andExpect(status().isOk());
-        for(int i = 0; i < clubCnt; i++) {
-            actions = buildPageableResponseContentChecker(actions, i)
-                    .andExpect(jsonPath("$.size").value(5))
-                    .andExpect(jsonPath("$.totalPages").value(2))
-                    .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(clubPerPage))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        for(int i = 0; i < clubPerPage; i++) {
+            actions = buildPageableResponseContentChecker(actions, i);
         }
     }
 
@@ -174,8 +173,8 @@ class ClubControllerReadTest {
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.전체;
         String belongs = "AnyBelongsString";
-        int clubCnt = clubTestDataRepository.getClubCnt();
-        PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
+        int clubPerPage = 5;
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
         List<ClubPrevDTO> clubPrevs = clubTestDataRepository.getClubPrevDTOs();
         Page<ClubPrevDTO> clubPrevDTOPage = new PageImpl<>(clubPrevs, request, clubPrevs.size());
 
@@ -187,18 +186,18 @@ class ClubControllerReadTest {
                 get("/club/prev")
                         .queryParam("campus", campus.toString())
                         .queryParam("belongs", belongs)
-                        .queryParam("size", "5")
+                        .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
                         .queryParam("sort", "name,ASC")
         );
 
         //then
-        actions = actions.andExpect(status().isOk());
-        for(int i = 0; i < clubCnt; i++) {
-            actions = buildPageableResponseContentChecker(actions, i)
-                    .andExpect(jsonPath("$.size").value(5))
-                    .andExpect(jsonPath("$.totalPages").value(2))
-                    .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(clubPerPage))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        for(int i = 0; i < clubPerPage; i++) {
+            actions = buildPageableResponseContentChecker(actions, i);
         }
     }
 
@@ -208,8 +207,8 @@ class ClubControllerReadTest {
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.전체;
         String belongs = "전체";
-        int clubCnt = clubTestDataRepository.getClubCnt();
-        PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
+        int clubPerPage = 5;
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
         List<ClubPrevDTO> clubPrevs = clubTestDataRepository.getClubPrevDTOs();
         Page<ClubPrevDTO> clubPrevDTOPage = new PageImpl<>(clubPrevs, request, clubPrevs.size());
 
@@ -220,21 +219,74 @@ class ClubControllerReadTest {
         ResultActions actions = mockMvc.perform(
                 get("/club/prev")
                         .queryParam("campus", campus.toString())
-                        .queryParam("size", "5")
+                        .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
                         .queryParam("sort", "name,ASC")
         );
 
         //then
-        actions = actions.andExpect(status().isOk());
-        for(int i = 0; i < clubCnt; i++) {
-            actions = buildPageableResponseContentChecker(actions, i)
-                    .andExpect(jsonPath("$.size").value(5))
-                    .andExpect(jsonPath("$.totalPages").value(2))
-                    .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(clubPerPage))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        for(int i = 0; i < clubPerPage; i++) {
+            actions = buildPageableResponseContentChecker(actions, i);
         }
     }
 
+    @Test
+    public void getClubPrevByKeyword_Default_Success() throws Exception{
+        //given
+        String keyword = "SKKU";
+        int clubPerPage = 5;
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
+        List<ClubPrevDTO> clubPrevDTOs = clubTestDataRepository.getClubPrevDTOs();
+        Page<ClubPrevDTO> clubPrevDTOPage = new PageImpl<>(clubPrevDTOs, request, clubPrevDTOs.size());
+        given(clubService.getClubPrevsByKeyword(keyword, request)).willReturn(clubPrevDTOPage);
+        clubPrevDTOs.stream()
+                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(clubTestDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/club/search/prevs")
+                        .queryParam("keyword", keyword)
+                        .queryParam("size", String.valueOf(clubPerPage))
+                        .queryParam("page", "0")
+                        .queryParam("sort", "name,ASC")
+        );
+
+        //then
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(clubPerPage))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        for(int i = 0; i < clubPerPage; i++) {
+            actions = buildPageableResponseContentChecker(actions, i);
+        }
+        List<FieldDescriptor> pageableResponseFields = new ArrayList<>();
+        pageableResponseFields.add(fieldWithPath("content[].id").type(WireFormat.FieldType.INT64).description("동아리 아이디"));
+        pageableResponseFields.add(fieldWithPath("content[].name").type(WireFormat.FieldType.STRING).description("동아리 이름"));
+        pageableResponseFields.add(fieldWithPath("content[].belongs").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명"));
+        pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("클럽 "));
+        pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디"));
+        pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명"));
+        pageableResponseFields.add(fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트"));
+        addPageableResponseFields(pageableResponseFields);
+
+        actions.andDo(
+                document("/club/get/prevs/category",
+                        queryParameters(
+                                parameterWithName("keyword").description("동아리 이름 검색 키워드").attributes(example("%Keyword%")),
+                                parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
+                                parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬").attributes(example("link:common/sorting.html[정렬,role=\"popup\"]"))
+                        ),
+                        responseFields(
+                                pageableResponseFields
+                        )
+                )
+        );
+
+     }
+
 }
-
-
