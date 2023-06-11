@@ -1,7 +1,7 @@
 :doctype: book
 :icons: font
-===== 중첩 가능
-===== ex : sort=name.asc&sort=id,desc
+==== 중첩 가능
+==== ex : sort=keyword1.order1&sort=keyword2,order2
 
 [[club-keyowrd]]
 include::{snippets}/sorting/club-keyowrd.adoc[]

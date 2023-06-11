@@ -68,6 +68,7 @@ public class ClubController {
     public Page<ClubPrevResponseDTO> getClubPrevByCategories(@RequestParam Campus campus, @RequestParam ClubType clubType, @RequestParam String belongs, Pageable pageable) {
         log.info("campus : {}, clubType : {}, belongs : {}", campus, clubType, belongs);
         Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
+        log.info("clubPrevs : {}", clubPrevs);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
 

@@ -10,6 +10,7 @@ import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
