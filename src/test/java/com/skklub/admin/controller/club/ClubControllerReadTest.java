@@ -135,35 +135,104 @@ class ClubControllerReadTest {
 
 
     @Test
-    public void getClubPrev_belongsEq전체_Success() throws Exception{
+    public void getClubPrev_NoBelongs_Success() throws Exception{
         //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.중앙동아리;
+        String belongs = "전체";
+        int clubCnt = clubTestDataRepository.getClubCnt();
+        PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
+        List<ClubPrevDTO> clubPrevs = clubTestDataRepository.getClubPrevDTOs();
+        Page<ClubPrevDTO> clubPrevDTOPage = new PageImpl<>(clubPrevs, request, clubPrevs.size());
 
+        given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPrevDTOPage);
+        clubPrevs.stream()
+                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(clubTestDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
         //when
         ResultActions actions = mockMvc.perform(
-                get("/club/prev/{campus}/{clubType}/{belongs}", "명륜", "중앙동아리", "전체")
-                        .queryParam("size", "3")
-                        .queryParam("page", "2")
-                        .queryParam("sortBy", "name-asc")
+                get("/club/prev")
+                        .queryParam("campus", campus.toString())
+                        .queryParam("clubType", clubType.toString())
+                        .queryParam("size", "5")
+                        .queryParam("page", "0")
+                        .queryParam("sort", "name,ASC")
         );
 
         //then
-
+        actions = actions.andExpect(status().isOk());
+        for(int i = 0; i < clubCnt; i++) {
+            actions = buildPageableResponseContentChecker(actions, i)
+                    .andExpect(jsonPath("$.size").value(5))
+                    .andExpect(jsonPath("$.totalPages").value(2))
+                    .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        }
     }
 
     @Test
-    public void getClubPrev_ClubTypeEq전체_Success() throws Exception{
+    public void getClubPrev_NoClubTypeAndAnyBelongs_Success() throws Exception{
         //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.전체;
+        String belongs = "AnyBelongsString";
+        int clubCnt = clubTestDataRepository.getClubCnt();
+        PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
+        List<ClubPrevDTO> clubPrevs = clubTestDataRepository.getClubPrevDTOs();
+        Page<ClubPrevDTO> clubPrevDTOPage = new PageImpl<>(clubPrevs, request, clubPrevs.size());
 
+        given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPrevDTOPage);
+        clubPrevs.stream()
+                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(clubTestDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
         //when
         ResultActions actions = mockMvc.perform(
-                get("/club/prev/{campus}/{clubType}/{belongs}", "명륜", "전체", "ㅁㄴㅇ")
-                        .queryParam("size", "3")
-                        .queryParam("page", "2")
-                        .queryParam("sortBy", "name-asc")
+                get("/club/prev")
+                        .queryParam("campus", campus.toString())
+                        .queryParam("belongs", belongs)
+                        .queryParam("size", "5")
+                        .queryParam("page", "0")
+                        .queryParam("sort", "name,ASC")
         );
 
         //then
+        actions = actions.andExpect(status().isOk());
+        for(int i = 0; i < clubCnt; i++) {
+            actions = buildPageableResponseContentChecker(actions, i)
+                    .andExpect(jsonPath("$.size").value(5))
+                    .andExpect(jsonPath("$.totalPages").value(2))
+                    .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        }
+    }
 
+    @Test
+    public void getClubPrev_NoClubTypeAndNoBelongs_Success() throws Exception{
+        //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.전체;
+        String belongs = "전체";
+        int clubCnt = clubTestDataRepository.getClubCnt();
+        PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
+        List<ClubPrevDTO> clubPrevs = clubTestDataRepository.getClubPrevDTOs();
+        Page<ClubPrevDTO> clubPrevDTOPage = new PageImpl<>(clubPrevs, request, clubPrevs.size());
+
+        given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPrevDTOPage);
+        clubPrevs.stream()
+                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(clubTestDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/club/prev")
+                        .queryParam("campus", campus.toString())
+                        .queryParam("size", "5")
+                        .queryParam("page", "0")
+                        .queryParam("sort", "name,ASC")
+        );
+
+        //then
+        actions = actions.andExpect(status().isOk());
+        for(int i = 0; i < clubCnt; i++) {
+            actions = buildPageableResponseContentChecker(actions, i)
+                    .andExpect(jsonPath("$.size").value(5))
+                    .andExpect(jsonPath("$.totalPages").value(2))
+                    .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        }
     }
 
 }

@@ -65,7 +65,10 @@ public class ClubController {
 
     //간소화(Preview) 조회
     @GetMapping("/club/prev")
-    public Page<ClubPrevResponseDTO> getClubPrevByCategories(@RequestParam Campus campus, @RequestParam ClubType clubType, @RequestParam String belongs, Pageable pageable) {
+    public Page<ClubPrevResponseDTO> getClubPrevByCategories(@RequestParam Campus campus,
+                                                             @RequestParam(required = false, defaultValue = "전체") ClubType clubType,
+                                                             @RequestParam(required = false, defaultValue = "전체") String belongs,
+                                                             Pageable pageable) {
         log.info("campus : {}, clubType : {}, belongs : {}", campus, clubType, belongs);
         Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
         log.info("clubPrevs : {}", clubPrevs);
