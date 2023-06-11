@@ -78,7 +78,7 @@ class ClubControllerUpdateTest {
                 .andDo(
                         document("/club/update/club",
                                 pathParameters(
-                                        parameterWithName("clubId").description("대상 동아리 ID")
+                                        parameterWithName("clubId").description("대상 동아리 ID").attributes(example("1"))
                                 ),
                                 queryParameters(
                                         parameterWithName("clubName").description("동아리 이름").attributes(example("클럽 SKKULOL")),

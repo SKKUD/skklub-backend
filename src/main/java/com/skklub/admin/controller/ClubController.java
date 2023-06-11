@@ -64,16 +64,16 @@ public class ClubController {
     }
 
     //간소화(Preview) 조회
-    @GetMapping("/club/prev/{campus}/{clubType}/{belongs}")
-    public Page<ClubPrevResponseDTO> getClubPrevByCategories(@PathVariable Campus campus, @PathVariable ClubType clubType, @PathVariable String belongs, Pageable pageable) {
+    @GetMapping("/club/prev")
+    public Page<ClubPrevResponseDTO> getClubPrevByCategories(@RequestParam Campus campus, @RequestParam ClubType clubType, @RequestParam String belongs, Pageable pageable) {
         log.info("campus : {}, clubType : {}, belongs : {}", campus, clubType, belongs);
         Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
 
     //이름 검색 완전 일치
-    @GetMapping("/club/search/{name}")
-    public ResponseEntity<ClubResponseDTO> getClubByName(@PathVariable String name) {
+    @GetMapping("/club/search")
+    public ResponseEntity<ClubResponseDTO> getClubByName(@RequestParam String name) {
         return clubService.getClubDetailInfoByName(name)
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
@@ -81,15 +81,15 @@ public class ClubController {
     }
 
     //이름 검색 부분 일치
-    @GetMapping("/club/search/prev/{keyword}")
-    public Page<ClubPrevResponseDTO> getClubPrevByKeyword(@PathVariable String keyword, Pageable pageable) {
+    @GetMapping("/club/search/prev")
+    public Page<ClubPrevResponseDTO> getClubPrevByKeyword(@RequestParam String keyword, Pageable pageable) {
         Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByKeyword(keyword, pageable);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
 
     //오늘의 추천 동아리
-    @GetMapping("/club/random/{campus}/{clubType}/{belongs}")
-    public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@PathVariable Campus campus, @PathVariable ClubType clubType, @PathVariable String belongs) {
+    @GetMapping("/club/random")
+    public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@RequestParam Campus campus, @RequestParam ClubType clubType, @RequestParam String belongs) {
         return clubService.getRandomClubsByCategories(campus, clubType, belongs).stream()
                 .map(dto -> new ClubNameAndIdDTO(dto.getId(), dto.getName()))
                 .collect(Collectors.toList());
@@ -124,8 +124,9 @@ public class ClubController {
 //=====DELETE=====//
 
     //특정 활동 사진 삭제
-    @DeleteMapping("/club/{clubId}/{activityImageName}")
-    public ResponseEntity<ActivityImageDeletionDTO> deleteActivityImage(@PathVariable Long clubId, @PathVariable String activityImageName) {
+    @DeleteMapping("/club/{clubId}/activityImage")
+    public ResponseEntity<ActivityImageDeletionDTO> deleteActivityImage(@PathVariable Long clubId, @RequestParam String activityImageName) {
+        log.info("name : {}", activityImageName);
         return clubService.deleteActivityImage(clubId, activityImageName)
                 .map(uploadedName -> {
                     s3Transferer.deleteOne(uploadedName);

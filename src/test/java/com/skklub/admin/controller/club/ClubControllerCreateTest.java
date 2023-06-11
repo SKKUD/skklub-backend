@@ -219,7 +219,7 @@ class ClubControllerCreateTest {
                 .andExpect(jsonPath("$.name").value("ClubName"))
                 .andDo(document("/club/create/activityImages",
                         pathParameters(
-                                parameterWithName("clubId").description("동아리 ID")
+                                parameterWithName("clubId").description("동아리 ID").attributes(example("1"))
                         ),
                         requestParts(
                                 partWithName("activityImages").description("활동 사진").optional()

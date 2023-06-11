@@ -13,11 +13,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.restdocs.operation.QueryParameters;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Optional;
 
+import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -59,7 +61,7 @@ class ClubControllerDeleteTest {
                 .andDo(
                         document("club/delete/club",
                                 pathParameters(
-                                        parameterWithName("clubId").description("동아리 ID")
+                                        parameterWithName("clubId").description("동아리 ID").attributes(example("1"))
                                 ),
                                 responseFields(
                                         fieldWithPath("id").type(WireFormat.FieldType.INT64).description("삭제된 동아리 ID"),
@@ -86,7 +88,7 @@ class ClubControllerDeleteTest {
                  .andDo(
                          document("club/revive/club"
                                  , pathParameters(
-                                         parameterWithName("clubId").description("살리려는 동아리 ID")
+                                         parameterWithName("clubId").description("살리려는 동아리 ID").attributes(example("1"))
                                  ),
                                  responseFields(
                                          fieldWithPath("id").type(WireFormat.FieldType.INT64).description("살아난 동아리 ID"),
@@ -105,7 +107,8 @@ class ClubControllerDeleteTest {
 
           //when
           ResultActions actions = mockMvc.perform(
-                  delete("/club/{clubId}/{activityImageName}", clubId, testImageName)
+                  delete("/club/{clubId}/activityImage", clubId)
+                          .queryParam("activityImageName", testImageName)
           );
 
           //then
@@ -115,8 +118,10 @@ class ClubControllerDeleteTest {
                   .andDo(
                           document("club/delete/activityImage"
                                   , pathParameters(
-                                          parameterWithName("clubId").description("대상 동아리 ID")
-                                          ,parameterWithName("activityImageName").description("지우려는 활동 이미지 파일명")
+                                          parameterWithName("clubId").description("대상 동아리 ID").attributes(example("1"))
+                                  ),
+                                  queryParameters(
+                                          parameterWithName("activityImageName").attributes(example("activity.png")).description("지우려는 활동 이미지 파일명")
                                   ),
                                   responseFields(
                                           fieldWithPath("clubId").type(WireFormat.FieldType.INT64).description("대상 동아리 ID"),
