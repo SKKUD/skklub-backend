@@ -662,22 +662,26 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h6 id="_post_club_response_fields"><a class="link" href="#_post_club_response_fields">Response fields</a></h6>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
 </colgroup>
 <thead>
 <tr>
 <th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">타입</th>
 <th class="tableblock halign-left valign-top">설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STRING</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">동아리 아이디</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STRING</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">동아리명</p></td>
 </tr>
 </tbody>
@@ -692,21 +696,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect5">
 <h6 id="_post_clubclubidactivityimage_path_parameters"><a class="link" href="#_post_clubclubidactivityimage_path_parameters">Path parameters</a></h6>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 1. /club/{clubId}/activityImage</caption>
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
 </colgroup>
 <thead>
 <tr>
-<th class="tableblock halign-left valign-top">Parameter</th>
-<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">동아리 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
 </tr>
 </tbody>
 </table>
@@ -739,22 +745,26 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h6 id="_post_clubclubidactivityimage_response_fields"><a class="link" href="#_post_clubclubidactivityimage_response_fields">Response fields</a></h6>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
 </colgroup>
 <thead>
 <tr>
 <th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">타입</th>
 <th class="tableblock halign-left valign-top">설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STRING</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">동아리 ID</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STRING</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">동아리 이름</p></td>
 </tr>
 </tbody>
@@ -794,7 +804,173 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_동아리_정보_수정"><a class="link" href="#_동아리_정보_수정">동아리 정보 수정</a></h3>
-
+<div class="sect4">
+<h5 id="_patch_clubclubid"><a class="link" href="#_patch_clubclubid">Patch - /club/{clubId}</a></h5>
+<div class="sect5">
+<h6 id="_patch_clubclubid_path_parameters"><a class="link" href="#_patch_clubclubid_path_parameters">Path parameters</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">대상 동아리 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect5">
+<h6 id="_patch_clubclubid_query_parameters"><a class="link" href="#_patch_clubclubid_query_parameters">Query parameters</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
+<th class="tableblock halign-left valign-top">필수여부</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">동아리 이름</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">클럽 SKKULOL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>campus</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">분류 - 캠퍼스</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="common/campus-type.html" class="popup">캠퍼스 종류</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubType</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">분류 - 동아리 종류</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="common/club-type.html" class="popup">동아리 종류</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>belongs</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">분류 - 동아리 분과</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="common/belongs.html" class="popup">분과 종류</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>briefActivityDescription</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">분류 - 활동 설명</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">E-SPORTS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>activityDescription</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">자세한 활동 설명</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubDescription</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">자세한 동아리 설명</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>establishDate</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">설립 연도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2023</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>headLine</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">한줄 소개</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">명륜 게임 동아리입니다</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mandatoryActivatePeriod</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">의무 활동 기간</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4학기</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>memberAmount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">동아리 인원</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">60</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>regularMeetingTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">정규 모임 시간</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Thursday 19:00</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>roomLocation</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">동아리 방 위치</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">학생회관 80210</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>webLink1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">관련 사이트 주소 1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">www.skklol.edu</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>webLink2</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">관련 사이트 주소 2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">skklol.com</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect5">
+<h6 id="_patch_clubclubid_response_fields"><a class="link" href="#_patch_clubclubid_response_fields">Response fields</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INT64</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">수정된 동아리 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STRING</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">수정된 동아리 이름</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -803,15 +979,180 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_동아리_삭제"><a class="link" href="#_동아리_삭제">동아리 삭제</a></h3>
-
+<div class="sect4">
+<h5 id="_delete_clubclubid"><a class="link" href="#_delete_clubclubid">Delete - /club/{clubId}</a></h5>
+<div class="sect5">
+<h6 id="_delete_clubclubid_path_parameters"><a class="link" href="#_delete_clubclubid_path_parameters">Path parameters</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">동아리 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect5">
+<h6 id="_delete_clubclubid_response_fields"><a class="link" href="#_delete_clubclubid_response_fields">Response fields</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INT64</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">삭제된 동아리 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STRING</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">삭제된 동아리 이름</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_동아리_삭제_취소복구"><a class="link" href="#_동아리_삭제_취소복구">동아리 삭제 취소(복구)</a></h3>
-
+<div class="sect4">
+<h5 id="_delete_clubclubidcancel"><a class="link" href="#_delete_clubclubidcancel">Delete - /club/{clubId}/cancel</a></h5>
+<div class="sect5">
+<h6 id="_delete_clubclubidcancel_path_parameters"><a class="link" href="#_delete_clubclubidcancel_path_parameters">Path parameters</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">살리려는 동아리 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect5">
+<h6 id="_delete_clubclubidcancel_response_fields"><a class="link" href="#_delete_clubclubidcancel_response_fields">Response fields</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INT64</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">살아난 동아리 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STRING</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">살아난 동아리 이름</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_특정_활동_사진_삭제"><a class="link" href="#_특정_활동_사진_삭제">특정 활동 사진 삭제</a></h3>
-
+<div class="sect4">
+<h5 id="_delete_clubclubidactivityimagename"><a class="link" href="#_delete_clubclubidactivityimagename">Delete - /club/{clubId}/{activityImageName}</a></h5>
+<div class="sect5">
+<h6 id="_delete_clubclubidactivityimagename_path_parameters"><a class="link" href="#_delete_clubclubidactivityimagename_path_parameters">Path parameters</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">대상 동아리 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect5">
+<h6 id="_delete_clubclubidactivityimagename_response_fields"><a class="link" href="#_delete_clubclubidactivityimagename_response_fields">Response fields</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INT64</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">대상 동아리 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deletedActivityImageName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STRING</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지워진 활동 사진 파일명</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 </div>

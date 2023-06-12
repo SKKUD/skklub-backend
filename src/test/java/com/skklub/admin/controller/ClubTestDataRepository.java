@@ -1,11 +1,11 @@
 package com.skklub.admin.controller;
 
+import com.skklub.admin.controller.dto.ClubResponseDTO;
 import com.skklub.admin.controller.dto.S3DownloadDto;
-import com.skklub.admin.domain.ActivityImage;
-import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.annotation.PostConstruct;
@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,17 +24,40 @@ import java.util.stream.Collectors;
 @Component
 public class ClubTestDataRepository {
 
+    private final int recruitCnt = 6;
     private final int clubCnt = 10;
     private final int activityImgPerClub = 5;
     private final List<Logo> logos = new ArrayList<>();
     private final List<ActivityImage> activityImages = new ArrayList<>();
     private final List<Club> clubs = new ArrayList<>();
+    private final List<Recruit> recruits = new ArrayList<>();
+    private final List<User> users = new ArrayList<>();
 
     @PostConstruct
     public void postConstruct() {
+        readyUser();
+        readyRecruit();
         readyLogo();
         readyActivityImages();
         readyClub();
+    }
+
+    public List<ClubResponseDTO> getClubResponseDTOs(){
+        return getClubDetailInfoDtos().stream()
+                .map(detail -> new ClubResponseDTO(detail,
+                        getLogoS3DownloadDto((int)(long)detail.getId()),
+                        getActivityImgS3DownloadDtos((int)(long)detail.getId())
+                )).collect(Collectors.toList());
+    }
+
+    public List<ClubDetailInfoDto> getClubDetailInfoDtos(){
+        List<ClubDetailInfoDto> r = new ArrayList<>();
+        for(long i = 0; i < clubCnt; i++){
+            ClubDetailInfoDto dto = new ClubDetailInfoDto(clubs.get((int)i));
+            dto.setId(i);
+            r.add(dto);
+        }
+        return r;
     }
 
     public List<ClubPrevDTO> getClubPrevDTOs() {
@@ -56,7 +81,7 @@ public class ClubTestDataRepository {
 
     public S3DownloadDto getLogoS3DownloadDto(int clubIndex) {
         return new S3DownloadDto(
-                0L,
+                (long) clubIndex,
                 clubs.get(clubIndex).getLogo().getOriginalName(),
                 "logoBytes"
         );
@@ -101,6 +126,8 @@ public class ClubTestDataRepository {
                 activityImagesTemp.add(activityImages.get(j + i * activityImgPerClub));
             }
             club.appendActivityImages(activityImagesTemp);
+            club.setUser(users.get(i));
+            club.startRecruit(recruits.get(i));
             clubs.add(club);
         }
     }
@@ -115,5 +142,19 @@ public class ClubTestDataRepository {
         for (int i = 0; i < clubCnt * activityImgPerClub; i++) {
             activityImages.add(new ActivityImage("activityOriginal" + i + ".png", "activitySaved" + i + ".png"));
         }
+    }
+
+    private void readyRecruit() {
+        for (int i = 0; i < recruitCnt; i++) {
+            recruits.add(new Recruit(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), i + "명", "Test Recruit Process" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4), "Test Recruit web" + i));
+        }
+            for (int i = recruitCnt; i < clubCnt; i++) {
+                recruits.add(null);
+            }
+    }
+
+    private void readyUser() {
+        for(int i = 0; i < clubCnt; i++)
+            users.add(new User("userId" + i, "userPw" + i, i, "userName" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4)));
     }
 }

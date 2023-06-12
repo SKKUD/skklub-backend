@@ -1,7 +1,6 @@
 package com.skklub.admin.controller.club;
 
 import com.skklub.admin.controller.ClubController;
-import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.service.ClubService;
@@ -19,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.restdocs.snippet.Attributes;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -30,19 +28,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static akka.protobuf.WireFormat.*;
+import static akka.protobuf.WireFormat.FieldType;
 import static com.skklub.admin.controller.RestDocsUtils.example;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -141,8 +136,8 @@ class ClubControllerCreateTest {
                                 partWithName("logo").description("동아리 로고")
                         ),
                         responseFields(
-                                fieldWithPath("id").type(FieldType.STRING).description("동아리 아이디"),
-                                fieldWithPath("name").type(FieldType.STRING).description("동아리명")
+                                fieldWithPath("id").type(FieldType.STRING).description("동아리 아이디").attributes(example("0")),
+                                fieldWithPath("name").type(FieldType.STRING).description("동아리명").attributes(example("클럽 SKKULOL"))
                         )
 
                 ));
@@ -225,8 +220,8 @@ class ClubControllerCreateTest {
                                 partWithName("activityImages").description("활동 사진").optional()
                         ),
                         responseFields(
-                                fieldWithPath("id").type(FieldType.STRING).description("동아리 ID"),
-                                fieldWithPath("name").type(FieldType.STRING).description("동아리 이름")
+                                fieldWithPath("id").type(FieldType.STRING).description("동아리 ID").attributes(example("0")),
+                                fieldWithPath("name").type(FieldType.STRING).description("동아리 이름").attributes(example("클럽 SKKULOL"))
                         )
                 ));
     }

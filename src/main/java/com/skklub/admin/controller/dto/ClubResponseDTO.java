@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @AllArgsConstructor
@@ -40,16 +41,7 @@ public class ClubResponseDTO {
     private String webLink2;
 
     //============RECRUIT==============//
-    //모집 시기
-    private LocalDateTime recruitStartAt;
-    private LocalDateTime recruitEndAt;
-    //정원
-    private String recruitQuota;
-    //디테일
-    private String recruitProcessDescription;
-    //모집관련 연락처
-    private String recruitContact;
-    private String recruitWebLink;
+    private Optional<RecruitDto> recruit;
 
     //============PRESIDENT==============//
     private String presidentName;
@@ -62,7 +54,7 @@ public class ClubResponseDTO {
     public ClubResponseDTO(ClubDetailInfoDto clubDetailInfoDto, S3DownloadDto logo, List<S3DownloadDto> activityImages) {
         this.id = clubDetailInfoDto.getId();
         this.campus = clubDetailInfoDto.getCampus();
-        this.clubType = clubDetailInfoDto.getClubType().toString();
+        this.clubType = clubDetailInfoDto.getClubType();
         this.belongs = clubDetailInfoDto.getBelongs();
         this.briefActivityDescription = clubDetailInfoDto.getBriefActivityDescription();
         this.name = clubDetailInfoDto.getName();
@@ -78,12 +70,7 @@ public class ClubResponseDTO {
         this.activityImages = activityImages;
         this.webLink1 = clubDetailInfoDto.getWebLink1();
         this.webLink2 = clubDetailInfoDto.getWebLink2();
-        this.recruitStartAt = clubDetailInfoDto.getRecruitStartAt();
-        this.recruitEndAt = clubDetailInfoDto.getRecruitEndAt();
-        this.recruitQuota = clubDetailInfoDto.getRecruitQuota();
-        this.recruitProcessDescription = clubDetailInfoDto.getRecruitProcessDescription();
-        this.recruitContact = clubDetailInfoDto.getRecruitContact();
-        this.recruitWebLink = clubDetailInfoDto.getRecruitWebLink();
+        this.recruit = clubDetailInfoDto.getRecruit();
         this.presidentName = clubDetailInfoDto.getPresidentName();
         this.presidentContact = clubDetailInfoDto.getPresidentContact();
     }

@@ -64,8 +64,8 @@ class ClubControllerDeleteTest {
                                         parameterWithName("clubId").description("동아리 ID").attributes(example("1"))
                                 ),
                                 responseFields(
-                                        fieldWithPath("id").type(WireFormat.FieldType.INT64).description("삭제된 동아리 ID"),
-                                        fieldWithPath("name").type(WireFormat.FieldType.STRING).description("삭제된 동아리 이름")
+                                        fieldWithPath("id").type(WireFormat.FieldType.INT64).description("삭제된 동아리 ID").attributes(example("1")),
+                                        fieldWithPath("name").type(WireFormat.FieldType.STRING).description("삭제된 동아리 이름").attributes(example("Test Club Name"))
                                 )
                         )
                 );
@@ -91,8 +91,8 @@ class ClubControllerDeleteTest {
                                          parameterWithName("clubId").description("살리려는 동아리 ID").attributes(example("1"))
                                  ),
                                  responseFields(
-                                         fieldWithPath("id").type(WireFormat.FieldType.INT64).description("살아난 동아리 ID"),
-                                         fieldWithPath("name").type(WireFormat.FieldType.STRING).description("살아난 동아리 이름")
+                                         fieldWithPath("id").type(WireFormat.FieldType.INT64).description("살아난 동아리 ID").attributes(example("1")),
+                                         fieldWithPath("name").type(WireFormat.FieldType.STRING).description("살아난 동아리 이름").attributes(example("Test Club Name"))
                                  )
                          )
                  );
@@ -124,8 +124,8 @@ class ClubControllerDeleteTest {
                                           parameterWithName("activityImageName").attributes(example("activity.png")).description("지우려는 활동 이미지 파일명")
                                   ),
                                   responseFields(
-                                          fieldWithPath("clubId").type(WireFormat.FieldType.INT64).description("대상 동아리 ID"),
-                                          fieldWithPath("deletedActivityImageName").type(WireFormat.FieldType.STRING).description("지워진 활동 사진 파일명")
+                                          fieldWithPath("clubId").type(WireFormat.FieldType.INT64).description("대상 동아리 ID").attributes(example("1")),
+                                          fieldWithPath("deletedActivityImageName").type(WireFormat.FieldType.STRING).description("지워진 활동 사진 파일명").attributes(example("activity.png"))
                                   )
                           )
                   );

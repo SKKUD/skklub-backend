@@ -98,8 +98,8 @@ class ClubControllerUpdateTest {
                                         parameterWithName("webLink2").description("관련 사이트 주소 2").optional().attributes(example("skklol.com"))
                                 ),
                                 responseFields(
-                                        fieldWithPath("id").type(WireFormat.FieldType.INT64).description("수정된 동아리 ID")
-                                        , fieldWithPath("name").type(WireFormat.FieldType.STRING).description("수정된 동아리 이름")
+                                        fieldWithPath("id").type(WireFormat.FieldType.INT64).description("수정된 동아리 ID").attributes(example("1"))
+                                        , fieldWithPath("name").type(WireFormat.FieldType.STRING).description("수정된 동아리 이름").attributes(example("클럽 SKKULOL"))
                                 )
                         )
                 );
