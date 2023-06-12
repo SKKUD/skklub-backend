@@ -23,7 +23,7 @@ include::adocs/Activity-Append.adoc[]
 === 동아리 세부 조회
 include::adocs/Club-Read-Detail.adoc[]
 
-=== 동아리 프리뷰 조회
+=== 동아리 프리뷰 조회 - 카테고리 선택
 include::adocs/Club-Read-Prev.adoc[]
 
 === 이름 검색(완전 일치)

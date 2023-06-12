@@ -86,13 +86,15 @@ public class ClubService {
     }
 
     public List<ClubPrevDTO> getRandomClubsByCategories(Campus campus, ClubType clubType, String belongs) {
-        if(belongs.equals("전체")) return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString(), belongs));
-        if(!clubType.equals(ClubType.전체)) return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString()));
-        return convertEntityToPrevDTO(clubRepository.findClubRandomByCategories(campus.toString()));
-    }
-
-    private List<ClubPrevDTO> convertEntityToPrevDTO(List<Club> clubEntitys) {
-        return clubEntitys.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
+        List<Club> clubs;
+        if(!belongs.equals("전체"))
+            clubs = clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString(), belongs);
+        else if(!clubType.equals(ClubType.전체))
+            clubs = clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString());
+        else clubs = clubRepository.findClubRandomByCategories(campus.toString());
+        return clubs.stream()
+                .map(ClubPrevDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     public Optional<String> deleteClub(Long clubId) {

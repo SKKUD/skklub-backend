@@ -12,8 +12,8 @@ public interface RestDocsUtils {
     String LINK_CAMPUS_TYPE = "link:common/campus-type.html[캠퍼스 종류,role=\"popup\"]";
     String LINK_BELONGS_TYPE = "link:common/belongs.html[분과 종류,role=\"popup\"]";
     String LINK_BELONGS_TYPE_NULL = "link:common/belongs-null.html[분과 종류,role=\"popup\"]";
-    String LINK_CLUB_TYPE = "\"link:common/club-type.html[동아리 종류,role=\\\"popup\\\"]\"";
-    String LINK_CLUB_TYPE_NULL = "\"link:common/club-type-null.html[동아리 종류,role=\\\"popup\\\"]\"";
+    String LINK_CLUB_TYPE = "link:common/club-type.html[동아리 종류,role=\\\"popup\\\"]";
+    String LINK_CLUB_TYPE_NULL = "link:common/club-type-null.html[동아리 종류,role=\\\"popup\\\"]";
     String LINK_SORT = "link:common/sorting.html[정렬,role=\"popup\"]";
     static Attributes.Attribute example(String value){
         return new Attributes.Attribute("example", value);

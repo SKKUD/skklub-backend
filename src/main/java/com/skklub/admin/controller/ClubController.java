@@ -91,7 +91,9 @@ public class ClubController {
 
     //오늘의 추천 동아리
     @GetMapping("/club/random")
-    public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@RequestParam Campus campus, @RequestParam ClubType clubType, @RequestParam String belongs) {
+    public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@RequestParam Campus campus,
+                                                                     @RequestParam(required = false, defaultValue = "전체") ClubType clubType,
+                                                                     @RequestParam(required = false, defaultValue = "전체") String belongs) {
         return clubService.getRandomClubsByCategories(campus, clubType, belongs).stream()
                 .map(dto -> new ClubNameAndIdDTO(dto.getId(), dto.getName()))
                 .collect(Collectors.toList());
