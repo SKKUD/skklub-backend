@@ -1,0 +1,154 @@
+|===
+|변수명|타입|설명|예시
+
+|`+id+`
+|INT64
+|동아리 Id
+|0
+
+|`+campus+`
+|STRING
+|분류 - 캠퍼스
+|명륜
+
+|`+clubType+`
+|STRING
+|분류 - 동아리 종류
+|중앙동아리
+
+|`+belongs+`
+|STRING
+|분류 - 동아리 분과
+|취미교양
+
+|`+briefActivityDescription+`
+|STRING
+|분류 - 활동 설명
+|E-SPORTS
+
+|`+name+`
+|STRING
+|동아리 이름
+|정상적인 클럽 SKKULOL0
+
+|`+headLine+`
+|STRING
+|한줄 소개
+|명륜 게임 동아리입니다
+
+|`+establishAt+`
+|STRING
+|설립 연도
+|2023
+
+|`+roomLocation+`
+|STRING
+|동아리 방 위치
+|학생회관 80210
+
+|`+memberAmount+`
+|STRING
+|동아리 인원
+|60
+
+|`+regularMeetingTime+`
+|STRING
+|정규 모임 시간
+|Thursday 19:00
+
+|`+mandatoryActivatePeriod+`
+|STRING
+|의무 활동 기간
+|4학기
+
+|`+clubDescription+`
+|STRING
+|자세한 동아리 설명
+|여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^
+
+|`+activityDescription+`
+|STRING
+|자세한 활동 설명
+|1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.
+
+|`+webLink1+`
+|STRING
+|관련 사이트 주소 1
+|www.skklol.com
+
+|`+webLink2+`
+|STRING
+|관련 사이트 주소 2
+|www.skkulol.edu
+
+|`+recruit.recruitStartAt+`
+|STRING
+|모집 시작일
+|yyyy-MM-ddTHH:mm (null when not recruting)
+
+|`+recruit.recruitEndAt+`
+|STRING
+|모집 종료일
+|yyyy-MM-ddTHH:mm (null when not recruting)
+
+|`+recruit.recruitQuota+`
+|STRING
+|모집 인원
+|10 ~ 30명 - Can Any Format(null when not recruting)
+
+|`+recruit.recruitProcessDescription+`
+|STRING
+|모집 절차 설명
+|Test Recruit Format(null when not recruting)
+
+|`+recruit.recruitContact+`
+|STRING
+|모집 문의처
+|010-1234-1234 or recruit@asd.asd - Can Any Format(null when not recruting)
+
+|`+recruit.recruitWebLink+`
+|STRING
+|모집 링크
+|form.goole.com - Can Any Format(null when not recruting)
+
+|`+presidentName+`
+|STRING
+|회장 이름
+|userName0
+
+|`+presidentContact+`
+|STRING
+|회장 연락처
+|010-0000-0000
+
+|`+logo.id+`
+|INT64
+|로고 ID
+|0
+
+|`+logo.fileName+`
+|STRING
+|로고 파일명
+|logoOriginal0.png
+
+|`+logo.bytes+`
+|STRING
+|로고 바이트(파일)
+|logoBytes
+
+|`+activityImages[].id+`
+|STRING
+|활동 사진 ID
+|0
+
+|`+activityImages[].fileName+`
+|STRING
+|활동 사진 파일명
+|activityOriginal0.png
+
+|`+activityImages.[]bytes+`
+|STRING
+|활동 사진 바이트(파일)
+|activityImgBytes0
+
+|===

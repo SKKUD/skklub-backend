@@ -1,0 +1,14 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Length: 471
+
+[{"id":0,"name":"정상적인 클럽 SKKULOL0"},{"id":1,"name":"정상적인 클럽 SKKULOL1"},{"id":2,"name":"정상적인 클럽 SKKULOL2"},{"id":3,"name":"정상적인 클럽 SKKULOL3"},{"id":4,"name":"정상적인 클럽 SKKULOL4"},{"id":5,"name":"정상적인 클럽 SKKULOL5"},{"id":6,"name":"정상적인 클럽 SKKULOL6"},{"id":7,"name":"정상적인 클럽 SKKULOL7"},{"id":8,"name":"정상적인 클럽 SKKULOL8"},{"id":9,"name":"정상적인 클럽 SKKULOL9"}]
+----

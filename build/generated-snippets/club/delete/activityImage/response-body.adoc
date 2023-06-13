@@ -1,0 +1,4 @@
+[source,json,options="nowrap"]
+----
+{"clubId":0,"deletedActivityImageName":"Test Activity Image Name"}
+----

@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/club/0' -i -X DELETE
+----

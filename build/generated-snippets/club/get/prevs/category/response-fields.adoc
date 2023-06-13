@@ -1,0 +1,134 @@
+|===
+|변수명|타입|설명|예시
+
+|`+content[].id+`
+|INT64
+|동아리 아이디
+|0
+
+|`+content[].name+`
+|STRING
+|동아리 이름
+|정상적인 클럽 SKKULOL0
+
+|`+content[].belongs+`
+|STRING
+|분류 - 활동 설명
+|취미교양
+
+|`+content[].briefActivityDescription+`
+|STRING
+|클럽 
+|E-SPORTS
+
+|`+content[].logo.id+`
+|INT64
+|로고 아이디
+|0
+
+|`+content[].logo.fileName+`
+|STRING
+|로고 원본 파일명
+|logoOriginal0.png
+
+|`+content[].logo.bytes+`
+|BYTES
+|로고 바이트
+|logoBytes
+
+|`+pageable.sort.empty+`
+|BOOL
+|정렬 상태 - true인 필드만 확인
+|false
+
+|`+pageable.sort.sorted+`
+|BOOL
+|정렬 상태 - true인 필드만 확인
+|true
+
+|`+pageable.sort.unsorted+`
+|BOOL
+|정렬 상태 - true인 필드만 확인
+|false
+
+|`+pageable.offset+`
+|INT32
+|페이지 첫번째 요소의 전체 순번
+|0
+
+|`+pageable.pageNumber+`
+|INT32
+|Page Index (start 0)
+|0
+
+|`+pageable.pageSize+`
+|INT32
+|Elements Count Per Page
+|20
+
+|`+pageable.paged+`
+|BOOL
+|페이징 여부 - true인 필드만 확인
+|true
+
+|`+pageable.unpaged+`
+|BOOL
+|페이징 여부 - true인 필드만 확인
+|false
+
+|`+totalPages+`
+|INT32
+|전체 페이지 수
+|5
+
+|`+totalElements+`
+|INT32
+|요소 전체 개수
+|100
+
+|`+first+`
+|BOOL
+|첫번째 페이지인지?
+|true
+
+|`+last+`
+|BOOL
+|마지막 페이지인지?
+|false
+
+|`+empty+`
+|BOOL
+|빈 페이지?
+|false
+
+|`+size+`
+|INT32
+|무시해줭..
+|
+
+|`+number+`
+|INT32
+|무시해줭...
+|
+
+|`+sort.empty+`
+|BOOL
+|무시해줭..
+|
+
+|`+sort.sorted+`
+|BOOL
+|무시해줭..
+|
+
+|`+sort.unsorted+`
+|BOOL
+|무시해줭..
+|
+
+|`+numberOfElements+`
+|INT32
+|무시해줭..
+|
+
+|===

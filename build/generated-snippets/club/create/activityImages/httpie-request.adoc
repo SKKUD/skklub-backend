@@ -1,0 +1,14 @@
+[source,bash]
+----
+$ http --multipart POST 'http://localhost:8080/club/0/activityImage' \
+    'activityImages'@'test0.png' \
+    'activityImages'@'test1.png' \
+    'activityImages'@'test2.png' \
+    'activityImages'@'test3.png' \
+    'activityImages'@'test4.png' \
+    'activityImages'@'test5.png' \
+    'activityImages'@'test6.png' \
+    'activityImages'@'test7.png' \
+    'activityImages'@'test8.png' \
+    'activityImages'@'test9.png'
+----

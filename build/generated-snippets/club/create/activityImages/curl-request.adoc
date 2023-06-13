@@ -1,0 +1,15 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/club/0/activityImage' -i -X POST \
+    -H 'Content-Type: multipart/form-data;charset=UTF-8' \
+    -F 'activityImages=@test0.png;type=multipart/form-data;charset=ISO-8859-1' \
+    -F 'activityImages=@test1.png;type=multipart/form-data;charset=ISO-8859-1' \
+    -F 'activityImages=@test2.png;type=multipart/form-data;charset=ISO-8859-1' \
+    -F 'activityImages=@test3.png;type=multipart/form-data;charset=ISO-8859-1' \
+    -F 'activityImages=@test4.png;type=multipart/form-data;charset=ISO-8859-1' \
+    -F 'activityImages=@test5.png;type=multipart/form-data;charset=ISO-8859-1' \
+    -F 'activityImages=@test6.png;type=multipart/form-data;charset=ISO-8859-1' \
+    -F 'activityImages=@test7.png;type=multipart/form-data;charset=ISO-8859-1' \
+    -F 'activityImages=@test8.png;type=multipart/form-data;charset=ISO-8859-1' \
+    -F 'activityImages=@test9.png;type=multipart/form-data;charset=ISO-8859-1'
+----

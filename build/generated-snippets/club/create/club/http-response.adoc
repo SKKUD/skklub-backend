@@ -1,0 +1,8 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 45
+
+{"id":0,"name":"정상적인 클럽 SKKULOL"}
+----

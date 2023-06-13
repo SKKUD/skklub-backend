@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ http --form DELETE 'http://localhost:8080/club/0/activityImage?activityImageName=Test%20Activity%20Image%20Name'
+----

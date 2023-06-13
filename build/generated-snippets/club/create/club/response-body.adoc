@@ -1,0 +1,4 @@
+[source,json,options="nowrap"]
+----
+{"id":0,"name":"정상적인 클럽 SKKULOL"}
+----

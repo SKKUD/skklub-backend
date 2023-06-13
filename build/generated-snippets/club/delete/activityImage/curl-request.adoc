@@ -1,0 +1,5 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/club/0/activityImage?activityImageName=Test%20Activity%20Image%20Name' -i -X DELETE \
+    -H 'Content-Type: application/x-www-form-urlencoded'
+----

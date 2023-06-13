@@ -1,0 +1,34 @@
+|===
+|변수명|설명|예시|필수여부
+
+|`+campus+`
+|분류 - 캠퍼스
+|link:common/campus-type.html[캠퍼스 종류,role="popup"]
+|필수!!
+
+|`+clubType+`
+|분류 - 동아리 종류
+|link:common/club-type-null.html[동아리 종류,role=\"popup\"]
+|필수!!
+
+|`+belongs+`
+|분류 - 동아리 분과
+|link:common/belongs-null.html[분과 종류,role="popup"]
+|필수!!
+
+|`+size+`
+|페이지 정보 - 한 페이지 크기
+|Default : 20
+|
+
+|`+page+`
+|페이지 정보 - 요청 페이지 번호(시작 0)
+|Default : 0
+|
+
+|`+sort+`
+|페이지 정보 - 정렬
+|link:common/sorting.html[정렬,role="popup"]
+|
+
+|===

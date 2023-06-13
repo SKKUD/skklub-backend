@@ -1,0 +1,4 @@
+[source,json,options="nowrap"]
+----
+{"id":0,"name":"Test Club Name"}
+----

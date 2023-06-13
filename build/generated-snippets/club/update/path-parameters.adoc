@@ -1,0 +1,8 @@
+.+/club/{clubId}+
+|===
+|Parameter|Description
+
+|`+clubId+`
+|대상 동아리 ID
+
+|===

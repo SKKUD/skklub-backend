@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ http GET 'http://localhost:8080/club/search?name=%EC%A0%95%EC%83%81%EC%A0%81%EC%9D%B8%20%ED%81%B4%EB%9F%BD%20SKKULOL0'
+----

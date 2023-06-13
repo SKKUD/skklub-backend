@@ -1,0 +1,6 @@
+[source,http,options="nowrap"]
+----
+DELETE /club/0/cancel HTTP/1.1
+Host: localhost:8080
+
+----
