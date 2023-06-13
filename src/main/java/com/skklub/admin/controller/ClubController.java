@@ -8,6 +8,7 @@ import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
@@ -25,10 +26,11 @@ import static org.springframework.web.servlet.function.ServerResponse.ok;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class ClubController {
 
-    private final ClubService clubService;
-    private final S3Transferer s3Transferer;
+    private ClubService clubService;
+    private S3Transferer s3Transferer;
 
 //=====CREATE=====//
 

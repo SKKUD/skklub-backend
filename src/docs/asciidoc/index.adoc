@@ -1,19 +1,44 @@
-= Spring REST Docs
+== SKKLUB API
+//= SKKLUB AP -> 오류 발생 why?
+// backtony.github.io(부제)
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
 :toc: left
 :toclevels: 2
 :sectlinks:
+:docinfo: shared-head
 
-[[resources-post]]
-== Post
+= User API
 
-[[resources-post-create]]
-=== Post 생성
+== Create
 
-==== HTTP request
+=== 유저 회원가입
+include::{snippets}/user-join/http-request.adoc[]
+include::{snippets}/user-join/http-response.adoc[]
+include::{snippets}/user-join/query-parameters.adoc[]
 
-include::{snippets}/club/query-parameters.adoc[]
-include::{snippets}/club/request-parts.adoc[]
+== Read
 
-==== HTTP response
+=== 유저 로그인
+include::{snippets}/user-login/http-request.adoc[]
+include::{snippets}/user-login/http-response.adoc[]
+include::{snippets}/user-login/query-parameters.adoc[]
 
-include::{snippets}/club/response-fields.adoc[]
+== Update
+
+=== 유저 정보 수정
+include::{snippets}/user-update/http-request.adoc[]
+include::{snippets}/user-update/http-response.adoc[]
+include::{snippets}/user-update/query-parameters.adoc[]
+
+== Delete
+
+=== 유저 로그아웃
+include::{snippets}/user-logout/http-request.adoc[]
+include::{snippets}/user-logout/http-response.adoc[]
+
+= RefreshToken API
+
+include::{snippets}/refresh/http-request.adoc[]
+include::{snippets}/refresh/http-response.adoc[]
