@@ -1,9 +1,9 @@
-package com.skklub.admin.controller;
+package com.skklub.admin.controller.user;
 
 
 import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skklub.admin.controller.dto.UserLoginRequestDto;
+import com.skklub.admin.controller.UserController;
 import com.skklub.admin.service.UserService;
 import com.skklub.admin.service.dto.UserProcResultDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,6 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @Slf4j
