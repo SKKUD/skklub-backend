@@ -21,14 +21,10 @@ public class QUser extends EntityPathBase<User> {
 
     public final QBaseTimeEntity _super = new QBaseTimeEntity(this);
 
-    public final NumberPath<Integer> authority = createNumber("authority", Integer.class);
-
     public final StringPath contact = createString("contact");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
-
-    public final StringPath externId = createString("externId");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -38,6 +34,10 @@ public class QUser extends EntityPathBase<User> {
     public final StringPath name = createString("name");
 
     public final StringPath password = createString("password");
+
+    public final EnumPath<com.skklub.admin.domain.enums.Role> role = createEnum("role", com.skklub.admin.domain.enums.Role.class);
+
+    public final StringPath username = createString("username");
 
     public QUser(String variable) {
         super(User.class, forVariable(variable));

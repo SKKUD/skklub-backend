@@ -3,6 +3,7 @@ package com.skklub.admin.repository;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.domain.enums.Role;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -49,7 +51,7 @@ class ClubRepositoryTest {
                     , "www.skklol.com"
                     , "www.skkulol.edu");
             Recruit recruit = new Recruit(LocalDateTime.now(), LocalDateTime.now(), "20명", "1차 서류, 2차 면접", "010 - 0000 - 0000", "www.example.com");
-            User user = new User("exampleId", "examplePw", 3, "Lee", "010 - 1234 - 5678");
+            User user = new User("exampleId", "examplePw", Role.ROLE_USER, "Lee", "010 - 1234 - 5678");
             Logo logo = new Logo("logoFile.png" + t, "uploadedLogo.png");
             List<ActivityImage> activityImages = new ArrayList<>();
             for (int i = 0; i < 10; i++) {
@@ -93,7 +95,7 @@ class ClubRepositoryTest {
                 , "www.skklol.com"
                 , "www.skkulol.edu");
         Recruit recruit = new Recruit(LocalDateTime.now(), LocalDateTime.now(), "20명", "1차 서류, 2차 면접", "010 - 0000 - 0000", "www.example.com");
-        User user = new User("exampleId", "examplePw", 3, "Lee", "010 - 1234 - 5678");
+        User user = new User("exampleId", "examplePw", Role.ROLE_USER, "Lee", "010 - 1234 - 5678");
         Logo logo = new Logo("logoFile.png", "uploadedLogo.png");
         List<ActivityImage> activityImages = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
@@ -157,7 +159,7 @@ class ClubRepositoryTest {
                 , "www.skklol.com"
                 , "www.skkulol.edu");
         Recruit recruit = new Recruit(LocalDateTime.now(), LocalDateTime.now(), "20명", "1차 서류, 2차 면접", "010 - 0000 - 0000", "www.example.com");
-        User user = new User("exampleId", "examplePw", 3, "Lee", "010 - 1234 - 5678");
+        User user = new User("exampleId", "examplePw", Role.ROLE_USER, "Lee", "010 - 1234 - 5678");
         club.setUser(user);
 
         em.persist(recruit);

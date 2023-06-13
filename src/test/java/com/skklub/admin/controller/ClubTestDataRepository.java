@@ -5,6 +5,7 @@ import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.FileNames;
@@ -155,6 +156,6 @@ public class ClubTestDataRepository {
 
     private void readyUser() {
         for(int i = 0; i < clubCnt; i++)
-            users.add(new User("userId" + i, "userPw" + i, i, "userName" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4)));
+            users.add(new User("userId" + i, "userPw" + i, Role.ROLE_USER, "userName" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4)));
     }
 }
