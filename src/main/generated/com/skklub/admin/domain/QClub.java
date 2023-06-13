@@ -28,9 +28,9 @@ public class QClub extends EntityPathBase<Club> {
 
     public final ListPath<ActivityImage, QActivityImage> activityImages = this.<ActivityImage, QActivityImage>createList("activityImages", ActivityImage.class, QActivityImage.class, PathInits.DIRECT2);
 
-    public final EnumPath<com.skklub.admin.domain.enums.ActivityType> activityType = createEnum("activityType", com.skklub.admin.domain.enums.ActivityType.class);
-
     public final BooleanPath alive = createBoolean("alive");
+
+    public final StringPath belongs = createString("belongs");
 
     public final StringPath briefActivityDescription = createString("briefActivityDescription");
 
@@ -39,8 +39,6 @@ public class QClub extends EntityPathBase<Club> {
     public final StringPath clubDescription = createString("clubDescription");
 
     public final EnumPath<com.skklub.admin.domain.enums.ClubType> clubType = createEnum("clubType", com.skklub.admin.domain.enums.ClubType.class);
-
-    public final EnumPath<com.skklub.admin.domain.enums.College> college = createEnum("college", com.skklub.admin.domain.enums.College.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;

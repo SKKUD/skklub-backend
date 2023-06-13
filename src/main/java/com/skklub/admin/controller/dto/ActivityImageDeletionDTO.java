@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ActivityImageDeletionDTO {
     private Long clubId;
-    private String clubName;
     private String deletedActivityImageName;
 }

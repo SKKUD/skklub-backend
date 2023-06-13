@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Getter
@@ -28,8 +29,8 @@ public class Recruit extends BaseEntity {
     private String webLink;
 
     public Recruit(LocalDateTime startAt, LocalDateTime endAt, String quota, String processDescription, String contact, String webLink) {
-        this.startAt = startAt;
-        this.endAt = endAt;
+        this.startAt = startAt.truncatedTo(ChronoUnit.SECONDS);
+        this.endAt = endAt.truncatedTo(ChronoUnit.SECONDS);
         this.quota = quota;
         this.processDescription = processDescription;
         this.contact = contact;

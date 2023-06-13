@@ -1,22 +1,15 @@
 package com.skklub.admin.controller.dto;
 
-import com.skklub.admin.domain.*;
-import com.skklub.admin.domain.enums.ActivityType;
 import com.skklub.admin.domain.enums.Campus;
-import com.skklub.admin.domain.enums.ClubType;
-import com.skklub.admin.domain.enums.College;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
-import com.skklub.admin.service.dto.FileNames;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Data
 @AllArgsConstructor
@@ -28,8 +21,7 @@ public class ClubResponseDTO {
     //분류
     private Campus campus;
     private String clubType;
-    private String college;
-    private String activityType;
+    private String belongs;
     private String briefActivityDescription;
 
     //Outlines
@@ -49,16 +41,7 @@ public class ClubResponseDTO {
     private String webLink2;
 
     //============RECRUIT==============//
-    //모집 시기
-    private LocalDateTime recruitStartAt;
-    private LocalDateTime recruitEndAt;
-    //정원
-    private String recruitQuota;
-    //디테일
-    private String recruitProcessDescription;
-    //모집관련 연락처
-    private String recruitContact;
-    private String recruitWebLink;
+    private Optional<RecruitDto> recruit;
 
     //============PRESIDENT==============//
     private String presidentName;
@@ -71,9 +54,8 @@ public class ClubResponseDTO {
     public ClubResponseDTO(ClubDetailInfoDto clubDetailInfoDto, S3DownloadDto logo, List<S3DownloadDto> activityImages) {
         this.id = clubDetailInfoDto.getId();
         this.campus = clubDetailInfoDto.getCampus();
-        this.clubType = clubDetailInfoDto.getClubType().toString();
-        this.college = clubDetailInfoDto.getCollege().toString();
-        this.activityType = clubDetailInfoDto.getActivityType().toString();
+        this.clubType = clubDetailInfoDto.getClubType();
+        this.belongs = clubDetailInfoDto.getBelongs();
         this.briefActivityDescription = clubDetailInfoDto.getBriefActivityDescription();
         this.name = clubDetailInfoDto.getName();
         this.headLine = clubDetailInfoDto.getHeadLine();
@@ -88,12 +70,7 @@ public class ClubResponseDTO {
         this.activityImages = activityImages;
         this.webLink1 = clubDetailInfoDto.getWebLink1();
         this.webLink2 = clubDetailInfoDto.getWebLink2();
-        this.recruitStartAt = clubDetailInfoDto.getRecruitStartAt();
-        this.recruitEndAt = clubDetailInfoDto.getRecruitEndAt();
-        this.recruitQuota = clubDetailInfoDto.getRecruitQuota();
-        this.recruitProcessDescription = clubDetailInfoDto.getRecruitProcessDescription();
-        this.recruitContact = clubDetailInfoDto.getRecruitContact();
-        this.recruitWebLink = clubDetailInfoDto.getRecruitWebLink();
+        this.recruit = clubDetailInfoDto.getRecruit();
         this.presidentName = clubDetailInfoDto.getPresidentName();
         this.presidentContact = clubDetailInfoDto.getPresidentContact();
     }

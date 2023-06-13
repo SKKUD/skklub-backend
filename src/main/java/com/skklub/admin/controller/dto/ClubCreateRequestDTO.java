@@ -1,33 +1,35 @@
 package com.skklub.admin.controller.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.enums.ActivityType;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
-import com.skklub.admin.domain.enums.College;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDate;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClubCreateRequestDTO {
+    @NotBlank
     private String clubName;
+    @NotBlank
     private String activityDescription;
+    @NotBlank
     private String briefActivityDescription;
+    @NotBlank
     private String clubDescription;
 
     //enums
-    private String activityType;
-    private String campus;
-    private String college;
-    private String clubType;
+    @NotBlank
+    private String belongs;
+    @NotBlank
+    private Campus campus;
+    @NotBlank
+    private ClubType clubType;
 
     //Can be NULL;
     private String establishDate;
@@ -40,6 +42,9 @@ public class ClubCreateRequestDTO {
     private String webLink2;
 
     public Club toEntity() {
-        return new Club(clubName, activityDescription, ActivityType.valueOf(activityType), ClubType.valueOf(clubType), briefActivityDescription, Campus.valueOf(campus), clubDescription, College.valueOf(college), establishDate, headLine, mandatoryActivatePeriod, memberAmount, regularMeetingTime, roomLocation, webLink1, webLink2);
+        return new Club(clubName, activityDescription, belongs,
+                clubType, briefActivityDescription, campus,
+                clubDescription,  establishDate, headLine,
+                mandatoryActivatePeriod, memberAmount, regularMeetingTime, roomLocation, webLink1, webLink2);
     }
 }

@@ -54,6 +54,7 @@ public class S3Transferer {
     public S3DownloadDto downloadOne(FileNames fileName) {
         S3DownloadDto download = download(fileName.getSavedName());
         download.setFileName(fileName.getOriginalName());
+        download.setId(fileName.getId());
         return download;
     }
 
@@ -72,5 +73,9 @@ public class S3Transferer {
             e.printStackTrace();
         }
         return new S3DownloadDto(bytes);
+    }
+
+    public void deleteOne(String key) {
+        amazonS3.deleteObject(bucket, key);
     }
 }

@@ -1,5 +1,4 @@
-== SKKLUB API
-//= SKKLUB AP -> 오류 발생 why?
+= SKklub API
 // backtony.github.io(부제)
 :doctype: book
 :icons: font
@@ -9,36 +8,70 @@
 :sectlinks:
 :docinfo: shared-head
 
-= User API
-
-== Create
+= Authentication API
 
 === 유저 회원가입
 include::{snippets}/user-join/http-request.adoc[]
 include::{snippets}/user-join/http-response.adoc[]
 include::{snippets}/user-join/query-parameters.adoc[]
 
-== Read
-
 === 유저 로그인
 include::{snippets}/user-login/http-request.adoc[]
 include::{snippets}/user-login/http-response.adoc[]
 include::{snippets}/user-login/query-parameters.adoc[]
-
-== Update
 
 === 유저 정보 수정
 include::{snippets}/user-update/http-request.adoc[]
 include::{snippets}/user-update/http-response.adoc[]
 include::{snippets}/user-update/query-parameters.adoc[]
 
-== Delete
-
 === 유저 로그아웃
 include::{snippets}/user-logout/http-request.adoc[]
 include::{snippets}/user-logout/http-response.adoc[]
 
-= RefreshToken API
-
+=== Token Refresh
 include::{snippets}/refresh/http-request.adoc[]
 include::{snippets}/refresh/http-response.adoc[]
+
+= Club API
+
+== Create
+
+=== 동아리 생성
+include::adocs/Club-Create.adoc[]
+
+=== 활동 사진 추가
+include::adocs/Activity-Append.adoc[]
+
+== Read
+
+=== 동아리 세부 조회
+include::adocs/Club-Read-Detail.adoc[]
+
+=== 동아리 프리뷰 조회 - 카테고리 선택
+include::adocs/Club-Read-Prev.adoc[]
+
+=== 이름 검색(완전 일치)
+include::adocs/Search-Exactly.adoc[]
+
+=== 이름 검색(부분 일치)
+include::adocs/Search-Part.adoc[]
+
+=== 오늘의 추천 동아리
+include::adocs/Today-Club.adoc[]
+
+== Update
+
+=== 동아리 정보 수정
+include::adocs/Club-Update.adoc[]
+
+== Delete
+
+=== 동아리 삭제
+include::adocs/Club-Delete.adoc[]
+
+=== 동아리 삭제 취소(복구)
+include::adocs/Club-Revive.adoc[]
+
+=== 특정 활동 사진 삭제
+include::adocs/Activity-Delete.adoc[]

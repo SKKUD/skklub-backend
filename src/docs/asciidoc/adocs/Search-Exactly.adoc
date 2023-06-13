@@ -1,0 +1,2 @@
+===== Get - /club/search
+operation::club/get/detail/search[snippets='query-parameters,response-fields']

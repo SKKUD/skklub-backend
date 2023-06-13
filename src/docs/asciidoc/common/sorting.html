@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>SKKLUB API</title>
+<title>중첩 가능</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -436,284 +436,68 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 </head>
-<body class="book toc2 toc-left">
+<body class="book">
 <div id="header">
-<h1>SKKLUB API</h1>
-<div id="toc" class="toc2">
-<div id="toctitle">Table of Contents</div>
-<ul class="sectlevel0">
-<li><a href="#_user_api">User API</a>
-<ul class="sectlevel1">
-<li><a href="#_create">Create</a>
-<ul class="sectlevel2">
-<li><a href="#_유저_회원가입">유저 회원가입</a></li>
-</ul>
-</li>
-<li><a href="#_read">Read</a>
-<ul class="sectlevel2">
-<li><a href="#_유저_로그인">유저 로그인</a></li>
-</ul>
-</li>
-<li><a href="#_update">Update</a>
-<ul class="sectlevel2">
-<li><a href="#_유저_정보_수정">유저 정보 수정</a></li>
-</ul>
-</li>
-<li><a href="#_delete">Delete</a>
-<ul class="sectlevel2">
-<li><a href="#_유저_로그아웃">유저 로그아웃</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#_refreshtoken_api">RefreshToken API</a></li>
-</ul>
-</div>
 </div>
 <div id="content">
-<h1 id="_user_api" class="sect0"><a class="link" href="#_user_api">User API</a></h1>
-<div class="sect1">
-<h2 id="_create"><a class="link" href="#_create">Create</a></h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_유저_회원가입"><a class="link" href="#_유저_회원가입">유저 회원가입</a></h3>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /user/join?username=user&amp;password=1234&amp;name=%EA%B9%80%EB%AA%85%EB%A5%9C&amp;contact=010-1234-5678 HTTP/1.1
-Content-Type: application/json
-Host: localhost:8080</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Type: application/json
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 0
-Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-X-Frame-Options: DENY
-Content-Length: 71
+<div class="sect3">
+<h4 id="_중첩_가능">중첩 가능</h4>
 
-{"id":1,"username":"user","name":"김명륜","contact":"010-1234-5678"}</code></pre>
 </div>
-</div>
-<table class="tableblock frame-all grid-all stretch">
+<div class="sect3">
+<h4 id="_ex_sortkeyword1_order1sortkeyword2order2">ex : sort=keyword1.order1&amp;sort=keyword2,order2</h4>
+<table id="club-keyowrd" class="tableblock frame-all grid-all stretch">
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 100%;">
 </colgroup>
 <thead>
 <tr>
-<th class="tableblock halign-left valign-top">Parameter</th>
-<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">클럽 정렬 키워드</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>username</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">유저 계정 ID</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">비밀번호</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">유저 이름</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>contact</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">연락처</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>campus</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubType</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>belongs</code></p></td>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_read"><a class="link" href="#_read">Read</a></h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_유저_로그인"><a class="link" href="#_유저_로그인">유저 로그인</a></h3>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /user/login?username=user&amp;password=1234 HTTP/1.1
-Content-Type: application/json
-Host: localhost:8080</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Authorization: Bearer access-token
-Refresh-Token: Bearer refresh-token
-Content-Type: text/plain;charset=UTF-8
-Content-Length: 14
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 0
-Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-X-Frame-Options: DENY
-
-user logged in</code></pre>
-</div>
-</div>
-<table class="tableblock frame-all grid-all stretch">
+<table id="ordering" class="tableblock frame-all grid-all stretch">
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 100%;">
 </colgroup>
 <thead>
 <tr>
-<th class="tableblock halign-left valign-top">Parameter</th>
-<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">정렬 순서 키워드</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>username</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">유저 계정 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>asc(default)</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">비밀번호</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>desc</code></p></td>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_update"><a class="link" href="#_update">Update</a></h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_유저_정보_수정"><a class="link" href="#_유저_정보_수정">유저 정보 수정</a></h3>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /user/1?password=12345&amp;name=%EC%9D%B4%EC%9C%A8%EC%A0%84&amp;contact=010-8765-4321 HTTP/1.1
-Content-Type: application/json
-Authorization: Bearer (access_token)
-Host: localhost:8080</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Type: application/json
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 0
-Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-X-Frame-Options: DENY
-Content-Length: 71
-
-{"id":1,"username":"user","name":"이율전","contact":"010-8765-4321"}</code></pre>
-</div>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Parameter</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">변경할 비밀번호</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">변경할 유저 이름</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>contact</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">변경할 연락처</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_delete"><a class="link" href="#_delete">Delete</a></h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_유저_로그아웃"><a class="link" href="#_유저_로그아웃">유저 로그아웃</a></h3>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /user/logout?username=user&amp;password=1234 HTTP/1.1
-Content-Type: application/json
-Authorization: Bearer (access_token)
-Host: localhost:8080</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Type: text/plain;charset=UTF-8
-Content-Length: 28
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 0
-Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-X-Frame-Options: DENY
-
-user logged out successfully</code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<h1 id="_refreshtoken_api" class="sect0"><a class="link" href="#_refreshtoken_api">RefreshToken API</a></h1>
-<div class="openblock partintro">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /refresh?_csrf=pmFqPKiCc_X-yGVH09pNl3U8w_zKX_KG6I_vB-XckQ8GXYa7lgNdWZ27R8fTrlQj4vd59UIM7p79bMar3LrfZoG9oz1jPrON HTTP/1.1
-Content-Type: application/json
-Authorization: Bearer access_token
-Refresh-Token: Bearer refresh_token
-Host: localhost:8080</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content
-Authorization: Bearer access_token
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 0
-Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-X-Frame-Options: DENY</code></pre>
-</div>
-</div>
-</div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-06-06 14:05:48 +0900
+Last updated 2023-06-11 18:43:36 +0900
 </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
-<script>
-if (!hljs.initHighlighting.called) {
-  hljs.initHighlighting.called = true
-  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
-}
-</script>
 </body>
 </html>

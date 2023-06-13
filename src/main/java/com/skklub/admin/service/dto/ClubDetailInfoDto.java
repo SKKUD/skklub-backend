@@ -1,5 +1,6 @@
 package com.skklub.admin.service.dto;
 
+import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Data
@@ -19,8 +21,7 @@ public class ClubDetailInfoDto {
     //분류
     private Campus campus;
     private String clubType;
-    private String college;
-    private String activityType;
+    private String belongs;
     private String briefActivityDescription;
 
     //Outlines
@@ -43,28 +44,22 @@ public class ClubDetailInfoDto {
     private String webLink2;
 
     //============RECRUIT==============//
-    //모집 시기
-    private LocalDateTime recruitStartAt;
-    private LocalDateTime recruitEndAt;
-    //정원
-    private String recruitQuota;
-    //디테일
-    private String recruitProcessDescription;
-    //모집관련 연락처
-    private String recruitContact;
-    private String recruitWebLink;
+    private Optional<RecruitDto> recruit;
 
 
     //============PRESIDENT==============//
     private String presidentName;
     private String presidentContact;
 
-    public ClubDetailInfoDto(Club club, Logo logo, List<ActivityImage> activityImage, Recruit recruit, User user) {
+    public ClubDetailInfoDto(Club club) {
+        Logo logo = club.getLogo();
+        List<ActivityImage> activityImages = club.getActivityImages();
+        Optional<Recruit> recruit = Optional.ofNullable(club.getRecruit());
+        User user = club.getPresident();
         this.id = club.getId();
         this.campus = club.getCampus();
         this.clubType = club.getClubType().toString();
-        this.college = club.getCollege().toString();
-        this.activityType = club.getActivityType().toString();
+        this.belongs = club.getBelongs();
         this.briefActivityDescription = club.getBriefActivityDescription();
         this.name = club.getName();
         this.headLine = club.getHeadLine();
@@ -76,17 +71,12 @@ public class ClubDetailInfoDto {
         this.clubDescription = club.getClubDescription();
         this.activityDescription = club.getActivityDescription();
         this.logo = new FileNames(logo);
-        this.activityImages = activityImage.stream()
+        this.activityImages = activityImages.stream()
                 .map(FileNames::new)
                 .collect(Collectors.toList());
         this.webLink1 = club.getWebLink1();
         this.webLink2 = club.getWebLink2();
-        this.recruitStartAt = recruit.getStartAt();
-        this.recruitEndAt = recruit.getEndAt();
-        this.recruitQuota = recruit.getQuota();
-        this.recruitProcessDescription = recruit.getProcessDescription();
-        this.recruitContact = recruit.getContact();
-        this.recruitWebLink = recruit.getWebLink();
+        this.recruit = recruit.map(RecruitDto::new);
         this.presidentName = user.getName();
         this.presidentContact = user.getContact();
     }
