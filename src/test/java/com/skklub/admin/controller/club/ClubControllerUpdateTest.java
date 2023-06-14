@@ -29,6 +29,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,6 +57,7 @@ class ClubControllerUpdateTest {
         //when
         ResultActions actions = mockMvc.perform(
                 patch("/club/{clubId}", clubId)
+                        .with(csrf())
                         .queryParam("clubName", "정상적인 클럽 SKKULOL")
                         .queryParam("campus", "명륜")
                         .queryParam("clubType", "중앙동아리")
@@ -78,7 +80,7 @@ class ClubControllerUpdateTest {
                 .andExpect(jsonPath("$.id").value(clubId))
                 .andExpect(jsonPath("$.name").value(clubName))
                 .andDo(
-                        document("/club/update/club",
+                        document("club/update/club",
                                 pathParameters(
                                         parameterWithName("clubId").description("대상 동아리 ID").attributes(example("1"))
                                 ),

@@ -1,0 +1,8 @@
+[source,http,options="nowrap"]
+----
+POST /user/logout?username=user&password=1234 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer (access_token)
+Host: localhost:8080
+
+----

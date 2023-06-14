@@ -29,6 +29,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static com.skklub.admin.controller.RestDocsUtils.LINK_CAMPUS_TYPE;
+import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
@@ -92,8 +94,8 @@ public class UserControllerLoginTest {
         ResultActions actions = mockMvc.perform(post("/user/login")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                            .queryParam("username", "user")
-                            .queryParam("password", "1234")
+                            .queryParam("username", username)
+                            .queryParam("password", password)
                 );
 
         //then
@@ -101,8 +103,8 @@ public class UserControllerLoginTest {
                 .andExpect(content().string(username +" logged in"))
                 .andDo(document("User-Login"
                         ,queryParameters(
-                                parameterWithName("username").description("유저 계정 ID"),
-                                parameterWithName("password").description("비밀번호")
+                                parameterWithName("username").description("유저 계정 ID").attributes(example(username)),
+                                parameterWithName("password").description("비밀번호").attributes(example(password))
                         )
                         ,responseHeaders(
                                 headerWithName("Authorization").description("기본 인증용 access-token"),

@@ -1,4 +1,4 @@
 [source,bash]
 ----
-$ curl 'http://localhost:8080/club/0' -i -X GET
+$ curl 'http://localhost:8080/club/0?_csrf=Q9aBGvjmgyJLcYFlYvoh3UqwecySHdEHy5hGE4xLh0YWV0y1d7SxIsjethVmRuVRB9cV6XvWVPSlKucqqKp3crUv4XUhby3Q' -i -X GET
 ----

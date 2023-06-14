@@ -1,6 +1,5 @@
 package com.skklub.admin.controller.user;
 
-
 import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.controller.UserController;
@@ -110,7 +109,7 @@ public class UserControllerUpdateTest {
                         ,requestHeaders(headerWithName("Authorization").description("기본 인증용 access-token")
                         )
                         ,pathParameters(
-                                parameterWithName("userId").description("유저 ID")
+                                parameterWithName("userId").description("유저 ID").attributes(example(String.valueOf(1L)))
                         )
                         ,queryParameters(
                                 parameterWithName("password").description("변경할 비밀번호").attributes(example("12345")),

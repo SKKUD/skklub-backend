@@ -26,6 +26,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,6 +55,7 @@ class ClubControllerDeleteTest {
         //when
         ResultActions actions = mockMvc.perform(
                 delete("/club/{clubId}", 0L)
+                        .with(csrf())
         );
 
         //then
@@ -81,6 +83,7 @@ class ClubControllerDeleteTest {
          //when
          ResultActions actions = mockMvc.perform(
                  delete("/club/{clubId}/cancel", 0L)
+                         .with(csrf())
          );
 
          //then
@@ -110,6 +113,7 @@ class ClubControllerDeleteTest {
           //when
           ResultActions actions = mockMvc.perform(
                   delete("/club/{clubId}/activityImage", clubId)
+                          .with(csrf())
                           .queryParam("activityImageName", testImageName)
           );
 

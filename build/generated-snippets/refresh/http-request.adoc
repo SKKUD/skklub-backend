@@ -1,0 +1,9 @@
+[source,http,options="nowrap"]
+----
+GET /refresh?_csrf=pmFqPKiCc_X-yGVH09pNl3U8w_zKX_KG6I_vB-XckQ8GXYa7lgNdWZ27R8fTrlQj4vd59UIM7p79bMar3LrfZoG9oz1jPrON HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer access_token
+Refresh-Token: Bearer refresh_token
+Host: localhost:8080
+
+----

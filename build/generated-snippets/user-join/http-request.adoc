@@ -1,0 +1,7 @@
+[source,http,options="nowrap"]
+----
+POST /user/join?username=user&password=1234&name=%EA%B9%80%EB%AA%85%EB%A5%9C&contact=010-1234-5678 HTTP/1.1
+Content-Type: application/json
+Host: localhost:8080
+
+----

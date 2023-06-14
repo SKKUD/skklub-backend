@@ -1,0 +1,7 @@
+|===
+|Name|Description
+
+|`+Authorization+`
+|재발급된 access-token
+
+|===

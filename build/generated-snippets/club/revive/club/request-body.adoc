@@ -1,4 +1,4 @@
-[source,options="nowrap"]
+[source,x-www-form-urlencoded,options="nowrap"]
 ----
-
+_csrf=bUXYwRhYHLqClfgb8ewOGLO-cGeyEFdMGCIMtS4BX1sTf4xYW3G-9npvKIiv8Mstk8E6LtCKXV_WJTRhIBs5jBw5Oj0iS7s5
 ----

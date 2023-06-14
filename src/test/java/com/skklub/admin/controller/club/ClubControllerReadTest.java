@@ -44,6 +44,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -80,6 +81,7 @@ class ClubControllerReadTest {
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/{clubId}", clubId)
+                        .with(csrf())
         );
 
         //then
@@ -116,7 +118,7 @@ class ClubControllerReadTest {
                     checkActivityImagesResponseJson(actions, i, activityImgS3DownloadDtos);
                 }
         actions.andDo(
-                document("/club/get/detail/id",
+                document("club/get/detail/id",
                         pathParameters(
                                 parameterWithName("clubId").attributes(example("1")).description("동아리 ID")
                         ),
@@ -171,6 +173,7 @@ class ClubControllerReadTest {
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/search")
+                        .with(csrf())
                         .queryParam("name", clubName)
         );
 
@@ -208,7 +211,7 @@ class ClubControllerReadTest {
             checkActivityImagesResponseJson(actions, i, activityImgS3DownloadDtos);
         }
         actions.andDo(
-                document("/club/get/detail/search",
+                document("club/get/detail/search",
                         queryParameters(
                                 parameterWithName("name").attributes(example(clubName)).description("동아리 이름(정확히 일치 시에만)")
                         ),
@@ -280,6 +283,7 @@ class ClubControllerReadTest {
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/prev")
+                        .with(csrf())
                         .queryParam("campus", campus.toString())
                         .queryParam("clubType", clubType.toString())
                         .queryParam("belongs", belongs)
@@ -308,7 +312,7 @@ class ClubControllerReadTest {
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(
-                document("/club/get/prevs/category",
+                document("club/get/prevs/category",
                         queryParameters(
                                 parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
                                 parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(LINK_CLUB_TYPE_NULL)),
@@ -354,6 +358,7 @@ class ClubControllerReadTest {
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/prev")
+                        .with(csrf())
                         .queryParam("campus", campus.toString())
                         .queryParam("clubType", clubType.toString())
                         .queryParam("size", String.valueOf(clubPerPage))
@@ -388,6 +393,7 @@ class ClubControllerReadTest {
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/prev")
+                        .with(csrf())
                         .queryParam("campus", campus.toString())
                         .queryParam("belongs", belongs)
                         .queryParam("size", String.valueOf(clubPerPage))
@@ -422,6 +428,7 @@ class ClubControllerReadTest {
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/prev")
+                        .with(csrf())
                         .queryParam("campus", campus.toString())
                         .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
@@ -453,6 +460,7 @@ class ClubControllerReadTest {
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/search/prevs")
+                        .with(csrf())
                         .queryParam("keyword", keyword)
                         .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
@@ -478,7 +486,7 @@ class ClubControllerReadTest {
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(
-                document("/club/get/prevs/search",
+                document("club/get/prevs/search",
                         queryParameters(
                                 parameterWithName("keyword").description("동아리 이름 검색 키워드").attributes(example("%Keyword%")),
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
@@ -505,6 +513,7 @@ class ClubControllerReadTest {
          //when
          ResultActions actions = mockMvc.perform(
                  get("/club/random")
+                         .with(csrf())
                          .queryParam("campus", campus.toString())
                          .queryParam("clubType", clubType.toString())
                          .queryParam("belongs", belongs)
@@ -517,7 +526,7 @@ class ClubControllerReadTest {
                      .andExpect(jsonPath("$["+i+"].name").value(clubPrevDTOs.get(i).getName()));
          }
          actions.andDo(
-                 document("/club/get/random",
+                 document("club/get/random",
                          queryParameters(
                                  parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
                                  parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(LINK_CLUB_TYPE_NULL)),
