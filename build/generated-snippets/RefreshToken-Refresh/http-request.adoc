@@ -1,6 +1,6 @@
 [source,http,options="nowrap"]
 ----
-GET /refresh?_csrf=CRBxH5fp1X1VxfuKiAH18cYPdGIeVcS9OteFMtx4wzCf9g1YMCITevHQ50x48M3puyzBkKM8WQN6bfeQXOa8Bb4Z9FapxWtt HTTP/1.1
+GET /refresh?_csrf=zRUyiIEwxyha2N3EveYXDh5oMHGWQ0i47VnG6sr_IaW1ytjQ9SEA6-VR8R53veui28sjOCdQHUn0JXmVi2v12_7LEsDU_L7k HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer access_token
 Refresh-Token: Bearer refresh_token

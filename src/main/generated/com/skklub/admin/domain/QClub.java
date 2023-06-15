@@ -46,7 +46,7 @@ public class QClub extends EntityPathBase<Club> {
     //inherited
     public final StringPath createdBy = _super.createdBy;
 
-    public final StringPath establishAt = createString("establishAt");
+    public final NumberPath<Integer> establishAt = createNumber("establishAt", Integer.class);
 
     public final StringPath headLine = createString("headLine");
 

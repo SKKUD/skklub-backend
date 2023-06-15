@@ -27,7 +27,7 @@ public class ClubResponseDTO {
     //Outlines
     private String name;
     private String headLine;
-    private String establishAt;
+    private Integer establishAt;
     private String roomLocation;
     private Integer memberAmount;
     private String regularMeetingTime;

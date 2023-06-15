@@ -1,5 +1,5 @@
 [source,bash]
 ----
 $ http --form DELETE 'http://localhost:8080/club/0' \
-    '_csrf=qtMaPjNBgYJ6dKSJCh2zW-HnaI3BB0fE7nsmI8ts7zuEINchkustXQV247VXRMDqPjCHbILRRe_3MnXp3kpHEfla2F21EOQW'
+    '_csrf=k9_c7UIVy7-nFip8LIy_WlRrmLRKfNlOaaI7HJruqy4GDPEw8uvqjCclrt2KcE8eH6GLOWUKtdV8TLpjW8cJevnWmB83OcAD'
 ----

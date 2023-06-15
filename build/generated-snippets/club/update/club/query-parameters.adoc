@@ -13,7 +13,7 @@
 
 |`+clubType+`
 |분류 - 동아리 종류
-|link:common/club-type.html[동아리 종류,role="popup"]
+|link:common/club-type.html[동아리 종류,role=\"popup\"]
 |필수!!
 
 |`+belongs+`
@@ -37,7 +37,7 @@
 |필수!!
 
 |`+establishDate+`
-|설립 연도
+|설립 연도, Integer(Min 1398)
 |2023
 |
 
