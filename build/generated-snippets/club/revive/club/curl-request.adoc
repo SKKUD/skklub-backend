@@ -1,5 +1,5 @@
 [source,bash]
 ----
 $ curl 'http://localhost:8080/club/0/cancel' -i -X DELETE \
-    -d '_csrf=9YKEYiF0Z9owzXZhQQZ20YWaYqziiI6eaedlQLCTHTneYnU8xeHnAUURBu0drhUFeStCsryoT5XWsOizXNFXItbyLwvrV0Ra'
+    -d '_csrf=h9RIWg9djhasBSSOS2XIG3Kon_H0zAydRDwftyEgYawWZmOt4-ZxOG4_vy6BZhC6KEj8eBTJspCS-DWwJgwq1hVEVJsjAlDM'
 ----

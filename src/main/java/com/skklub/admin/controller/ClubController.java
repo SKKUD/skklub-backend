@@ -1,6 +1,7 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
+import com.skklub.admin.controller.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
@@ -17,8 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,9 +36,9 @@ public class ClubController {
 
     //추가
     @PostMapping(value = "/club")
-    public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam MultipartFile logo) {
+    public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam(required = false) Optional<MultipartFile> logo) {
         ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
-        FileNames uploadedLogo = s3Transferer.uploadOne(logo);
+        FileNames uploadedLogo = logo.map(s3Transferer::uploadOne).orElse(new FileNames("alt.jpg", UUID.randomUUID() + ".jpg"));
         Club club = clubCreateRequestDTO.toEntity();
         Long id = clubService.createClub(club, uploadedLogo.getOriginalName(), uploadedLogo.getSavedName());
         return new ClubNameAndIdDTO(id, club.getName());

@@ -1,4 +1,4 @@
-package com.skklub.admin.controller.exception;
+package com.skklub.admin.controller.error.exception;
 
 public class UnmatchFileException extends RuntimeException{
     public UnmatchFileException() {

@@ -1,6 +1,6 @@
-package com.skklub.admin.controller;
+package com.skklub.admin.controller.error.handler;
 
-import com.skklub.admin.controller.exception.InvalidBelongsException;
+import com.skklub.admin.controller.error.exception.InvalidBelongsException;
 import com.skklub.admin.domain.enums.BelongsSeoulCentral;
 import com.skklub.admin.domain.enums.BelongsSuwonCentral;
 import com.skklub.admin.domain.enums.Campus;

@@ -1,5 +1,7 @@
-package com.skklub.admin.controller;
+package com.skklub.admin.controller.error.handler;
 
+import com.skklub.admin.controller.ClubController;
+import com.skklub.admin.controller.error.handler.dto.BindingErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
