@@ -32,7 +32,7 @@ public class Club extends BaseEntity {
     //Outlines
     private String name;
     private String headLine;
-    private String establishAt;
+    private Integer establishAt;
     private String roomLocation;
     private Integer memberAmount;
     private String regularMeetingTime;
@@ -69,7 +69,7 @@ public class Club extends BaseEntity {
                 String briefActivityDescription,
                 Campus campus,
                 String clubDescription,
-                String establishAt,
+                Integer establishAt,
                 String headLine,
                 String mandatoryActivatePeriod,
                 Integer memberAmount,

@@ -33,8 +33,8 @@ public class ClubController {
 
     //추가
     @PostMapping(value = "/club")
-    public ClubNameAndIdDTO createClub(@ModelAttribute ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam MultipartFile logo) {
-        log.info("club name : {}, logo size : {}", clubCreateRequestDTO.getClubName(), logo.getSize());
+    public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam MultipartFile logo) {
+        ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
         FileNames uploadedLogo = s3Transferer.uploadOne(logo);
         Club club = clubCreateRequestDTO.toEntity();
         Long id = clubService.createClub(club, uploadedLogo.getOriginalName(), uploadedLogo.getSavedName());

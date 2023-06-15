@@ -3,7 +3,7 @@ package com.skklub.admin.controller.dto;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,13 +26,14 @@ public class ClubCreateRequestDTO {
     //enums
     @NotBlank
     private String belongs;
-    @NotBlank
+    @NotNull
     private Campus campus;
-    @NotBlank
+    @NotNull
     private ClubType clubType;
 
     //Can be NULL;
-    private String establishDate;
+    @DecimalMin(value = "1397")
+    private Integer establishDate;
     private String headLine;
     private String mandatoryActivatePeriod;
     private Integer memberAmount;

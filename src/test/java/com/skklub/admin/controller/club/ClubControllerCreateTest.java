@@ -1,6 +1,7 @@
 package com.skklub.admin.controller.club;
 
 import com.skklub.admin.controller.ClubController;
+import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.service.ClubService;
@@ -119,13 +120,13 @@ class ClubControllerCreateTest {
                 .andDo(document("/club/create/club",
                         queryParameters(
                                 parameterWithName("clubName").description("동아리 이름").attributes(example("클럽 SKKULOL")),
-                                parameterWithName("campus").description("분류 - 캠퍼스").attributes(example("link:common/campus-type.html[캠퍼스 종류,role=\"popup\"]")),
-                                parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example("link:common/club-type.html[동아리 종류,role=\"popup\"]")),
-                                parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example("link:common/belongs.html[분과 종류,role=\"popup\"]")),
+                                parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(RestDocsUtils.LINK_CAMPUS_TYPE)),
+                                parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(RestDocsUtils.LINK_CLUB_TYPE)),
+                                parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(RestDocsUtils.LINK_BELONGS_TYPE)),
                                 parameterWithName("briefActivityDescription").description("분류 - 활동 설명").attributes(example("E-SPORTS")),
                                 parameterWithName("activityDescription").description("자세한 활동 설명").attributes(example("1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")),
                                 parameterWithName("clubDescription").description("자세한 동아리 설명").attributes(example("여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")),
-                                parameterWithName("establishDate").description("설립 연도").optional().attributes(example("2023")),
+                                parameterWithName("establishDate").description("설립 연도, Integer(Min 1398)").optional().attributes(example("2023")),
                                 parameterWithName("headLine").description("한줄 소개").optional().attributes(example("명륜 게임 동아리입니다")),
                                 parameterWithName("mandatoryActivatePeriod").description("의무 활동 기간").optional().attributes(example("4학기")),
                                 parameterWithName("memberAmount").description("동아리 인원").optional().attributes(example("60")),

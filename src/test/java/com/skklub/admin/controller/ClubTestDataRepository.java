@@ -113,7 +113,7 @@ public class ClubTestDataRepository {
                     , "E-SPORTS"
                     , Campus.명륜
                     , "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^"
-                    , "2023"
+                    , 2023
                     , "명륜 게임 동아리입니다"
                     , "4학기"
                     , 60
