@@ -51,7 +51,7 @@ public class UserController {
 
     //update
     @PostMapping(value = "/user/{userId}")
-    public ResponseEntity<UserProcResultDTO> update(@PathVariable Long userId, UserUpdateRequestDTO userUpdateRequestDTO, @AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<UserProcResultDTO> update(@PathVariable Long userId, @ModelAttribute UserUpdateRequestDTO userUpdateRequestDTO, @AuthenticationPrincipal UserDetails userDetails){
         UserProcResultDTO updated = userService.userUpdate(
                 new UserUpdateDTO(
                         userId, userUpdateRequestDTO.getPassword(), role, userUpdateRequestDTO.getName(),userUpdateRequestDTO.getContact(),userDetails));

@@ -1,0 +1,7 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/refresh?_csrf=pmFqPKiCc_X-yGVH09pNl3U8w_zKX_KG6I_vB-XckQ8GXYa7lgNdWZ27R8fTrlQj4vd59UIM7p79bMar3LrfZoG9oz1jPrON' -i -X GET \
+    -H 'Content-Type: application/json' \
+    -H 'Authorization: Bearer access_token' \
+    -H 'Refresh-Token: Bearer refresh_token'
+----

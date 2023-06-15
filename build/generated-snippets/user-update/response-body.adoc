@@ -1,0 +1,4 @@
+[source,json,options="nowrap"]
+----
+{"id":1,"username":"user","name":"이율전","contact":"010-8765-4321"}
+----

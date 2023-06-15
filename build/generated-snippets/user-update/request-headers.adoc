@@ -1,0 +1,7 @@
+|===
+|Name|Description
+
+|`+Authorization+`
+|기본 인증용 access-token
+
+|===

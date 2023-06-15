@@ -1,0 +1,6 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/user/logout?username=user&password=1234' -i -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Authorization: Bearer (access_token)'
+----

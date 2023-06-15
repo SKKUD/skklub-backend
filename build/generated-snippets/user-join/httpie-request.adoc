@@ -1,0 +1,5 @@
+[source,bash]
+----
+$ http POST 'http://localhost:8080/user/join?username=user&password=1234&name=%EA%B9%80%EB%AA%85%EB%A5%9C&contact=010-1234-5678' \
+    'Content-Type:application/json'
+----

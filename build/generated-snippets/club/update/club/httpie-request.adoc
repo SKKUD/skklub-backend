@@ -9,5 +9,6 @@ $ http --form PATCH 'http://localhost:8080/club/0?clubName=%EC%A0%95%EC%83%81%EC
     'clubDescription=여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^' \
     'headLine=명륜 게임 동아리입니다' \
     'mandatoryActivatePeriod=4학기' \
-    'roomLocation=학생회관 80210'
+    'roomLocation=학생회관 80210' \
+    '_csrf=z-WWAiz6yNv_83EHjxpZqxHXqA_J0GtPlyvlhKO1RHIGK5QS_oGuMBzN-brSy0c2vzdtkiDhhTb54lpi8RzWtJKGfBExTqEr'
 ----

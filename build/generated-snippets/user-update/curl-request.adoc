@@ -1,0 +1,6 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/user/1?password=12345&name=%EC%9D%B4%EC%9C%A8%EC%A0%84&contact=010-8765-4321' -i -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Authorization: Bearer (access_token)'
+----

@@ -40,6 +40,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -92,9 +93,11 @@ class ClubControllerCreateTest {
         given(s3Transferer.uploadOne(any(MockMultipartFile.class))).willReturn(new FileNames("test.png", "saved-test.png"));
         //when
         ResultActions actions = mockMvc.perform(
+
                 multipart("/club")
                         .file(mockLogo)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
                         .queryParam("clubName", "정상적인 클럽 SKKULOL")
                         .queryParam("campus", "명륜")
                         .queryParam("clubType", "중앙동아리")
@@ -117,7 +120,7 @@ class ClubControllerCreateTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.id", 0L).exists())
                 .andExpect(jsonPath("$.name", "정상적인 클럽 SKKULOL").exists())
-                .andDo(document("/club/create/club",
+                .andDo(document("club/create/club",
                         queryParameters(
                                 parameterWithName("clubName").description("동아리 이름").attributes(example("클럽 SKKULOL")),
                                 parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(RestDocsUtils.LINK_CAMPUS_TYPE)),
@@ -208,6 +211,7 @@ class ClubControllerCreateTest {
                         .file(mockActivityImages.get(8))
                         .file(mockActivityImages.get(9))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
         );
 
         //then
@@ -215,7 +219,7 @@ class ClubControllerCreateTest {
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(0L))
                 .andExpect(jsonPath("$.name").value("ClubName"))
-                .andDo(document("/club/create/activityImages",
+                .andDo(document("club/create/activityImages",
                         pathParameters(
                                 parameterWithName("clubId").description("동아리 ID").attributes(example("1"))
                         ),
@@ -240,6 +244,7 @@ class ClubControllerCreateTest {
         ResultActions actions = mockMvc.perform(
                 multipart("/club/{clubId}/activityImage", 0L)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
         );
 
         //then

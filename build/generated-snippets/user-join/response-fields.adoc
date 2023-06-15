@@ -1,0 +1,24 @@
+|===
+|변수명|타입|설명|예시
+
+|`+id+`
+|INT64
+|유저 ID
+|
+
+|`+username+`
+|STRING
+|유저 계정 ID
+|
+
+|`+name+`
+|STRING
+|유저 이름
+|
+
+|`+contact+`
+|STRING
+|연락처
+|
+
+|===

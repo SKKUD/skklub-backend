@@ -1,0 +1,16 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Authorization: Bearer access-token
+Refresh-Token: Bearer refresh-token
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 14
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+
+user logged in
+----

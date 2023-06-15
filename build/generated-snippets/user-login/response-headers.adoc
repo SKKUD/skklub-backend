@@ -1,0 +1,10 @@
+|===
+|Name|Description
+
+|`+Authorization+`
+|기본 인증용 access-token
+
+|`+Refresh-Token+`
+|access-token 재발급용 refresh-token
+
+|===
