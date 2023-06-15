@@ -5,6 +5,7 @@ import com.skklub.admin.controller.ClubTestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.error.exception.InvalidBelongsException;
+import com.skklub.admin.controller.error.exception.NoMatchClubException;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
@@ -35,6 +36,7 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -323,7 +325,7 @@ class ClubControllerCreateTest {
                                 parameterWithName("clubId").description("동아리 ID").attributes(example("1"))
                         ),
                         requestParts(
-                                partWithName("activityImages").description("활동 사진").optional()
+                                partWithName("activityImages").description("활동 사진")
                         ),
                         responseFields(
                                 fieldWithPath("id").type(FieldType.STRING).description("동아리 ID").attributes(example("0")),
@@ -333,7 +335,7 @@ class ClubControllerCreateTest {
     }
 
     @Test
-    public void uploadActivityImages_EmptyList_Fail() throws Exception {
+    public void uploadActivityImages_NoList_Fail() throws Exception {
         //given
         List<MultipartFile> multipartFiles = new ArrayList<>();
         List<FileNames> activityImageDtos = new ArrayList<>();
@@ -351,4 +353,32 @@ class ClubControllerCreateTest {
         actions.andExpect(status().is4xxClientError());
     }
 
+    @Test
+    public void uploadActivityImages_IllegalClubId_UnMatchClubException() throws Exception{
+        //given
+        Long clubId = -1L;
+        List<FileNames> emptyList = new ArrayList<>();
+        given(s3Transferer.uploadAll(anyList())).willReturn(emptyList);
+        given(clubService.appendActivityImages(clubId, emptyList)).willReturn(Optional.empty());
+
+        //when
+        MvcResult badIdResult = mockMvc.perform(
+                multipart("/club/{clubId}/activityImage", clubId)
+                        .file(mockActivityImages.get(0))
+                        .file(mockActivityImages.get(1))
+                        .file(mockActivityImages.get(2))
+                        .file(mockActivityImages.get(3))
+                        .file(mockActivityImages.get(4))
+                        .file(mockActivityImages.get(5))
+                        .file(mockActivityImages.get(6))
+                        .file(mockActivityImages.get(7))
+                        .file(mockActivityImages.get(8))
+                        .file(mockActivityImages.get(9))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(NoMatchClubException.class);
+     }
 }

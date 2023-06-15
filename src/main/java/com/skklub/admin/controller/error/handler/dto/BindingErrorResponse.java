@@ -26,7 +26,7 @@ public class BindingErrorResponse {
                 .collect(Collectors.toList());
         return BindingErrorResponse.builder()
                 .errorDetails(errorDetails)
-                .exception(bindException.getClass().toString())
+                .exception(bindException.getClass().getName())
                 .url(request.getRequestURI())
                 .build();
     }

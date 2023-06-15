@@ -1,6 +1,7 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
+import com.skklub.admin.controller.error.exception.NoMatchClubException;
 import com.skklub.admin.controller.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
@@ -18,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,12 +47,11 @@ public class ClubController {
     //활동 사진 등록(LIST)
     @PostMapping("/club/{clubId}/activityImage")
     public ResponseEntity<ClubNameAndIdDTO> uploadActivityImages(@PathVariable Long clubId, @RequestParam List<MultipartFile> activityImages) {
-        log.info("request CLUB : {}, file count : {}", clubId, activityImages.size());
         List<FileNames> savedActivityImages = s3Transferer.uploadAll(activityImages);
         return clubService.appendActivityImages(clubId, savedActivityImages)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(NoMatchClubException::new);
     }
 
 //=====READ=====//
