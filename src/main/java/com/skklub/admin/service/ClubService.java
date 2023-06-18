@@ -1,14 +1,17 @@
 package com.skklub.admin.service;
 
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
+import com.skklub.admin.controller.error.exception.AlreadyRecruitingException;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.LogoRepository;
+import com.skklub.admin.repository.RecruitRepository;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.FileNames;
@@ -19,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,6 +35,7 @@ public class ClubService {
 
     public final ClubRepository clubRepository;
     public final LogoRepository logoRepository;
+    public final RecruitRepository recruitRepository;
     public final ActivityImageRepository activityImageRepository;
 
     public Long createClub(Club club, String logoOriginalName, String logoSavedName) {
@@ -52,6 +57,26 @@ public class ClubService {
                 }
         );
         return club.map(Club::getName);
+    }
+
+    public Optional<String> startRecruit(Long clubId, Recruit recruit) throws AlreadyRecruitingException{
+        return clubRepository.findById(clubId)
+                .map(club -> {
+                    if(club.onRecruit()) throw new AlreadyRecruitingException();
+                    recruitRepository.save(recruit);
+                    club.startRecruit(recruit);
+                    return club.getName();
+                });
+    }
+
+    public Optional<String> endRecruit(Long clubId) {
+        return clubRepository.findById(clubId)
+                .map(club -> {
+                    Optional.ofNullable(club.getRecruit())
+                            .ifPresent(recruitRepository::delete);
+                    club.endRecruit();
+                    return club.getName();
+                });
     }
 
     public Optional<ClubDetailInfoDto> getClubDetailInfoById(Long clubId) {

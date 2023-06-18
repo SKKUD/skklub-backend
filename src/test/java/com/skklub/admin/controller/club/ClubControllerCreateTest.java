@@ -1,12 +1,16 @@
 package com.skklub.admin.controller.club;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.ClubTestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
+import com.skklub.admin.controller.dto.RecruitDto;
+import com.skklub.admin.controller.error.exception.AlreadyRecruitingException;
 import com.skklub.admin.controller.error.exception.InvalidBelongsException;
-import com.skklub.admin.controller.error.exception.NoMatchClubException;
+import com.skklub.admin.controller.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.service.ClubService;
@@ -15,8 +19,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -33,10 +35,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.validation.BindException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +49,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -72,6 +72,8 @@ class ClubControllerCreateTest {
     private S3Transferer s3Transferer;
     @Autowired
     private ClubTestDataRepository clubTestDataRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private MockMultipartFile mockLogo;
     private List<MockMultipartFile> mockActivityImages = new ArrayList<>();
@@ -379,6 +381,99 @@ class ClubControllerCreateTest {
         ).andReturn();
 
         //then
-        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(NoMatchClubException.class);
+        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
      }
+
+     @Test
+     public void startRecruit_Default_Success() throws Exception{
+         //given
+         Long clubId = 0L;
+         Long recruitId = 0L;
+         Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+         RecruitDto recruitDto = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+         Recruit recruit = recruitDto.toEntity();
+         String recruitDtoJson = objectMapper.writeValueAsString(recruitDto);
+         given(clubService.startRecruit(clubId, recruit)).willReturn(Optional.of(club.getName()));
+
+
+         //when
+         ResultActions actions = mockMvc.perform(
+                 post("/club/{clubId}/recruit", clubId)
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(recruitDtoJson)
+                         .with(csrf())
+         );
+
+         //then
+         actions.andExpect(status().isOk())
+                 .andExpect(jsonPath("$.id").value(clubId))
+                 .andExpect(jsonPath("$.name").value(club.getName()))
+                 .andDo(
+                         document("club/create/recruit",
+                                 pathParameters(
+                                         parameterWithName("clubId").description("동아리 ID").attributes(example("1"))
+                                 ),
+                                 requestFields(
+                                         fieldWithPath("recruitStartAt").description("모집 시작일").attributes(example("yyyy-MM-ddTHH:mm(T는 날짜랑 시간 구분용 문자)")),
+                                         fieldWithPath("recruitEndAt").description("모집 종료일").attributes(example("yyyy-MM-ddTHH:mm(T는 날짜랑 시간 구분용 문자)")),
+                                         fieldWithPath("recruitQuota").description("모집 정원 - String value").attributes(example("xx명 || 최대한 많이 뽑을 예정")),
+                                         fieldWithPath("recruitProcessDescription").description("모집 방식").attributes(example("1. 어쩌구 2. 어쩌구 AnyString")),
+                                         fieldWithPath("recruitContact").description("모집 문의처").attributes(example("010 - 1234 - 1234 || 인스타 아이디")).optional(),
+                                         fieldWithPath("recruitWebLink").description("모집 링크").attributes(example("www.xxx.com || or any String")).optional()
+                                 ),
+                                 responseFields(
+                                         fieldWithPath("id").type(FieldType.STRING).description("동아리 ID").attributes(example("0")),
+                                         fieldWithPath("name").type(FieldType.STRING).description("동아리 이름").attributes(example("클럽 SKKULOL"))
+                                 )
+                         )
+                 );
+
+      }
+
+      @Test
+      public void startRecruit_IllegalClubId_UnMatchClubException() throws Exception{
+          //given
+          Long clubId = -1L;
+          Long recruitId = 0L;
+          RecruitDto recruitDto = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+          Recruit recruit = recruitDto.toEntity();
+          String recruitDtoJson = objectMapper.writeValueAsString(recruitDto);
+          given(clubService.startRecruit(clubId, recruit)).willReturn(Optional.empty());
+
+          //when
+          MvcResult badClubIdResult = mockMvc.perform(
+                  post("/club/{clubId}/recruit", clubId)
+                          .contentType(MediaType.APPLICATION_JSON)
+                          .content(recruitDtoJson)
+                          .with(csrf())
+          ).andReturn();
+
+          //then
+          Assertions.assertThat(badClubIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
+       }
+
+       @Test
+       public void startRecruit_ClubRecruitNotNull_AlreadyRecruitingException() throws Exception{
+           //given
+           Long clubId = 0L;
+           Long recruitId = 0L;
+           RecruitDto recruitDto = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+           Recruit recruit = recruitDto.toEntity();
+           String recruitDtoJson = objectMapper.writeValueAsString(recruitDto);
+           given(clubService.startRecruit(clubId, recruit)).willThrow(AlreadyRecruitingException.class);
+
+           //when
+           MvcResult doubleRecruitResult = mockMvc.perform(
+                   post("/club/{clubId}/recruit", clubId)
+                           .contentType(MediaType.APPLICATION_JSON)
+                           .content(recruitDtoJson)
+                           .with(csrf())
+           ).andExpect(status().isBadRequest())
+                   .andExpect(jsonPath("$.errorDetail.reasonMessage").value("이미 모집 정보가 등록된 club입니다"))
+                   .andReturn();
+
+           //then
+           Assertions.assertThat(doubleRecruitResult.getResolvedException()).isExactlyInstanceOf(AlreadyRecruitingException.class);
+
+        }
 }

@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
@@ -128,7 +129,7 @@ public class ClubTestDataRepository {
             }
             club.appendActivityImages(activityImagesTemp);
             club.setUser(users.get(i));
-            club.startRecruit(recruits.get(i));
+            Optional.ofNullable(recruits.get(i)).ifPresent(club::startRecruit);
             clubs.add(club);
         }
     }
@@ -147,7 +148,7 @@ public class ClubTestDataRepository {
 
     private void readyRecruit() {
         for (int i = 0; i < recruitCnt; i++) {
-            recruits.add(new Recruit(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), i + "명", "Test Recruit Process" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4), "Test Recruit web" + i));
+            recruits.add(new Recruit(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), i + "명", "Test Recruit Process" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4), "Test Recruit web" + i));
         }
             for (int i = recruitCnt; i < clubCnt; i++) {
                 recruits.add(null);

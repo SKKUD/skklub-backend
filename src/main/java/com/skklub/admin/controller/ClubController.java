@@ -1,9 +1,11 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
-import com.skklub.admin.controller.error.exception.NoMatchClubException;
+import com.skklub.admin.controller.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.controller.error.exception.ClubNameMisMatchException;
 import com.skklub.admin.controller.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.service.dto.ClubPrevDTO;
@@ -51,7 +53,17 @@ public class ClubController {
         return clubService.appendActivityImages(clubId, savedActivityImages)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseThrow(NoMatchClubException::new);
+                .orElseThrow(ClubIdMisMatchException::new);
+    }
+
+    //모집 등록
+    @PostMapping("/club/{clubId}/recruit")
+    public ResponseEntity<ClubNameAndIdDTO> startRecruit(@PathVariable Long clubId, @RequestBody RecruitDto recruitDto) {
+        Recruit recruit = recruitDto.toEntity();
+        return clubService.startRecruit(clubId, recruit)
+                .map(name -> new ClubNameAndIdDTO(clubId, name))
+                .map(ResponseEntity::ok)
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
 //=====READ=====//
@@ -62,7 +74,7 @@ public class ClubController {
         return clubService.getClubDetailInfoById(clubId)
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
     //간소화(Preview) 조회
@@ -71,6 +83,7 @@ public class ClubController {
                                                              @RequestParam(required = false, defaultValue = "전체") ClubType clubType,
                                                              @RequestParam(required = false, defaultValue = "전체") String belongs,
                                                              Pageable pageable) {
+        ClubValidator.validateBelongs(campus, clubType, belongs);
         Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
@@ -81,7 +94,7 @@ public class ClubController {
         return clubService.getClubDetailInfoByName(name)
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.noContent().build());
+                .orElseThrow(ClubNameMisMatchException::new);
     }
 
     //이름 검색 부분 일치
@@ -96,6 +109,7 @@ public class ClubController {
     public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@RequestParam Campus campus,
                                                                      @RequestParam(required = false, defaultValue = "전체") ClubType clubType,
                                                                      @RequestParam(required = false, defaultValue = "전체") String belongs) {
+        ClubValidator.validateBelongs(campus, clubType, belongs);
         return clubService.getRandomClubsByCategories(campus, clubType, belongs).stream()
                 .map(dto -> new ClubNameAndIdDTO(dto.getId(), dto.getName()))
                 .collect(Collectors.toList());
@@ -128,7 +142,11 @@ public class ClubController {
                 .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
     }
 
-//=====DELETE=====//
+    //로고 변경
+
+    //모집 내용 수정정
+
+//====DELETE=====//
 
     //특정 활동 사진 삭제
     @DeleteMapping("/club/{clubId}/activityImage")
@@ -163,5 +181,8 @@ public class ClubController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
     }
+
+    //모집 마감
+
 
 }

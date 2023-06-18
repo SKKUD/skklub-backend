@@ -57,8 +57,7 @@ public class Club extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User president;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruit_id")
+    @OneToOne(mappedBy = "club")
     private Recruit recruit;
 
 
@@ -131,8 +130,9 @@ public class Club extends BaseEntity {
 
     public void startRecruit(Recruit recruit) {
         this.recruit = recruit;
+        recruit.setClub(this);
     }
-    public void endRecruit(Recruit recruit){
+    public void endRecruit(){
         this.recruit = null;
     }
 
@@ -155,5 +155,9 @@ public class Club extends BaseEntity {
     //Must be Removed
     public void setUser(User user) {
         this.president = user;
+    }
+
+    public boolean onRecruit() {
+        return recruit != null;
     }
 }
