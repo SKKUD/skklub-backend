@@ -8,6 +8,7 @@ import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.controller.error.exception.AllTimeRecruitTimeFormattingException;
 import com.skklub.admin.controller.error.exception.AlreadyRecruitingException;
 import com.skklub.admin.controller.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.controller.error.exception.RecruitIdMisMatchException;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.service.RecruitService;
@@ -33,9 +34,11 @@ import java.util.Optional;
 import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -352,4 +355,44 @@ class RecruitControllerTest {
            Assertions.assertThat(endNullResult.getResolvedException()).isExactlyInstanceOf(AllTimeRecruitTimeFormattingException.class);
 
        }
+
+       @Test
+       public void endRecruit_Default_Success() throws Exception{
+           //given
+           Long recruitId = 0L;
+           doNothing().when(recruitService).endRecruit(recruitId);
+
+           //when
+           ResultActions actions = mockMvc.perform(
+                   delete("/recruit/{recruitId}", recruitId)
+                           .with(csrf())
+           );
+
+           //then
+           actions.andExpect(status().isOk())
+                   .andExpect(content().json(recruitId.toString()))
+                   .andDo(
+                           document("recruit/delete",
+                                   pathParameters(
+                                           parameterWithName("recruitId").description("모집 정보 ID").attributes(example("1"))
+                                   )
+                           ));
+        }
+
+        @Test
+        public void endRecruit_IllegalRecruitId_RecruitIdMisMatchException() throws Exception{
+            //given
+             Long recruitId = -1L;
+            doThrow(RecruitIdMisMatchException.class).when(recruitService).endRecruit(recruitId);
+
+            //when
+            MvcResult result = mockMvc.perform(
+                    delete("/recruit/{recruitId}", recruitId)
+                            .with(csrf())
+            ).andReturn();
+
+            //then
+            Assertions.assertThat(result.getResolvedException()).isExactlyInstanceOf(RecruitIdMisMatchException.class);
+
+         }
 }

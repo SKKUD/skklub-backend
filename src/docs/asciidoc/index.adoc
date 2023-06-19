@@ -83,3 +83,6 @@ include::adocs/Recruit-Create.adoc[]
 
 === 모집 정보 수정
 include::adocs/Recruit-Update.adoc[]
+
+=== 모집 정보 삭제
+include::adocs/Recruit-Delete.adoc[]
