@@ -1,5 +1,5 @@
 [source,bash]
 ----
 $ curl 'http://localhost:8080/club/0/activityImage?activityImageName=Test%20Activity%20Image%20Name' -i -X DELETE \
-    -d '_csrf=HL7kLFaoXlNOQENwLdhE4VKnPGXzEA2ABfTEkO_Be90juHbXfo2FHTORbWJjeHBFHfVw0WGfEVzGdj6tMpL9pNf2TOoXjkbh'
+    -d '_csrf=MzAy94LIbncCCu1fEzHnjCyRIC5rgYqWKuspMnvKnXHXW8HBAlRRkeD7DEMvM9s5KxzTvRuiDU9S5-m7G9JNVE77rBThaPH2'
 ----

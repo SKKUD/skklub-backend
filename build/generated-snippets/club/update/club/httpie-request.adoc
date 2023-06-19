@@ -10,5 +10,5 @@ $ http --form PATCH 'http://localhost:8080/club/0?clubName=%EC%A0%95%EC%83%81%EC
     'headLine=명륜 게임 동아리입니다' \
     'mandatoryActivatePeriod=4학기' \
     'roomLocation=학생회관 80210' \
-    '_csrf=_aSSPqJuPgb3SM5aeq9J0y8JOaLi56r8o04xC9imPiM3GtjaypHxCsRaBzXafvY_HoJ95k5oFMODhMnRkigEPuvAWxsEL764'
+    '_csrf=36QOqz_4aeq6i4Dfk8n-AtM_ARx1dl9VRfoXfbzWma-gLUHA7ZU3mQrJD4yXsrjm9uTKN-deLH0TQDl4c8J0T4zmqpnFHyCh'
 ----

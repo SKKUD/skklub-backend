@@ -71,7 +71,7 @@ public class ClubService {
 
     public Optional<ClubDetailInfoDto> getClubDetailInfoById(Long clubId) {
         return clubRepository.findDetailClubById(clubId)
-                .map(c -> new ClubDetailInfoDto(c));
+                .map(ClubDetailInfoDto::new);
     }
 
     public Optional<ClubDetailInfoDto> getClubDetailInfoByName(String name) {

@@ -7,6 +7,8 @@ import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.controller.dto.S3DownloadDto;
+import com.skklub.admin.controller.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.controller.error.exception.ClubNameMisMatchException;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
@@ -14,6 +16,7 @@ import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -29,6 +32,7 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.ArrayList;
@@ -157,6 +161,23 @@ class ClubControllerReadTest {
         );
      }
 
+     @Test
+     public void getClubById_IllegalClubId_ClubIdMisMatchException() throws Exception{
+         //given
+         Long clubId = -1L;
+         given(clubService.getClubDetailInfoById(clubId)).willReturn(Optional.empty());
+
+         //when
+         MvcResult badIdResult = mockMvc.perform(
+                 get("/club/{clubId}", clubId)
+                         .with(csrf())
+         ).andReturn();
+
+         //then
+         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
+
+      }
+
     @Test
     public void getClubByName_Default_Success() throws Exception{
         //given
@@ -249,6 +270,23 @@ class ClubControllerReadTest {
                 )
         );
     }
+
+    @Test
+    public void getClubByName_NoMatchClubName_ClubNameMisMatchException() throws Exception{
+        //given
+        String clubName = "이 이름은 절대로 없을꺼야 ㅋㅋ";
+        given(clubService.getClubDetailInfoByName(clubName)).willReturn(Optional.empty());
+
+        //when
+        MvcResult badNameResult = mockMvc.perform(
+                get("/club/search")
+                        .with(csrf())
+                        .queryParam("name", clubName)
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badNameResult.getResolvedException()).isExactlyInstanceOf(ClubNameMisMatchException.class);
+     }
 
     private void checkActivityImagesResponseJson(ResultActions actions, int activityImgIndex, List<S3DownloadDto> activityImgS3DownloadDtos) throws Exception {
         actions.andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].id").value(activityImgS3DownloadDtos.get(activityImgIndex).getId()))

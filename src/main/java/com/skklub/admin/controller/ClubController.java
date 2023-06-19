@@ -33,14 +33,15 @@ public class ClubController {
 
     private final ClubService clubService;
     private final S3Transferer s3Transferer;
+    private final static String DEFAULT_LOGO_NAME = "alt.jpg";
 
 //=====CREATE=====//
 
     //추가
     @PostMapping(value = "/club")
-    public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam(required = false) Optional<MultipartFile> logo) {
+    public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam(required = false) MultipartFile logo) {
         ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
-        FileNames uploadedLogo = logo.map(s3Transferer::uploadOne).orElse(new FileNames("alt.jpg", UUID.randomUUID() + ".jpg"));
+        FileNames uploadedLogo = Optional.ofNullable(logo).map(s3Transferer::uploadOne).orElse(new FileNames(DEFAULT_LOGO_NAME, DEFAULT_LOGO_NAME));
         Club club = clubCreateRequestDTO.toEntity();
         Long id = clubService.createClub(club, uploadedLogo.getOriginalName(), uploadedLogo.getSavedName());
         return new ClubNameAndIdDTO(id, club.getName());
@@ -59,7 +60,7 @@ public class ClubController {
 //=====READ=====//
 
     //세부 정보 조회 by ID
-    @GetMapping( "/club/{clubId}")
+    @GetMapping("/club/{clubId}")
     public ResponseEntity<ClubResponseDTO> getClubById(@PathVariable Long clubId) {
         return clubService.getClubDetailInfoById(clubId)
                 .map(this::convertClubImagesToFile)
@@ -134,8 +135,6 @@ public class ClubController {
 
     //로고 변경
 
-    //모집 내용 수정정
-
 //====DELETE=====//
 
     //특정 활동 사진 삭제
@@ -171,8 +170,5 @@ public class ClubController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
     }
-
-    //모집 마감
-
 
 }
