@@ -1,2 +1,2 @@
-===== Post - /recruit/{clubId}
+===== Post - /recruit/{clubId} (application_json)
 operation::recruit/create[snippets='path-parameters,request-fields,response-fields']

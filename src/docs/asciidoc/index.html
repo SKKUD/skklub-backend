@@ -520,6 +520,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 </ul>
 </li>
+<li><a href="#_recruit_api">Recruit API</a>
+<ul class="sectlevel2">
+<li><a href="#_모집_정보_등록">모집 정보 등록</a></li>
+<li><a href="#_모집_정보_수정">모집 정보 수정</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -986,7 +992,7 @@ X-Frame-Options: DENY</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>activityImages</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">활동 사진</p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
 </tr>
 </tbody>
 </table>
@@ -2417,10 +2423,221 @@ X-Frame-Options: DENY</code></pre>
 </div>
 </div>
 </div>
+<h1 id="_recruit_api" class="sect0"><a class="link" href="#_recruit_api">Recruit API</a></h1>
+<div class="sect2">
+<h3 id="_모집_정보_등록"><a class="link" href="#_모집_정보_등록">모집 정보 등록</a></h3>
+<div class="sect4">
+<h5 id="_post_recruitclubid_application_json"><a class="link" href="#_post_recruitclubid_application_json">Post - /recruit/{clubId} (application_json)</a></h5>
+<div class="sect5">
+<h6 id="_post_recruitclubid_application_json_path_parameters"><a class="link" href="#_post_recruitclubid_application_json_path_parameters">Path parameters</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clubId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">동아리 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect5">
+<h6 id="_post_recruitclubid_application_json_request_fields"><a class="link" href="#_post_recruitclubid_application_json_request_fields">Request fields</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
+<th class="tableblock halign-left valign-top">필수여부</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitStartAt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 시작일</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yyyy-MM-ddTHH:mm(T는 날짜랑 시간 구분용 문자)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitEndAt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 종료일</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2012-06-02T14:04(상시모집은 시작일 종료일 null or No Field)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitQuota</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 정원 - String value</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">00명 || 최대한 많이 뽑을 예정</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitProcessDescription</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 방식</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1. 어쩌구 2. 어쩌구 AnyString</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitContact</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 문의처</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">010 - 1234 - 1234 || 인스타 아이디</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitWebLink</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 링크</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">www.xxx.com || or any String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect5">
+<h6 id="_post_recruitclubid_application_json_response_fields"><a class="link" href="#_post_recruitclubid_application_json_response_fields">Response fields</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STRING</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">동아리 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STRING</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">동아리 이름</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">클럽 SKKULOL</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_모집_정보_수정"><a class="link" href="#_모집_정보_수정">모집 정보 수정</a></h3>
+<div class="sect4">
+<h5 id="_patch_recruitrecruitid_application_json"><a class="link" href="#_patch_recruitrecruitid_application_json">Patch - /recruit/{recruitId} (application_json)</a></h5>
+<div class="sect5">
+<h6 id="_patch_recruitrecruitid_application_json_path_parameters"><a class="link" href="#_patch_recruitrecruitid_application_json_path_parameters">Path parameters</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 정보 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect5">
+<h6 id="_patch_recruitrecruitid_application_json_request_fields"><a class="link" href="#_patch_recruitrecruitid_application_json_request_fields">Request fields</a></h6>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">변수명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">예시</th>
+<th class="tableblock halign-left valign-top">필수여부</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitStartAt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 시작일</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yyyy-MM-ddTHH:mm(T는 날짜랑 시간 구분용 문자)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitEndAt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 종료일</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2012-06-02T14:04(상시모집은 시작일 종료일 null or No Field)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitQuota</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 정원 - String value</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">00명 || 최대한 많이 뽑을 예정</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitProcessDescription</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 방식</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1. 어쩌구 2. 어쩌구 AnyString</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">필수!!</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitContact</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 문의처</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">010 - 1234 - 1234 || 인스타 아이디</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recruitWebLink</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모집 링크</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">www.xxx.com || or any String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="paragraph">
+<p>Return Only RecruitId When Success</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-06-14 17:05:38 +0900
+Last updated 2023-06-19 18:01:59 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

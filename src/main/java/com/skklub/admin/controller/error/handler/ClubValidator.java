@@ -7,7 +7,6 @@ import com.skklub.admin.domain.enums.BelongsSeoulCentral;
 import com.skklub.admin.domain.enums.BelongsSuwonCentral;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
-import jakarta.validation.Valid;
 
 public interface ClubValidator {
     static void validateBelongs(Campus campus, ClubType clubType, String belongs) throws InvalidBelongsException {
@@ -37,8 +36,8 @@ public interface ClubValidator {
         }
     }
 
-    static void validateRecruitTimeFormat(@Valid RecruitDto recruit) throws AllTimeRecruitTimeFormattingException {
-        if (recruit.getRecruitStartAt() == null ^ recruit.getRecruitEndAt() == null)
+    static void validateRecruitTimeFormat(RecruitDto recruit) throws AllTimeRecruitTimeFormattingException {
+        if (recruit.getRecruitEndAt() == null ^ recruit.getRecruitStartAt() == null)
             throw new AllTimeRecruitTimeFormattingException();
     }
 }

@@ -5,7 +5,6 @@ import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.controller.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.controller.error.exception.RecruitIdMisMatchException;
 import com.skklub.admin.controller.error.handler.ClubValidator;
-import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.service.RecruitService;
 import jakarta.validation.Valid;
