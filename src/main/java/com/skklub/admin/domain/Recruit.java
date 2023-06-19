@@ -1,15 +1,14 @@
 package com.skklub.admin.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Entity
 @Getter
+@EqualsAndHashCode(exclude = "club")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Recruit extends BaseEntity {
     @Id
@@ -29,11 +28,20 @@ public class Recruit extends BaseEntity {
     private String webLink;
 
     public Recruit(LocalDateTime startAt, LocalDateTime endAt, String quota, String processDescription, String contact, String webLink) {
-        this.startAt = startAt.truncatedTo(ChronoUnit.SECONDS);
-        this.endAt = endAt.truncatedTo(ChronoUnit.SECONDS);
+        this.startAt = startAt;
+        this.endAt = endAt;
         this.quota = quota;
         this.processDescription = processDescription;
         this.contact = contact;
         this.webLink = webLink;
+    }
+
+    public void update(Recruit recruit) {
+        this.startAt = recruit.getStartAt();
+        this.endAt = recruit.getEndAt();
+        this.quota = recruit.getQuota();
+        this.processDescription = recruit.getProcessDescription();
+        this.contact = recruit.getContact();
+        this.webLink = recruit.getWebLink();
     }
 }

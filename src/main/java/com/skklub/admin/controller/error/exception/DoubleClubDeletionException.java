@@ -1,4 +1,4 @@
-package com.skklub.admin.controller.exception;
+package com.skklub.admin.controller.error.exception;
 
 public class DoubleClubDeletionException extends RuntimeException{
     public DoubleClubDeletionException() {

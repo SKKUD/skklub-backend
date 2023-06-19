@@ -1,0 +1,11 @@
+|===
+|변수명|설명|예시|필수여부
+
+{{#fields}}
+|{{#tableCellContent}}`+{{path}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{description}}{{/tableCellContent}}
+|{{#example}}{{#tableCellContent}}{{example}}{{/tableCellContent}}{{/example}}
+|{{#tableCellContent}}{{^optional}}필수!!{{/optional}}{{/tableCellContent}}
+
+{{/fields}}
+|===

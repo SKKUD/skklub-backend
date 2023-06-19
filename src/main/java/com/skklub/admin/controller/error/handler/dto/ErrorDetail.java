@@ -1,4 +1,4 @@
-package com.skklub.admin.controller;
+package com.skklub.admin.controller.error.handler.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

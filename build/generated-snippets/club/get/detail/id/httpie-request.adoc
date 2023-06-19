@@ -1,4 +1,4 @@
 [source,bash]
 ----
-$ http GET 'http://localhost:8080/club/0?_csrf=_AM_OJ9AszMiegY9K4QYOhwFD2-FOIBw2xtamdz20YjYb1mUmDYGC6pwg1UPSWIFGaksW39gIg7mCeZdvX9squnHtbu5Czyl'
+$ http GET 'http://localhost:8080/club/0?_csrf=aJnw0eR-vc7cNokCtNLyaXUsY39AGDuVmOZ_R4_8d_3UCOQFDPrB59JGhKjxAb5gg__GCxFOTh1xLgi4_dYeIenNFpiwPoY9'
 ----

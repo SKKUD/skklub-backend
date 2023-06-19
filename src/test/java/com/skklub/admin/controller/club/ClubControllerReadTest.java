@@ -13,7 +13,6 @@ import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
-import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

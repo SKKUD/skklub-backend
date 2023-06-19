@@ -1,28 +1,37 @@
 package com.skklub.admin.controller.club;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.controller.ClubController;
+import com.skklub.admin.controller.ClubTestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
+import com.skklub.admin.controller.error.exception.InvalidBelongsException;
+import com.skklub.admin.controller.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.enums.Campus;
+import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.FileNames;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileInputStream;
@@ -32,13 +41,13 @@ import java.util.Optional;
 
 import static akka.protobuf.WireFormat.FieldType;
 import static com.skklub.admin.controller.RestDocsUtils.example;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willReturn;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -47,6 +56,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
+@Import(ClubTestDataRepository.class)
 @WebMvcTest(controllers = ClubController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 @WithMockUser
@@ -57,11 +67,15 @@ class ClubControllerCreateTest {
     private ClubService clubService;
     @MockBean
     private S3Transferer s3Transferer;
+    @Autowired
+    private ClubTestDataRepository clubTestDataRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private MockMultipartFile mockLogo;
     private List<MockMultipartFile> mockActivityImages = new ArrayList<>();
 
-    @BeforeEach
+    @PostConstruct
     public void beforeEach() throws Exception {
         mockLogo = new MockMultipartFile(
                 "logo",
@@ -78,12 +92,6 @@ class ClubControllerCreateTest {
                     new FileInputStream("src/main/resources/2020-12-25 (5).png")
             ));
         }
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mockLogo = null;
-        mockActivityImages = new ArrayList<>();
     }
 
     @Test
@@ -139,7 +147,7 @@ class ClubControllerCreateTest {
                                 parameterWithName("webLink2").description("관련 사이트 주소 2").optional().attributes(example("skklol.com"))
                         ),
                         requestParts(
-                                partWithName("logo").description("동아리 로고")
+                                partWithName("logo").description("동아리 로고").optional()
                         ),
                         responseFields(
                                 fieldWithPath("id").type(FieldType.STRING).description("동아리 아이디").attributes(example("0")),
@@ -150,42 +158,134 @@ class ClubControllerCreateTest {
     }
 
     @Test
-    public void clubCreation_NullAtNullables_Success() throws Exception {
+    public void clubCreation_NullAtSomeNullables_Success() throws Exception {
         //given
+        Long clubId = 0L;
+        clubTestDataRepository.getClubs().get(0);
+        FileNames logoFileName = clubTestDataRepository.getLogoFileName((int) (long)clubId);
+        given(s3Transferer.uploadOne(any(MultipartFile.class))).willReturn(logoFileName);
+        given(clubService.createClub(any(Club.class), eq(logoFileName.getOriginalName()), eq(logoFileName.getSavedName()))).willReturn(clubId);
 
         //when
+        ResultActions actions = mockMvc.perform(
+                multipart("/club")
+                        .file(mockLogo)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
+                        .queryParam("clubName", "정상적인 클럽 SKKULOL")
+                        .queryParam("campus", "명륜")
+                        .queryParam("clubType", "중앙동아리")
+                        .queryParam("belongs", "취미교양")
+                        .queryParam("briefActivityDescription", "E-SPORTS")
+                        .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
+                        .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
+                        .queryParam("establishDate", "") // Blank
+//                        .queryParam("headLine", )
+//                        .queryParam("mandatoryActivatePeriod", "4학기") // missing field
+//                        .queryParam("memberAmount", "60")
+//                        .queryParam("regularMeetingTime", "Thursday 19:00")
+//                        .queryParam("roomLocation", "학생회관 80210")
+//                        .queryParam("webLink1", "www.skklol.com")
+//                        .queryParam("webLink2", "www.skkulol.edu")
+        );
 
         //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(clubId))
+                .andExpect(jsonPath("$.name").value("정상적인 클럽 SKKULOL"));
+    }
+
+     @Test
+     public void clubCreation_EnumMisMatch_MethodArgumentNotValidException() throws Exception{
+         //given
+         String wrongCampus = "안암";
+         String wrongClubType = "중준중동아리";
+
+         //when
+         MvcResult wrongClubTypeResult = mockMvc.perform(
+                 multipart("/club")
+                         .file(mockLogo)
+                         .contentType(MediaType.MULTIPART_FORM_DATA)
+                         .with(csrf())
+                         .queryParam("clubName", "정상적인 클럽 SKKULOL")
+                         .queryParam("campus", Campus.명륜.toString())
+                         .queryParam("clubType", wrongClubType)
+                         .queryParam("belongs", "취미교양")
+                         .queryParam("briefActivityDescription", "E-SPORTS")
+                         .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
+                         .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
+         ).andReturn();
+         MvcResult wrongCampusResult = mockMvc.perform(
+                 multipart("/club")
+                         .file(mockLogo)
+                         .contentType(MediaType.MULTIPART_FORM_DATA)
+                         .with(csrf())
+                         .queryParam("clubName", "정상적인 클럽 SKKULOL")
+                         .queryParam("campus", wrongCampus)
+                         .queryParam("clubType", "중앙동아리")
+                         .queryParam("belongs", "취미교양")
+                         .queryParam("briefActivityDescription", "E-SPORTS")
+                         .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
+                         .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
+         ).andReturn();
+
+         //then
+         Assertions.assertThat(wrongCampusResult.getResolvedException()).isInstanceOf(BindException.class);
+         Assertions.assertThat(wrongClubTypeResult.getResolvedException()).isInstanceOf(BindException.class);
+
+      }
+
+    @Test
+    public void clubCreation_EmptyLogoImage_FileNameEqDefaultLogo() throws Exception {
+        //given
+        Long successId = 12345L;
+        given(clubService.createClub(any(Club.class), eq("alt.jpg"), anyString())).willReturn(successId);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                multipart("/club")
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
+                        .queryParam("clubName", "정상적인 클럽 SKKULOL")
+                        .queryParam("campus", Campus.명륜.toString())
+                        .queryParam("clubType", "중앙동아리")
+                        .queryParam("belongs", "취미교양")
+                        .queryParam("briefActivityDescription", "E-SPORTS")
+                        .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
+                        .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(successId))
+                .andExpect(jsonPath("$.name").value("정상적인 클럽 SKKULOL"));
 
     }
 
     @Test
-    public void clubCreation_NullAtNotNulls_Fail() throws Exception {
+    public void clubCreation_InvalidBelongs_InvalidBelongsException() throws Exception {
         //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.중앙동아리;
+        String suwonCentralBelongs = "건강체육";
 
         //when
+        MvcResult wrongBelongsResult = mockMvc.perform(
+                multipart("/club")
+                        .file(mockLogo)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
+                        .queryParam("clubName", "정상적인 클럽 SKKULOL")
+                        .queryParam("campus", campus.toString())
+                        .queryParam("clubType", clubType.toString())
+                        .queryParam("belongs", suwonCentralBelongs)
+                        .queryParam("briefActivityDescription", "E-SPORTS")
+                        .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
+                        .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
+        ).andReturn();
 
         //then
-
-    }
-
-    @Test
-    public void clubCreation_EmptyLogoImage_GetDefaultLogo() throws Exception {
-        //given
-
-        //when
-
-        //then
-
-    }
-
-    @Test
-    public void clubCreation_SameLogoFileName_Success() throws Exception {
-        //given
-
-        //when
-
-        //then
+        Assertions.assertThat(wrongBelongsResult.getResolvedException()).isInstanceOf(InvalidBelongsException.class);
 
     }
 
@@ -224,7 +324,7 @@ class ClubControllerCreateTest {
                                 parameterWithName("clubId").description("동아리 ID").attributes(example("1"))
                         ),
                         requestParts(
-                                partWithName("activityImages").description("활동 사진").optional()
+                                partWithName("activityImages").description("활동 사진")
                         ),
                         responseFields(
                                 fieldWithPath("id").type(FieldType.STRING).description("동아리 ID").attributes(example("0")),
@@ -234,7 +334,7 @@ class ClubControllerCreateTest {
     }
 
     @Test
-    public void uploadActivityImages_EmptyList_Fail() throws Exception {
+    public void uploadActivityImages_NoList_Fail() throws Exception {
         //given
         List<MultipartFile> multipartFiles = new ArrayList<>();
         List<FileNames> activityImageDtos = new ArrayList<>();
@@ -251,5 +351,34 @@ class ClubControllerCreateTest {
 
         actions.andExpect(status().is4xxClientError());
     }
+
+    @Test
+    public void uploadActivityImages_IllegalClubId_UnMatchClubException() throws Exception{
+        //given
+        Long clubId = -1L;
+        List<FileNames> emptyList = new ArrayList<>();
+        given(s3Transferer.uploadAll(anyList())).willReturn(emptyList);
+        given(clubService.appendActivityImages(clubId, emptyList)).willReturn(Optional.empty());
+
+        //when
+        MvcResult badIdResult = mockMvc.perform(
+                multipart("/club/{clubId}/activityImage", clubId)
+                        .file(mockActivityImages.get(0))
+                        .file(mockActivityImages.get(1))
+                        .file(mockActivityImages.get(2))
+                        .file(mockActivityImages.get(3))
+                        .file(mockActivityImages.get(4))
+                        .file(mockActivityImages.get(5))
+                        .file(mockActivityImages.get(6))
+                        .file(mockActivityImages.get(7))
+                        .file(mockActivityImages.get(8))
+                        .file(mockActivityImages.get(9))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
+     }
 
 }

@@ -75,3 +75,14 @@ include::adocs/Club-Revive.adoc[]
 
 === 특정 활동 사진 삭제
 include::adocs/Activity-Delete.adoc[]
+
+= Recruit API
+
+=== 모집 정보 등록
+include::adocs/Recruit-Create.adoc[]
+
+=== 모집 정보 수정
+include::adocs/Recruit-Update.adoc[]
+
+=== 모집 정보 삭제
+include::adocs/Recruit-Delete.adoc[]

@@ -1,7 +1,11 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
+import com.skklub.admin.controller.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.controller.error.exception.ClubNameMisMatchException;
+import com.skklub.admin.controller.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.service.dto.ClubPrevDTO;
@@ -19,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,9 +38,9 @@ public class ClubController {
 
     //추가
     @PostMapping(value = "/club")
-    public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam MultipartFile logo) {
+    public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam(required = false) Optional<MultipartFile> logo) {
         ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
-        FileNames uploadedLogo = s3Transferer.uploadOne(logo);
+        FileNames uploadedLogo = logo.map(s3Transferer::uploadOne).orElse(new FileNames("alt.jpg", UUID.randomUUID() + ".jpg"));
         Club club = clubCreateRequestDTO.toEntity();
         Long id = clubService.createClub(club, uploadedLogo.getOriginalName(), uploadedLogo.getSavedName());
         return new ClubNameAndIdDTO(id, club.getName());
@@ -44,12 +49,11 @@ public class ClubController {
     //활동 사진 등록(LIST)
     @PostMapping("/club/{clubId}/activityImage")
     public ResponseEntity<ClubNameAndIdDTO> uploadActivityImages(@PathVariable Long clubId, @RequestParam List<MultipartFile> activityImages) {
-        log.info("request CLUB : {}, file count : {}", clubId, activityImages.size());
         List<FileNames> savedActivityImages = s3Transferer.uploadAll(activityImages);
         return clubService.appendActivityImages(clubId, savedActivityImages)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
 //=====READ=====//
@@ -60,7 +64,7 @@ public class ClubController {
         return clubService.getClubDetailInfoById(clubId)
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
     //간소화(Preview) 조회
@@ -69,6 +73,7 @@ public class ClubController {
                                                              @RequestParam(required = false, defaultValue = "전체") ClubType clubType,
                                                              @RequestParam(required = false, defaultValue = "전체") String belongs,
                                                              Pageable pageable) {
+        ClubValidator.validateBelongs(campus, clubType, belongs);
         Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
@@ -79,7 +84,7 @@ public class ClubController {
         return clubService.getClubDetailInfoByName(name)
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.noContent().build());
+                .orElseThrow(ClubNameMisMatchException::new);
     }
 
     //이름 검색 부분 일치
@@ -94,6 +99,7 @@ public class ClubController {
     public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@RequestParam Campus campus,
                                                                      @RequestParam(required = false, defaultValue = "전체") ClubType clubType,
                                                                      @RequestParam(required = false, defaultValue = "전체") String belongs) {
+        ClubValidator.validateBelongs(campus, clubType, belongs);
         return clubService.getRandomClubsByCategories(campus, clubType, belongs).stream()
                 .map(dto -> new ClubNameAndIdDTO(dto.getId(), dto.getName()))
                 .collect(Collectors.toList());
@@ -126,7 +132,11 @@ public class ClubController {
                 .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
     }
 
-//=====DELETE=====//
+    //로고 변경
+
+    //모집 내용 수정정
+
+//====DELETE=====//
 
     //특정 활동 사진 삭제
     @DeleteMapping("/club/{clubId}/activityImage")
@@ -161,5 +171,8 @@ public class ClubController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
     }
+
+    //모집 마감
+
 
 }

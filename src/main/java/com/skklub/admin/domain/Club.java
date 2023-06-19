@@ -132,7 +132,7 @@ public class Club extends BaseEntity {
     public void startRecruit(Recruit recruit) {
         this.recruit = recruit;
     }
-    public void endRecruit(Recruit recruit){
+    public void endRecruit(){
         this.recruit = null;
     }
 
@@ -155,5 +155,9 @@ public class Club extends BaseEntity {
     //Must be Removed
     public void setUser(User user) {
         this.president = user;
+    }
+
+    public boolean onRecruit() {
+        return recruit != null;
     }
 }

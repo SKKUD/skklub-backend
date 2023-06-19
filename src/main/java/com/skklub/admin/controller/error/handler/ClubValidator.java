@@ -1,6 +1,8 @@
-package com.skklub.admin.controller;
+package com.skklub.admin.controller.error.handler;
 
-import com.skklub.admin.controller.exception.InvalidBelongsException;
+import com.skklub.admin.controller.dto.RecruitDto;
+import com.skklub.admin.controller.error.exception.AllTimeRecruitTimeFormattingException;
+import com.skklub.admin.controller.error.exception.InvalidBelongsException;
 import com.skklub.admin.domain.enums.BelongsSeoulCentral;
 import com.skklub.admin.domain.enums.BelongsSuwonCentral;
 import com.skklub.admin.domain.enums.Campus;
@@ -18,7 +20,7 @@ public interface ClubValidator {
         }
     }
 
-    static void validateSuwonCentralClubBelongs(String belongs) {
+    private static void validateSuwonCentralClubBelongs(String belongs) {
         try {
             BelongsSuwonCentral.valueOf(belongs);
         } catch (IllegalArgumentException e) {
@@ -26,11 +28,16 @@ public interface ClubValidator {
         }
     }
 
-    static void validateSeoulCentralClubBelongs(String belongs) throws InvalidBelongsException{
+    private static void validateSeoulCentralClubBelongs(String belongs) throws InvalidBelongsException{
         try {
             BelongsSeoulCentral.valueOf(belongs);
         } catch (IllegalArgumentException e) {
             throw new InvalidBelongsException();
         }
+    }
+
+    static void validateRecruitTimeFormat(RecruitDto recruit) throws AllTimeRecruitTimeFormattingException {
+        if (recruit.getRecruitEndAt() == null ^ recruit.getRecruitStartAt() == null)
+            throw new AllTimeRecruitTimeFormattingException();
     }
 }

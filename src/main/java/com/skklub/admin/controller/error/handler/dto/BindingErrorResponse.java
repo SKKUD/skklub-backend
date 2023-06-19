@@ -1,4 +1,4 @@
-package com.skklub.admin.controller;
+package com.skklub.admin.controller.error.handler.dto;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ public class BindingErrorResponse {
                 .collect(Collectors.toList());
         return BindingErrorResponse.builder()
                 .errorDetails(errorDetails)
-                .exception(bindException.getClass().toString())
+                .exception(bindException.getClass().getName())
                 .url(request.getRequestURI())
                 .build();
     }

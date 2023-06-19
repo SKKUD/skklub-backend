@@ -1,0 +1,3 @@
+===== Delete - /recruit/{recruitId}
+operation::recruit/delete[snippets='path-parameters']
+Return Only RecruitId When Success
