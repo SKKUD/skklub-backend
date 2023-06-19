@@ -56,16 +56,6 @@ public class ClubController {
                 .orElseThrow(ClubIdMisMatchException::new);
     }
 
-    //모집 등록
-    @PostMapping("/club/{clubId}/recruit")
-    public ResponseEntity<ClubNameAndIdDTO> startRecruit(@PathVariable Long clubId, @RequestBody RecruitDto recruitDto) {
-        Recruit recruit = recruitDto.toEntity();
-        return clubService.startRecruit(clubId, recruit)
-                .map(name -> new ClubNameAndIdDTO(clubId, name))
-                .map(ResponseEntity::ok)
-                .orElseThrow(ClubIdMisMatchException::new);
-    }
-
 //=====READ=====//
 
     //세부 정보 조회 by ID

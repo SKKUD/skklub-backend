@@ -98,7 +98,7 @@ public class QClub extends EntityPathBase<Club> {
         super(type, metadata, inits);
         this.logo = inits.isInitialized("logo") ? new QLogo(forProperty("logo")) : null;
         this.president = inits.isInitialized("president") ? new QUser(forProperty("president")) : null;
-        this.recruit = inits.isInitialized("recruit") ? new QRecruit(forProperty("recruit"), inits.get("recruit")) : null;
+        this.recruit = inits.isInitialized("recruit") ? new QRecruit(forProperty("recruit")) : null;
     }
 
 }

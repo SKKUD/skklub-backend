@@ -1,10 +1,13 @@
 package com.skklub.admin.controller.error.handler;
 
+import com.skklub.admin.controller.dto.RecruitDto;
+import com.skklub.admin.controller.error.exception.AllTimeRecruitTimeFormattingException;
 import com.skklub.admin.controller.error.exception.InvalidBelongsException;
 import com.skklub.admin.domain.enums.BelongsSeoulCentral;
 import com.skklub.admin.domain.enums.BelongsSuwonCentral;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import jakarta.validation.Valid;
 
 public interface ClubValidator {
     static void validateBelongs(Campus campus, ClubType clubType, String belongs) throws InvalidBelongsException {
@@ -32,5 +35,10 @@ public interface ClubValidator {
         } catch (IllegalArgumentException e) {
             throw new InvalidBelongsException();
         }
+    }
+
+    static void validateRecruitTimeFormat(@Valid RecruitDto recruit) throws AllTimeRecruitTimeFormattingException {
+        if (recruit.getRecruitStartAt() == null ^ recruit.getRecruitEndAt() == null)
+            throw new AllTimeRecruitTimeFormattingException();
     }
 }

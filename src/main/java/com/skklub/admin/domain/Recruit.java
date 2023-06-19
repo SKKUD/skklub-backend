@@ -27,10 +27,6 @@ public class Recruit extends BaseEntity {
     private String contact;
     private String webLink;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_id")
-    public Club club;
-
     public Recruit(LocalDateTime startAt, LocalDateTime endAt, String quota, String processDescription, String contact, String webLink) {
         this.startAt = startAt;
         this.endAt = endAt;
@@ -40,8 +36,12 @@ public class Recruit extends BaseEntity {
         this.webLink = webLink;
     }
 
-    public void setClub(Club club) {
-        this.club = club;
+    public void update(Recruit recruit) {
+        this.startAt = recruit.getStartAt();
+        this.endAt = recruit.getEndAt();
+        this.quota = recruit.getQuota();
+        this.processDescription = recruit.getProcessDescription();
+        this.contact = recruit.getContact();
+        this.webLink = recruit.getWebLink();
     }
-
 }

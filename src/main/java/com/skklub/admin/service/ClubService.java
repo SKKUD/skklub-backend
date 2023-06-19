@@ -59,16 +59,6 @@ public class ClubService {
         return club.map(Club::getName);
     }
 
-    public Optional<String> startRecruit(Long clubId, Recruit recruit) throws AlreadyRecruitingException{
-        return clubRepository.findById(clubId)
-                .map(club -> {
-                    if(club.onRecruit()) throw new AlreadyRecruitingException();
-                    recruitRepository.save(recruit);
-                    club.startRecruit(recruit);
-                    return club.getName();
-                });
-    }
-
     public Optional<String> endRecruit(Long clubId) {
         return clubRepository.findById(clubId)
                 .map(club -> {

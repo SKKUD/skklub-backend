@@ -1,9 +1,8 @@
 package com.skklub.admin.controller.error.handler;
 
 import com.skklub.admin.controller.ClubController;
-import com.skklub.admin.controller.error.exception.AlreadyRecruitingException;
-import com.skklub.admin.controller.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.controller.error.exception.ClubNameMisMatchException;
+import com.skklub.admin.controller.RecruitController;
+import com.skklub.admin.controller.error.exception.*;
 import com.skklub.admin.controller.error.handler.dto.BindingErrorResponse;
 import com.skklub.admin.controller.error.handler.dto.ErrorDetail;
 import com.skklub.admin.controller.error.handler.dto.ErrorResponse;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
-@RestControllerAdvice(basePackageClasses = ClubController.class)
+@RestControllerAdvice(basePackageClasses = {ClubController.class, RecruitController.class})
 public class ClubExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<BindingErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
@@ -50,5 +49,25 @@ public class ClubExceptionHandler {
                 .reasonMessage("이미 모집 정보가 등록된 club입니다")
                 .build();
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
+    @ExceptionHandler(RecruitIdMisMatchException.class)
+    public ResponseEntity<ErrorResponse> recruitIdMisMatchException(RecruitIdMisMatchException e, HttpServletRequest req) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("recruitId")
+                .given("path variable")
+                .reasonMessage("해당 아이디와 일치하는 Recruit 정보가 없습니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, req, errorDetail));
+    }
+
+    @ExceptionHandler(AllTimeRecruitTimeFormattingException.class)
+    public ResponseEntity<ErrorResponse> allTimeRecruitTimeFormattingException(AllTimeRecruitTimeFormattingException e, HttpServletRequest req) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("recruitStartAt, recruitEndAt")
+                .given(req.getParameter("recruitStartAt") + ", " + req.getParameter("recruitEndAt"))
+                .reasonMessage("둘다 NULL이거나 둘다 NULL이 아니어야합니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, req, errorDetail));
     }
 }
