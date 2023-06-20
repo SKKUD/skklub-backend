@@ -1,5 +1,5 @@
 [source,bash]
 ----
 $ http --form DELETE 'http://localhost:8080/club/0/activityImage?activityImageName=Test%20Activity%20Image%20Name' \
-    '_csrf=MzAy94LIbncCCu1fEzHnjCyRIC5rgYqWKuspMnvKnXHXW8HBAlRRkeD7DEMvM9s5KxzTvRuiDU9S5-m7G9JNVE77rBThaPH2'
+    '_csrf=MKIs_nGGVZE2c0zJtg-hXiF_DUmQSPr3oDXC6-4hyvQv9Re-VZocz0nlYaAbQC-ogiKVbxdMICugLczamACniNgWqJFMlyOH'
 ----

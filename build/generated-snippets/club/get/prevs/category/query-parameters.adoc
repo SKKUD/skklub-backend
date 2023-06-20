@@ -8,13 +8,13 @@
 
 |`+clubType+`
 |분류 - 동아리 종류
-|link:common/club-type-null.html[동아리 종류,role=\"popup\"]
-|필수!!
+|link:common/club-type-null.html[동아리 종류,role="popup"]
+|
 
 |`+belongs+`
 |분류 - 동아리 분과
 |link:common/belongs-null.html[분과 종류,role="popup"]
-|필수!!
+|
 
 |`+size+`
 |페이지 정보 - 한 페이지 크기
