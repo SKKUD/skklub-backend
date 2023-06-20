@@ -65,6 +65,9 @@ include::adocs/Today-Club.adoc[]
 === 동아리 정보 수정
 include::adocs/Club-Update.adoc[]
 
+=== 동아리 로고 수정
+include::adocs/Logo-Update.adoc[]
+
 == Delete
 
 === 동아리 삭제

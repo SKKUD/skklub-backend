@@ -1,17 +1,19 @@
-package com.skklub.admin.controller.error.handler;
+package com.skklub.admin.error.handler;
 
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.RecruitController;
-import com.skklub.admin.controller.error.exception.*;
-import com.skklub.admin.controller.error.handler.dto.BindingErrorResponse;
-import com.skklub.admin.controller.error.handler.dto.ErrorDetail;
-import com.skklub.admin.controller.error.handler.dto.ErrorResponse;
+import com.skklub.admin.error.exception.*;
+import com.skklub.admin.error.handler.dto.BindingErrorResponse;
+import com.skklub.admin.error.handler.dto.ErrorDetail;
+import com.skklub.admin.error.handler.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @Slf4j
 @RestControllerAdvice(basePackageClasses = {ClubController.class, RecruitController.class})
@@ -19,6 +21,26 @@ public class ClubExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<BindingErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         return ResponseEntity.badRequest().body(BindingErrorResponse.fromException(e, request));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> missingServletRequestParameterException(MissingServletRequestParameterException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field(e.getParameterName())
+                .given("none")
+                .reasonMessage("명시된 field는 필수 입니다.")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ErrorResponse> missingServletRequestPartException(MissingServletRequestPartException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field(e.getRequestPartName())
+                .given("none")
+                .reasonMessage("명시된 field는 필수 입니다.")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
     }
 
     @ExceptionHandler(ClubIdMisMatchException.class)

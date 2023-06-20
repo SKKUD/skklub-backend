@@ -1,11 +1,10 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
-import com.skklub.admin.controller.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.controller.error.exception.ClubNameMisMatchException;
-import com.skklub.admin.controller.error.handler.ClubValidator;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.ClubNameMisMatchException;
+import com.skklub.admin.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.service.dto.ClubPrevDTO;
@@ -23,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -127,13 +125,26 @@ public class ClubController {
     //정보 변경
     @PatchMapping("/club/{clubId}")
     public ResponseEntity<ClubNameAndIdDTO> updateClub(@PathVariable Long clubId, @ModelAttribute ClubCreateRequestDTO clubCreateRequestDTO) {
-        return clubService.updateClub(clubId, clubCreateRequestDTO)
+        ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
+        Club club = clubCreateRequestDTO.toEntity();
+        return clubService.updateClub(clubId, club)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
     //로고 변경
+    @PostMapping("/club/{clubId}/logo")
+    public ResponseEntity<ClubIdAndLogoNameDTO> updateLogo(@PathVariable Long clubId, @RequestParam MultipartFile logo) {
+        FileNames fileNames = s3Transferer.uploadOne(logo);
+        return clubService.updateLogo(clubId, fileNames)
+                .map(oldLogoName -> {
+                    if(!oldLogoName.equals(DEFAULT_LOGO_NAME)) s3Transferer.deleteOne(oldLogoName);
+                    return new ClubIdAndLogoNameDTO(clubId, fileNames.getOriginalName(), fileNames.getSavedName());
+                })
+                .map(ResponseEntity::ok)
+                .orElseThrow(ClubIdMisMatchException::new);
+    }
 
 //====DELETE=====//
 

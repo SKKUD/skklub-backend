@@ -1,4 +1,4 @@
-package com.skklub.admin.controller.error.exception;
+package com.skklub.admin.error.exception;
 
 public class AllTimeRecruitTimeFormattingException extends RuntimeException {
 }

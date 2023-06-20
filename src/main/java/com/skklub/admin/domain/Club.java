@@ -4,11 +4,13 @@ import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -45,7 +47,7 @@ public class Club extends BaseEntity {
     private String activityDescription;
 
     //Files
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "logo")
     private Logo logo;
     @OneToMany(mappedBy = "club")
@@ -114,9 +116,12 @@ public class Club extends BaseEntity {
         this.webLink2 = updateInfo.webLink2;
     }
 
-    public void changeLogo(Logo logo) {
+    public String changeLogo(Logo logo) {
+        String oldSavedName = Optional.ofNullable(this.logo).map(Logo::getUploadedName).orElse(null);
         this.logo = logo;
+        return oldSavedName;
     }
+
 
     public void appendActivityImages(List<ActivityImage> activityImages) {
         for (ActivityImage activityImage : activityImages) {
