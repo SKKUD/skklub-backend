@@ -14,6 +14,9 @@ public class FileNames {
     private String originalName;
     private String savedName;
 
+    public Logo toLogoEntity() {
+        return new Logo(originalName, savedName);
+    }
     public ActivityImage toActivityImageEntity() {
         return new ActivityImage(originalName, savedName);
     }

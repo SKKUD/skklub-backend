@@ -122,7 +122,7 @@ public class ClubTestDataRepository {
                     , "학생회관 80210"
                     , "www.skklol.com"
                     , "www.skkulol.edu");
-            club.changeLogo(logos.get(i));
+            Optional.ofNullable(logos.get(i)).ifPresent(club::changeLogo);
             List<ActivityImage> activityImagesTemp = new ArrayList<>();
             for (int j = 0; j < activityImgPerClub; j++) {
                 activityImagesTemp.add(activityImages.get(j + i * activityImgPerClub));

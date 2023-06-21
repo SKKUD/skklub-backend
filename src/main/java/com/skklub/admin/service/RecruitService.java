@@ -1,9 +1,7 @@
 package com.skklub.admin.service;
 
-import com.querydsl.core.group.GroupBy;
-import com.skklub.admin.controller.error.exception.AlreadyRecruitingException;
-import com.skklub.admin.controller.error.exception.NotRecruitingException;
-import com.skklub.admin.controller.error.exception.RecruitIdMisMatchException;
+import com.skklub.admin.error.exception.AlreadyRecruitingException;
+import com.skklub.admin.error.exception.RecruitIdMisMatchException;
 import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.RecruitRepository;

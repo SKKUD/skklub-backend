@@ -3,9 +3,13 @@ package com.skklub.admin.controller.club;
 import akka.protobuf.WireFormat;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;
+import com.skklub.admin.error.exception.ActivityImageMisMatchException;
+import com.skklub.admin.error.exception.AlreadyAliveClubException;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.DoubleClubDeletionException;
 import com.skklub.admin.service.ClubService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.impl.conn.Wire;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -13,9 +17,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
-import org.springframework.restdocs.operation.QueryParameters;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Optional;
@@ -24,7 +28,8 @@ import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -46,9 +51,8 @@ class ClubControllerDeleteTest {
     @Autowired
     private MockMvc mockMvc;
 
-
     @Test
-    public void deleteClubById_Default_Success() throws Exception{
+    public void deleteClubById_Default_Success() throws Exception {
         //given
         given(clubService.deleteClub(0L)).willReturn(Optional.of("Test Club Name"));
 
@@ -73,68 +77,156 @@ class ClubControllerDeleteTest {
                                 )
                         )
                 );
+    }
+
+    @Test
+    public void deleteClubById_NoClubExist_ClubIdMisMatchException() throws Exception{
+        //given
+        Long clubId = -1L;
+        given(clubService.deleteClub(clubId)).willReturn(Optional.empty());
+
+        //when
+        MvcResult badIdResult = mockMvc.perform(
+                        delete("/club/{clubId}", clubId)
+                                .with(csrf())
+                ).andExpect(status().isBadRequest())
+                .andReturn();
+
+        //then
+        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
      }
-
+     
      @Test
-     public void cancelClubDeletionById_Default_Success() throws Exception{
+     public void deleteClubById_AlreadyDeletedClub_DoubleClubDeletionException() throws Exception{
          //given
-         given(clubService.reviveClub(0L)).willReturn(Optional.of("Test Club Name"));
-
+         Long clubId = 0L;
+         given(clubService.deleteClub(clubId)).willThrow(DoubleClubDeletionException.class);
+         
          //when
-         ResultActions actions = mockMvc.perform(
-                 delete("/club/{clubId}/cancel", 0L)
-                         .with(csrf())
-         );
+         MvcResult doubleDeletionResult = mockMvc.perform(
+                         delete("/club/{clubId}", clubId)
+                                 .with(csrf())
+                 ).andExpect(status().isBadRequest())
+                 .andReturn();
 
          //then
-         actions.andExpect(status().isOk())
-                 .andExpect(jsonPath("$.id").value(0L))
-                 .andExpect(jsonPath("$.name").value("Test Club Name"))
-                 .andDo(
-                         document("club/revive/club"
-                                 , pathParameters(
-                                         parameterWithName("clubId").description("살리려는 동아리 ID").attributes(example("1"))
-                                 ),
-                                 responseFields(
-                                         fieldWithPath("id").type(WireFormat.FieldType.INT64).description("살아난 동아리 ID").attributes(example("1")),
-                                         fieldWithPath("name").type(WireFormat.FieldType.STRING).description("살아난 동아리 이름").attributes(example("Test Club Name"))
-                                 )
-                         )
-                 );
+         Assertions.assertThat(doubleDeletionResult.getResolvedException()).isExactlyInstanceOf(DoubleClubDeletionException.class);
+         
       }
 
-      @Test
-      public void deleteActivityImage_Default_Success() throws Exception{
-          //given
-          String testImageName = "Test Activity Image Name";
-          long clubId = 0L;
-          given(clubService.deleteActivityImage(clubId, testImageName)).willReturn(Optional.of(testImageName));
+    @Test
+    public void cancelClubDeletionById_Default_Success() throws Exception {
+        //given
+        given(clubService.reviveClub(0L)).willReturn(Optional.of("Test Club Name"));
 
-          //when
-          ResultActions actions = mockMvc.perform(
-                  delete("/club/{clubId}/activityImage", clubId)
-                          .with(csrf())
-                          .queryParam("activityImageName", testImageName)
-          );
+        //when
+        ResultActions actions = mockMvc.perform(
+                delete("/club/{clubId}/cancel", 0L)
+                        .with(csrf())
+        );
 
-          //then
-          actions.andExpect(status().isOk())
-                  .andExpect(jsonPath("$.clubId").value(clubId))
-                  .andExpect(jsonPath("$.deletedActivityImageName").value(testImageName))
-                  .andDo(
-                          document("club/delete/activityImage"
-                                  , pathParameters(
-                                          parameterWithName("clubId").description("대상 동아리 ID").attributes(example("1"))
-                                  ),
-                                  queryParameters(
-                                          parameterWithName("activityImageName").attributes(example("activity.png")).description("지우려는 활동 이미지 파일명")
-                                  ),
-                                  responseFields(
-                                          fieldWithPath("clubId").type(WireFormat.FieldType.INT64).description("대상 동아리 ID").attributes(example("1")),
-                                          fieldWithPath("deletedActivityImageName").type(WireFormat.FieldType.STRING).description("지워진 활동 사진 파일명").attributes(example("activity.png"))
-                                  )
-                          )
-                  );
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(0L))
+                .andExpect(jsonPath("$.name").value("Test Club Name"))
+                .andDo(
+                        document("club/revive/club"
+                                , pathParameters(
+                                        parameterWithName("clubId").description("살리려는 동아리 ID").attributes(example("1"))
+                                ),
+                                responseFields(
+                                        fieldWithPath("id").type(WireFormat.FieldType.INT64).description("살아난 동아리 ID").attributes(example("1")),
+                                        fieldWithPath("name").type(WireFormat.FieldType.STRING).description("살아난 동아리 이름").attributes(example("Test Club Name"))
+                                )
+                        )
+                );
+    }
 
-       }
+    @Test
+    public void cancelClubDeletionById_NoClubExist_ClubIdMisMatchException() throws Exception {
+        Long clubId = -1L;
+        given(clubService.reviveClub(clubId)).willReturn(Optional.empty());
+
+        //when
+        MvcResult badIdResult = mockMvc.perform(
+                        delete("/club/{clubId}/cancel", clubId)
+                                .with(csrf())
+                ).andExpect(status().isBadRequest())
+                .andReturn();
+
+        //then
+        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
+    }
+    
+    @Test
+    public void cancelClubDeletionById_ReviveToAlive_AlreadyAliveClubException() throws Exception{
+        //given
+        Long clubId = 0L;
+        given(clubService.reviveClub(clubId)).willThrow(AlreadyAliveClubException.class);
+
+        //when
+        MvcResult reviveToAliveResult = mockMvc.perform(
+                        delete("/club/{clubId}/cancel", clubId)
+                                .with(csrf())
+                ).andExpect(status().isBadRequest())
+                .andReturn();
+
+        //then
+        Assertions.assertThat(reviveToAliveResult.getResolvedException()).isExactlyInstanceOf(AlreadyAliveClubException.class);
+    }
+
+    @Test
+    public void deleteActivityImage_Default_Success() throws Exception {
+        //given
+        String testImageName = "Test Activity Image Name";
+        long clubId = 0L;
+        given(clubService.deleteActivityImage(clubId, testImageName)).willReturn(Optional.of(testImageName));
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                delete("/club/{clubId}/activityImage", clubId)
+                        .with(csrf())
+                        .queryParam("activityImageName", testImageName)
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.clubId").value(clubId))
+                .andExpect(jsonPath("$.deletedActivityImageName").value(testImageName))
+                .andDo(
+                        document("club/delete/activityImage"
+                                , pathParameters(
+                                        parameterWithName("clubId").description("대상 동아리 ID").attributes(example("1"))
+                                ),
+                                queryParameters(
+                                        parameterWithName("activityImageName").attributes(example("activity.png")).description("지우려는 활동 이미지 파일명")
+                                ),
+                                responseFields(
+                                        fieldWithPath("clubId").type(WireFormat.FieldType.INT64).description("대상 동아리 ID").attributes(example("1")),
+                                        fieldWithPath("deletedActivityImageName").type(WireFormat.FieldType.STRING).description("지워진 활동 사진 파일명").attributes(example("activity.png"))
+                                )
+                        )
+                );
+
+    }
+       
+    @Test
+    public void deleteActivityImage_ClubIdAndImgNameMisMatch_ActivityImageMisMatchException() throws Exception{
+        //given
+        Long clubId = -1L;
+        String activityImageName = "testImg.jpg";
+        given(clubService.deleteActivityImage(clubId, activityImageName)).willReturn(Optional.empty());
+        
+        //when
+        MvcResult imgIdMisMatchResult = mockMvc.perform(
+                        delete("/club/{clubId}/activityImage", clubId)
+                                .with(csrf())
+                                .queryParam("activityImageName", activityImageName)
+                ).andExpect(status().isBadRequest())
+                .andReturn();
+
+        //then
+        Assertions.assertThat(imgIdMisMatchResult.getResolvedException()).isExactlyInstanceOf(ActivityImageMisMatchException.class);
+        
+     }
 }

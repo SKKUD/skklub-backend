@@ -1,11 +1,11 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
-import com.skklub.admin.controller.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.controller.error.exception.ClubNameMisMatchException;
-import com.skklub.admin.controller.error.handler.ClubValidator;
+import com.skklub.admin.error.exception.ActivityImageMisMatchException;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.ClubNameMisMatchException;
+import com.skklub.admin.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.service.dto.ClubPrevDTO;
@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,14 +32,15 @@ public class ClubController {
 
     private final ClubService clubService;
     private final S3Transferer s3Transferer;
+    private final static String DEFAULT_LOGO_NAME = "alt.jpg";
 
 //=====CREATE=====//
 
     //추가
     @PostMapping(value = "/club")
-    public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam(required = false) Optional<MultipartFile> logo) {
+    public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam(required = false) MultipartFile logo) {
         ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
-        FileNames uploadedLogo = logo.map(s3Transferer::uploadOne).orElse(new FileNames("alt.jpg", UUID.randomUUID() + ".jpg"));
+        FileNames uploadedLogo = Optional.ofNullable(logo).map(s3Transferer::uploadOne).orElse(new FileNames(DEFAULT_LOGO_NAME, DEFAULT_LOGO_NAME));
         Club club = clubCreateRequestDTO.toEntity();
         Long id = clubService.createClub(club, uploadedLogo.getOriginalName(), uploadedLogo.getSavedName());
         return new ClubNameAndIdDTO(id, club.getName());
@@ -59,7 +59,7 @@ public class ClubController {
 //=====READ=====//
 
     //세부 정보 조회 by ID
-    @GetMapping( "/club/{clubId}")
+    @GetMapping("/club/{clubId}")
     public ResponseEntity<ClubResponseDTO> getClubById(@PathVariable Long clubId) {
         return clubService.getClubDetailInfoById(clubId)
                 .map(this::convertClubImagesToFile)
@@ -126,41 +126,48 @@ public class ClubController {
     //정보 변경
     @PatchMapping("/club/{clubId}")
     public ResponseEntity<ClubNameAndIdDTO> updateClub(@PathVariable Long clubId, @ModelAttribute ClubCreateRequestDTO clubCreateRequestDTO) {
-        return clubService.updateClub(clubId, clubCreateRequestDTO)
+        ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
+        Club club = clubCreateRequestDTO.toEntity();
+        return clubService.updateClub(clubId, club)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
     //로고 변경
-
-    //모집 내용 수정정
+    @PostMapping("/club/{clubId}/logo")
+    public ResponseEntity<ClubIdAndLogoNameDTO> updateLogo(@PathVariable Long clubId, @RequestParam MultipartFile logo) {
+        FileNames fileNames = s3Transferer.uploadOne(logo);
+        return clubService.updateLogo(clubId, fileNames)
+                .map(oldLogoName -> {
+                    if(!oldLogoName.equals(DEFAULT_LOGO_NAME)) s3Transferer.deleteOne(oldLogoName);
+                    return new ClubIdAndLogoNameDTO(clubId, fileNames.getOriginalName(), fileNames.getSavedName());
+                })
+                .map(ResponseEntity::ok)
+                .orElseThrow(ClubIdMisMatchException::new);
+    }
 
 //====DELETE=====//
 
     //특정 활동 사진 삭제
     @DeleteMapping("/club/{clubId}/activityImage")
     public ResponseEntity<ActivityImageDeletionDTO> deleteActivityImage(@PathVariable Long clubId, @RequestParam String activityImageName) {
-        log.info("name : {}", activityImageName);
         return clubService.deleteActivityImage(clubId, activityImageName)
                 .map(uploadedName -> {
                     s3Transferer.deleteOne(uploadedName);
                     return new ActivityImageDeletionDTO(clubId, activityImageName);
                 })
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ActivityImageMisMatchException::new);
     }
 
     //삭제
     @DeleteMapping("/club/{clubId}")
     public ResponseEntity<ClubNameAndIdDTO> deleteClubById(@PathVariable Long clubId) {
         return clubService.deleteClub(clubId)
-                .map(name -> {
-                    log.info("name : {}", name);
-                    return new ClubNameAndIdDTO(clubId, name);
-                })
+                .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
     //삭제 취소 (복구)
@@ -169,10 +176,7 @@ public class ClubController {
         return clubService.reviveClub(clubId)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ClubIdMisMatchException::new);
     }
-
-    //모집 마감
-
 
 }

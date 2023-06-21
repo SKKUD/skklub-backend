@@ -1,13 +1,13 @@
 package com.skklub.admin.service;
 
-import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
-import com.skklub.admin.controller.error.exception.AlreadyRecruitingException;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
-import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.error.exception.AlreadyAliveClubException;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.DoubleClubDeletionException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.LogoRepository;
@@ -22,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -71,7 +70,7 @@ public class ClubService {
 
     public Optional<ClubDetailInfoDto> getClubDetailInfoById(Long clubId) {
         return clubRepository.findDetailClubById(clubId)
-                .map(c -> new ClubDetailInfoDto(c));
+                .map(ClubDetailInfoDto::new);
     }
 
     public Optional<ClubDetailInfoDto> getClubDetailInfoByName(String name) {
@@ -91,12 +90,11 @@ public class ClubService {
         return clubRepository.findClubPrevByNameContainingOrderByName(keyword, pageable).map(ClubPrevDTO::fromEntity);
     }
 
-    public Optional<String> updateClub(Long clubId, ClubCreateRequestDTO clubCreateRequestDTO) {
-        Club changeInfo = clubCreateRequestDTO.toEntity();
+    public Optional<String> updateClub(Long clubId, Club club) {
         return clubRepository.findDetailClubById(clubId)
-                .map(club -> {
-                    club.update(changeInfo);
-                    return club.getName();
+                .map(base -> {
+                    base.update(club);
+                    return base.getName();
                 });
     }
 
@@ -112,32 +110,33 @@ public class ClubService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<String> deleteClub(Long clubId) {
+    public Optional<String> deleteClub(Long clubId) throws DoubleClubDeletionException {
         return clubRepository.findById(clubId)
                 .map(club -> {
-                    if(club.remove()) return club.getName();
-                    return null;
+                    if (club.remove()) return club.getName();
+                    throw new DoubleClubDeletionException();
                 });
     }
 
-    public Optional<String> reviveClub(Long clubId) {
+    public Optional<String> reviveClub(Long clubId) throws AlreadyAliveClubException{
         return clubRepository.findById(clubId)
                 .map(club -> {
                     if(club.revive()) return club.getName();
-                    return null;
+                    throw new AlreadyAliveClubException();
                 });
     }
 
     public Optional<String> deleteActivityImage(Long clubId, String activityImageName) {
-        Optional<ActivityImage> activityImage = activityImageRepository.findByOriginalName(activityImageName);
-        if(activityImage.isEmpty()) return Optional.empty();
-
-        Optional<Club> club = clubRepository.findById(clubId);
-        return club.map(c -> {
-            c.removeActivityImages(activityImage.get());
-            activityImageRepository.delete(activityImage.get());
-            return activityImage.get().getUploadedName();
-        });
-
+        return activityImageRepository.findByOriginalNameAndClubId(activityImageName, clubId)
+                .map(img -> {
+                    activityImageRepository.delete(img);
+                    return img.getUploadedName();
+                });
     }
+
+    public Optional<String> updateLogo(Long clubId, FileNames fileNames) {
+        return logoRepository.findByClubId(clubId)
+                .map(logo -> logo.update(fileNames.getOriginalName(), fileNames.getSavedName()));
+    }
+
 }

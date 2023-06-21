@@ -7,6 +7,9 @@ import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.controller.dto.S3DownloadDto;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.ClubNameMisMatchException;
+import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
@@ -14,6 +17,7 @@ import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -29,6 +33,7 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.ArrayList;
@@ -157,6 +162,23 @@ class ClubControllerReadTest {
         );
      }
 
+     @Test
+     public void getClubById_IllegalClubId_ClubIdMisMatchException() throws Exception{
+         //given
+         Long clubId = -1L;
+         given(clubService.getClubDetailInfoById(clubId)).willReturn(Optional.empty());
+
+         //when
+         MvcResult badIdResult = mockMvc.perform(
+                 get("/club/{clubId}", clubId)
+                         .with(csrf())
+         ).andReturn();
+
+         //then
+         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
+
+      }
+
     @Test
     public void getClubByName_Default_Success() throws Exception{
         //given
@@ -250,23 +272,25 @@ class ClubControllerReadTest {
         );
     }
 
-    private void checkActivityImagesResponseJson(ResultActions actions, int activityImgIndex, List<S3DownloadDto> activityImgS3DownloadDtos) throws Exception {
-        actions.andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].id").value(activityImgS3DownloadDtos.get(activityImgIndex).getId()))
-                .andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].fileName").value(activityImgS3DownloadDtos.get(activityImgIndex).getFileName()))
-                .andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].bytes").value(activityImgS3DownloadDtos.get(activityImgIndex).getBytes()));
+    @Test
+    public void getClubByName_NoMatchClubName_ClubNameMisMatchException() throws Exception{
+        //given
+        String clubName = "이 이름은 절대로 없을꺼야 ㅋㅋ";
+        given(clubService.getClubDetailInfoByName(clubName)).willReturn(Optional.empty());
 
-    }
-    private void checkRecruitResponseJson(ResultActions actions, RecruitDto recruitDto) throws Exception {
-        actions.andExpect(jsonPath("$.recruit.recruitStartAt").value(recruitDto.getRecruitStartAt().toString()))
-                .andExpect(jsonPath("$.recruit.recruitEndAt").value(recruitDto.getRecruitEndAt().toString()))
-                .andExpect(jsonPath("$.recruit.recruitQuota").value(recruitDto.getRecruitQuota()))
-                .andExpect(jsonPath("$.recruit.recruitProcessDescription").value(recruitDto.getRecruitProcessDescription()))
-                .andExpect(jsonPath("$.recruit.recruitContact").value(recruitDto.getRecruitContact()))
-                .andExpect(jsonPath("$.recruit.recruitWebLink").value(recruitDto.getRecruitWebLink()));
-    }
+        //when
+        MvcResult badNameResult = mockMvc.perform(
+                get("/club/search")
+                        .with(csrf())
+                        .queryParam("name", clubName)
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badNameResult.getResolvedException()).isExactlyInstanceOf(ClubNameMisMatchException.class);
+     }
 
     @Test
-    public void getClubPrev_FullCategory_Success() throws Exception{
+    public void getClubPrevByCategories_FullCategory_Success() throws Exception{
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
@@ -314,8 +338,8 @@ class ClubControllerReadTest {
                 document("club/get/prevs/category",
                         queryParameters(
                                 parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
-                                parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(LINK_CLUB_TYPE_NULL)),
-                                parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(LINK_BELONGS_TYPE_NULL)),
+                                parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(LINK_CLUB_TYPE_NULL)).optional(),
+                                parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(LINK_BELONGS_TYPE_NULL)).optional(),
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
                                 parameterWithName("sort").optional().description("페이지 정보 - 정렬").attributes(example(RestDocsUtils.LINK_SORT))
@@ -327,21 +351,8 @@ class ClubControllerReadTest {
         );
     }
 
-    private ResultActions buildPageableResponseContentChecker(ResultActions actions, int index) throws Exception {
-        Club club = clubTestDataRepository.getClubs().get(index);
-        S3DownloadDto s3Dto = clubTestDataRepository.getLogoS3DownloadDto(index);
-        return actions
-                .andExpect(jsonPath("$.content[" + index + "].id").value(index))
-                .andExpect(jsonPath("$.content[" + index + "].name").value(club.getName()))
-                .andExpect(jsonPath("$.content[" + index + "].belongs").value(club.getBelongs()))
-                .andExpect(jsonPath("$.content[" + index + "].briefActivityDescription").value(club.getBriefActivityDescription()))
-                .andExpect(jsonPath("$.content[" + index + "].logo.id").value(s3Dto.getId()))
-                .andExpect(jsonPath("$.content[" + index + "].logo.fileName").value(s3Dto.getFileName()))
-                .andExpect(jsonPath("$.content[" + index + "].logo.bytes").value(s3Dto.getBytes()));
-    }
-
     @Test
-    public void getClubPrev_NoBelongs_Success() throws Exception{
+    public void getClubPrevByCategories_NoBelongs_Success() throws Exception{
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
@@ -376,7 +387,7 @@ class ClubControllerReadTest {
     }
 
     @Test
-    public void getClubPrev_NoClubTypeAndAnyBelongs_Success() throws Exception{
+    public void getClubPrevByCategories_NoClubTypeAndAnyBelongs_Success() throws Exception{
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.전체;
@@ -411,7 +422,7 @@ class ClubControllerReadTest {
     }
 
     @Test
-    public void getClubPrev_NoClubTypeAndNoBelongs_Success() throws Exception{
+    public void getClubPrevByCategories_NoClubTypeAndNoBelongs_Success() throws Exception{
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.전체;
@@ -443,6 +454,28 @@ class ClubControllerReadTest {
             actions = buildPageableResponseContentChecker(actions, i);
         }
     }
+
+    @Test
+    public void getClubPrevByCategories_IllegalBelongsType_InvalidBelongsException() throws Exception{
+        //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.중앙동아리;
+        String belongs = "IllegalCategory";
+
+        //when
+        MvcResult badBelongsResult = mockMvc.perform(
+                get("/club/prev")
+                        .queryParam("campus", campus.toString())
+                        .queryParam("clubType", clubType.toString())
+                        .queryParam("belongs", belongs)
+                        .queryParam("size", String.valueOf(5))
+                        .queryParam("page", "0")
+                        .queryParam("sort", "name,ASC")
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badBelongsResult.getResolvedException()).isExactlyInstanceOf(InvalidBelongsException.class);
+     }
 
     @Test
     public void getClubPrevByKeyword_Default_Success() throws Exception{
@@ -528,8 +561,8 @@ class ClubControllerReadTest {
                  document("club/get/random",
                          queryParameters(
                                  parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
-                                 parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(LINK_CLUB_TYPE_NULL)),
-                                 parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(LINK_BELONGS_TYPE_NULL))
+                                 parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(LINK_CLUB_TYPE_NULL)).optional(),
+                                 parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(LINK_BELONGS_TYPE_NULL)).optional()
                          ),
                          responseFields(
                                  fieldWithPath("[]id").type(WireFormat.FieldType.INT64).description("동아리 Id").attributes(example(clubPrevDTOs.get(0).getId().toString())),
@@ -538,5 +571,54 @@ class ClubControllerReadTest {
                  )
          );
       }
+
+    @Test
+    public void getRandomClubNameAndIdByCategories_IllegalBelongsType_InvalidBelongsException() throws Exception{
+        //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.중앙동아리;
+        String belongs = "IllegalCategory";
+
+        //when
+        MvcResult badBelongsResult = mockMvc.perform(
+                get("/club/random")
+                        .queryParam("campus", campus.toString())
+                        .queryParam("clubType", clubType.toString())
+                        .queryParam("belongs", belongs)
+                        .queryParam("size", String.valueOf(5))
+                        .queryParam("page", "0")
+                        .queryParam("sort", "name,ASC")
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badBelongsResult.getResolvedException()).isExactlyInstanceOf(InvalidBelongsException.class);
+    }
+
+    private void checkActivityImagesResponseJson(ResultActions actions, int activityImgIndex, List<S3DownloadDto> activityImgS3DownloadDtos) throws Exception {
+        actions.andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].id").value(activityImgS3DownloadDtos.get(activityImgIndex).getId()))
+                .andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].fileName").value(activityImgS3DownloadDtos.get(activityImgIndex).getFileName()))
+                .andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].bytes").value(activityImgS3DownloadDtos.get(activityImgIndex).getBytes()));
+
+    }
+    private void checkRecruitResponseJson(ResultActions actions, RecruitDto recruitDto) throws Exception {
+        actions.andExpect(jsonPath("$.recruit.recruitStartAt").value(recruitDto.getRecruitStartAt().toString()))
+                .andExpect(jsonPath("$.recruit.recruitEndAt").value(recruitDto.getRecruitEndAt().toString()))
+                .andExpect(jsonPath("$.recruit.recruitQuota").value(recruitDto.getRecruitQuota()))
+                .andExpect(jsonPath("$.recruit.recruitProcessDescription").value(recruitDto.getRecruitProcessDescription()))
+                .andExpect(jsonPath("$.recruit.recruitContact").value(recruitDto.getRecruitContact()))
+                .andExpect(jsonPath("$.recruit.recruitWebLink").value(recruitDto.getRecruitWebLink()));
+    }
+    private ResultActions buildPageableResponseContentChecker(ResultActions actions, int index) throws Exception {
+        Club club = clubTestDataRepository.getClubs().get(index);
+        S3DownloadDto s3Dto = clubTestDataRepository.getLogoS3DownloadDto(index);
+        return actions
+                .andExpect(jsonPath("$.content[" + index + "].id").value(index))
+                .andExpect(jsonPath("$.content[" + index + "].name").value(club.getName()))
+                .andExpect(jsonPath("$.content[" + index + "].belongs").value(club.getBelongs()))
+                .andExpect(jsonPath("$.content[" + index + "].briefActivityDescription").value(club.getBriefActivityDescription()))
+                .andExpect(jsonPath("$.content[" + index + "].logo.id").value(s3Dto.getId()))
+                .andExpect(jsonPath("$.content[" + index + "].logo.fileName").value(s3Dto.getFileName()))
+                .andExpect(jsonPath("$.content[" + index + "].logo.bytes").value(s3Dto.getBytes()));
+    }
 
 }

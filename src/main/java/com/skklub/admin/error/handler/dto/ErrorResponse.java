@@ -1,4 +1,4 @@
-package com.skklub.admin.controller.error.handler.dto;
+package com.skklub.admin.error.handler.dto;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
