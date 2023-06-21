@@ -1,6 +1,7 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
+import com.skklub.admin.error.exception.ActivityImageMisMatchException;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.ClubNameMisMatchException;
 import com.skklub.admin.error.handler.ClubValidator;
@@ -151,26 +152,22 @@ public class ClubController {
     //특정 활동 사진 삭제
     @DeleteMapping("/club/{clubId}/activityImage")
     public ResponseEntity<ActivityImageDeletionDTO> deleteActivityImage(@PathVariable Long clubId, @RequestParam String activityImageName) {
-        log.info("name : {}", activityImageName);
         return clubService.deleteActivityImage(clubId, activityImageName)
                 .map(uploadedName -> {
                     s3Transferer.deleteOne(uploadedName);
                     return new ActivityImageDeletionDTO(clubId, activityImageName);
                 })
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ActivityImageMisMatchException::new);
     }
 
     //삭제
     @DeleteMapping("/club/{clubId}")
     public ResponseEntity<ClubNameAndIdDTO> deleteClubById(@PathVariable Long clubId) {
         return clubService.deleteClub(clubId)
-                .map(name -> {
-                    log.info("name : {}", name);
-                    return new ClubNameAndIdDTO(clubId, name);
-                })
+                .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
     //삭제 취소 (복구)
@@ -179,7 +176,7 @@ public class ClubController {
         return clubService.reviveClub(clubId)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
 }

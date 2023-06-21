@@ -50,7 +50,7 @@ public class Club extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "logo")
     private Logo logo;
-    @OneToMany(mappedBy = "club")
+    @OneToMany(mappedBy = "club", orphanRemoval = true)
     private List<ActivityImage> activityImages = new ArrayList<>();
     private String webLink1;
     private String webLink2;
@@ -130,16 +130,13 @@ public class Club extends BaseEntity {
         }
     }
 
-    public void removeActivityImages(ActivityImage activityImage) {
-        this.activityImages.remove(activityImage);
-    }
-
     public void startRecruit(Recruit recruit) {
         this.recruit = recruit;
     }
     public void endRecruit(){
         this.recruit = null;
     }
+
 
     public boolean remove() {
         if(alive) {
@@ -164,5 +161,9 @@ public class Club extends BaseEntity {
 
     public boolean onRecruit() {
         return recruit != null;
+    }
+
+    public boolean isAlive() {
+        return alive;
     }
 }

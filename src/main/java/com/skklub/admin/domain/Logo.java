@@ -21,4 +21,11 @@ public class Logo {
         this.originalName = originalName;
         this.uploadedName = uploadedName;
     }
+
+    public String update(String originalName, String savedName) {
+        String old = this.uploadedName;
+        this.originalName = originalName;
+        this.uploadedName = savedName;
+        return old;
+    }
 }

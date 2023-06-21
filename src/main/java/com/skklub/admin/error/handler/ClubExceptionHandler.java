@@ -92,4 +92,34 @@ public class ClubExceptionHandler {
                 .build();
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, req, errorDetail));
     }
+
+    @ExceptionHandler(ActivityImageMisMatchException.class)
+    public ResponseEntity<ErrorResponse> activityImageMisMatchException(ActivityImageMisMatchException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("clubId, activityImageName")
+                .given(request.getParameter("clubId") + ", " + request.getParameter("activityImageName"))
+                .reasonMessage("해당 클럽 아이디에 매칭하는 활동 사진명이 존재하지 않습니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
+    @ExceptionHandler(DoubleClubDeletionException.class)
+    public ResponseEntity<ErrorResponse> doubleClubDeletionException(DoubleClubDeletionException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("clubId")
+                .given("path variable")
+                .reasonMessage("이미 삭제된 동아리 입니다.")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
+    @ExceptionHandler(AlreadyAliveClubException.class)
+    public ResponseEntity<ErrorResponse> alreadyAliveClubException(AlreadyAliveClubException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("clubId")
+                .given("path variable")
+                .reasonMessage("이미 살아있는 동아리 입니다.")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
 }

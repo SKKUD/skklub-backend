@@ -5,7 +5,9 @@ import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.error.exception.AlreadyAliveClubException;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.DoubleClubDeletionException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.LogoRepository;
@@ -108,42 +110,33 @@ public class ClubService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<String> deleteClub(Long clubId) {
+    public Optional<String> deleteClub(Long clubId) throws DoubleClubDeletionException {
         return clubRepository.findById(clubId)
                 .map(club -> {
-                    if(club.remove()) return club.getName();
-                    return null;
+                    if (club.remove()) return club.getName();
+                    throw new DoubleClubDeletionException();
                 });
     }
 
-    public Optional<String> reviveClub(Long clubId) {
+    public Optional<String> reviveClub(Long clubId) throws AlreadyAliveClubException{
         return clubRepository.findById(clubId)
                 .map(club -> {
                     if(club.revive()) return club.getName();
-                    return null;
+                    throw new AlreadyAliveClubException();
                 });
     }
 
     public Optional<String> deleteActivityImage(Long clubId, String activityImageName) {
-        Optional<ActivityImage> activityImage = activityImageRepository.findByOriginalName(activityImageName);
-        if(activityImage.isEmpty()) return Optional.empty();
-
-        Optional<Club> club = clubRepository.findById(clubId);
-        return club.map(c -> {
-            c.removeActivityImages(activityImage.get());
-            activityImageRepository.delete(activityImage.get());
-            return activityImage.get().getUploadedName();
-        });
-
+        return activityImageRepository.findByOriginalNameAndClubId(activityImageName, clubId)
+                .map(img -> {
+                    activityImageRepository.delete(img);
+                    return img.getUploadedName();
+                });
     }
 
     public Optional<String> updateLogo(Long clubId, FileNames fileNames) {
-        return clubRepository.findById(clubId).map(
-                club -> {
-                    Logo logo = fileNames.toLogoEntity();
-                    logoRepository.save(logo);
-                    return club.changeLogo(logo);
-                }
-        );
+        return logoRepository.findByClubId(clubId)
+                .map(logo -> logo.update(fileNames.getOriginalName(), fileNames.getSavedName()));
     }
+
 }
