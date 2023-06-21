@@ -10,14 +10,11 @@ import com.skklub.admin.domain.enums.ClubType;
 
 public interface ClubValidator {
     static void validateBelongs(Campus campus, ClubType clubType, String belongs) throws InvalidBelongsException {
-        if (campus.equals(Campus.명륜) && clubType.equals(ClubType.중앙동아리)) {
-            validateSeoulCentralClubBelongs(belongs);
-            return;
-        }
-        if (campus.equals(Campus.율전) && clubType.equals(ClubType.중앙동아리)) {
-            validateSuwonCentralClubBelongs(belongs);
-            return;
-        }
+        if(clubType.equals(ClubType.중앙동아리) || clubType.equals(ClubType.준중앙동아리))
+            switch (campus) {
+                case 명륜 -> validateSeoulCentralClubBelongs(belongs);
+                case 율전 -> validateSuwonCentralClubBelongs(belongs);
+            }
     }
 
     private static void validateSuwonCentralClubBelongs(String belongs) {

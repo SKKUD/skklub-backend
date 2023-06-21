@@ -58,16 +58,6 @@ public class ClubService {
         return club.map(Club::getName);
     }
 
-    public Optional<String> endRecruit(Long clubId) {
-        return clubRepository.findById(clubId)
-                .map(club -> {
-                    Optional.ofNullable(club.getRecruit())
-                            .ifPresent(recruitRepository::delete);
-                    club.endRecruit();
-                    return club.getName();
-                });
-    }
-
     public Optional<ClubDetailInfoDto> getClubDetailInfoById(Long clubId) {
         return clubRepository.findDetailClubById(clubId)
                 .map(ClubDetailInfoDto::new);
