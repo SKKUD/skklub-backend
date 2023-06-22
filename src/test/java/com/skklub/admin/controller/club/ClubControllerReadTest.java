@@ -2,7 +2,7 @@ package com.skklub.admin.controller.club;
 
 import akka.protobuf.WireFormat;
 import com.skklub.admin.controller.ClubController;
-import com.skklub.admin.controller.ClubTestDataRepository;
+import com.skklub.admin.ClubTestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.RecruitDto;
@@ -19,6 +19,7 @@ import com.skklub.admin.service.ClubService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -68,7 +69,7 @@ class ClubControllerReadTest {
     @MockBean
     private S3Transferer s3Transferer;
 
-    @Autowired
+    @InjectMocks
     private ClubTestDataRepository clubTestDataRepository;
 
     @Test

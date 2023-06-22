@@ -2,7 +2,7 @@ package com.skklub.admin.controller.recruit;
 
 import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skklub.admin.controller.ClubTestDataRepository;
+import com.skklub.admin.ClubTestDataRepository;
 import com.skklub.admin.controller.RecruitController;
 import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.error.exception.AllTimeRecruitTimeFormattingException;
@@ -15,6 +15,7 @@ import com.skklub.admin.service.RecruitService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -58,7 +59,7 @@ class RecruitControllerTest {
     private MockMvc mockMvc;
     @MockBean
     private RecruitService recruitService;
-    @Autowired
+    @InjectMocks
     private ClubTestDataRepository clubTestDataRepository;
     @Autowired
     private ObjectMapper objectMapper;

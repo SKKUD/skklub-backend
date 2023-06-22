@@ -1,4 +1,4 @@
-package com.skklub.admin.controller;
+package com.skklub.admin;
 
 import com.skklub.admin.controller.dto.ClubResponseDTO;
 import com.skklub.admin.controller.dto.S3DownloadDto;
@@ -11,6 +11,8 @@ import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
-@Component
+@TestComponent
 public class ClubTestDataRepository {
 
     private final int recruitCnt = 6;
@@ -35,8 +37,7 @@ public class ClubTestDataRepository {
     private final List<Recruit> recruits = new ArrayList<>();
     private final List<User> users = new ArrayList<>();
 
-    @PostConstruct
-    public void postConstruct() {
+    public ClubTestDataRepository() {
         readyUser();
         readyRecruit();
         readyLogo();
@@ -93,8 +94,6 @@ public class ClubTestDataRepository {
         List<FileNames> fileNames = clubs.get(clubIndex).getActivityImages().stream()
                 .map(FileNames::new)
                 .collect(Collectors.toList());
-        for(long i = 0; i < activityImgPerClub; i++)
-            fileNames.get((int) i).setId(i);
         return fileNames;
     }
 

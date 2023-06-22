@@ -2,9 +2,11 @@ package com.skklub.admin.controller.club;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.controller.ClubController;
-import com.skklub.admin.controller.ClubTestDataRepository;
+import com.skklub.admin.ClubTestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
+import com.skklub.admin.domain.ActivityImage;
+import com.skklub.admin.domain.Logo;
 import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.domain.Club;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,6 +41,7 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static akka.protobuf.WireFormat.FieldType;
 import static com.skklub.admin.controller.RestDocsUtils.example;
@@ -67,7 +71,7 @@ class ClubControllerCreateTest {
     private ClubService clubService;
     @MockBean
     private S3Transferer s3Transferer;
-    @Autowired
+    @InjectMocks
     private ClubTestDataRepository clubTestDataRepository;
     @Autowired
     private ObjectMapper objectMapper;
@@ -97,7 +101,7 @@ class ClubControllerCreateTest {
     @Test
     public void clubCreation_FullData_Success() throws Exception {
         //given
-        given(clubService.createClub(any(Club.class), anyString(), anyString())).willReturn(0L);
+        given(clubService.createClub(any(Club.class), any(Logo.class))).willReturn(0L);
         given(s3Transferer.uploadOne(any(MockMultipartFile.class))).willReturn(new FileNames("test.png", "saved-test.png"));
         //when
         ResultActions actions = mockMvc.perform(
@@ -161,10 +165,9 @@ class ClubControllerCreateTest {
     public void clubCreation_NullAtSomeNullables_Success() throws Exception {
         //given
         Long clubId = 0L;
-        clubTestDataRepository.getClubs().get(0);
         FileNames logoFileName = clubTestDataRepository.getLogoFileName((int) (long)clubId);
         given(s3Transferer.uploadOne(any(MultipartFile.class))).willReturn(logoFileName);
-        given(clubService.createClub(any(Club.class), eq(logoFileName.getOriginalName()), eq(logoFileName.getSavedName()))).willReturn(clubId);
+        given(clubService.createClub(any(Club.class), any(Logo.class))).willReturn(clubId);
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -239,7 +242,8 @@ class ClubControllerCreateTest {
     public void clubCreation_EmptyLogoImage_FileNameEqDefaultLogo() throws Exception {
         //given
         Long successId = 12345L;
-        given(clubService.createClub(any(Club.class), eq("alt.jpg"), anyString())).willReturn(successId);
+        Logo logo = new Logo("alt.jpg", "alt.jpg");
+        given(clubService.createClub(any(Club.class), eq(logo))).willReturn(successId);
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -294,8 +298,11 @@ class ClubControllerCreateTest {
         //given
         List<MultipartFile> multipartFiles = new ArrayList<>();
         List<FileNames> activityImageDtos = new ArrayList<>();
+        List<ActivityImage> activityImages = activityImageDtos.stream()
+                .map(FileNames::toActivityImageEntity)
+                .collect(Collectors.toList());
         given(s3Transferer.uploadAll(multipartFiles)).willReturn(activityImageDtos);
-        given(clubService.appendActivityImages(0L, activityImageDtos)).willReturn(Optional.of("ClubName"));
+        given(clubService.appendActivityImages(0L, activityImages)).willReturn(Optional.of("ClubName"));
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -358,7 +365,10 @@ class ClubControllerCreateTest {
         Long clubId = -1L;
         List<FileNames> emptyList = new ArrayList<>();
         given(s3Transferer.uploadAll(anyList())).willReturn(emptyList);
-        given(clubService.appendActivityImages(clubId, emptyList)).willReturn(Optional.empty());
+        List<ActivityImage> activityImages = emptyList.stream()
+                .map(FileNames::toActivityImageEntity)
+                .collect(Collectors.toList());
+        given(clubService.appendActivityImages(clubId, activityImages)).willReturn(Optional.empty());
 
         //when
         MvcResult badIdResult = mockMvc.perform(

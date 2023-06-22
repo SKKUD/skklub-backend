@@ -1,6 +1,8 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
+import com.skklub.admin.domain.ActivityImage;
+import com.skklub.admin.domain.Logo;
 import com.skklub.admin.error.exception.ActivityImageMisMatchException;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.ClubNameMisMatchException;
@@ -42,14 +44,17 @@ public class ClubController {
         ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
         FileNames uploadedLogo = Optional.ofNullable(logo).map(s3Transferer::uploadOne).orElse(new FileNames(DEFAULT_LOGO_NAME, DEFAULT_LOGO_NAME));
         Club club = clubCreateRequestDTO.toEntity();
-        Long id = clubService.createClub(club, uploadedLogo.getOriginalName(), uploadedLogo.getSavedName());
+        Logo logoAfterUpload = uploadedLogo.toLogoEntity();
+        Long id = clubService.createClub(club, logoAfterUpload);
         return new ClubNameAndIdDTO(id, club.getName());
     }
 
     //활동 사진 등록(LIST)
     @PostMapping("/club/{clubId}/activityImage")
     public ResponseEntity<ClubNameAndIdDTO> uploadActivityImages(@PathVariable Long clubId, @RequestParam List<MultipartFile> activityImages) {
-        List<FileNames> savedActivityImages = s3Transferer.uploadAll(activityImages);
+        List<ActivityImage> savedActivityImages = s3Transferer.uploadAll(activityImages).stream()
+                .map(FileNames::toActivityImageEntity)
+                .collect(Collectors.toList());
         return clubService.appendActivityImages(clubId, savedActivityImages)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)

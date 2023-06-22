@@ -47,7 +47,7 @@ public class Club extends BaseEntity {
     private String activityDescription;
 
     //Files
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "logo")
     private Logo logo;
     @OneToMany(mappedBy = "club", orphanRemoval = true)
