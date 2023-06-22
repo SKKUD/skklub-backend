@@ -10,7 +10,6 @@ import com.skklub.admin.error.exception.DoubleClubDeletionException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.LogoRepository;
-import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
@@ -50,28 +49,20 @@ public class ClubService {
         );
     }
 
-    public Page<ClubPrevDTO> getClubPrevsByCategories(Campus campus, ClubType clubType, String belongs, Pageable pageable) {
+    public Page<Club> getClubPrevsByCategories(Campus campus, ClubType clubType, String belongs, Pageable pageable) {
         if (!belongs.equals("전체"))
-            return clubRepository.findClubPrevByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, pageable).map(ClubPrevDTO::fromEntity);
+            return clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, pageable);
         if (!clubType.equals(ClubType.전체))
-            return clubRepository.findClubPrevByCampusAndClubTypeOrderByName(campus, clubType, pageable).map(ClubPrevDTO::fromEntity);
-        return clubRepository.findClubPrevByCampusOrderByName(campus, pageable).map(ClubPrevDTO::fromEntity);
+            return clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, pageable);
+        return clubRepository.findClubByCampusOrderByName(campus, pageable);
     }
 
-    public Page<ClubPrevDTO> getClubPrevsByKeyword(String keyword, Pageable pageable) {
-        return clubRepository.findClubPrevByNameContainingOrderByName(keyword, pageable).map(ClubPrevDTO::fromEntity);
-    }
-
-    public List<ClubPrevDTO> getRandomClubsByCategories(Campus campus, ClubType clubType, String belongs) {
-        List<Club> clubs;
+    public List<Club> getRandomClubsByCategories(Campus campus, ClubType clubType, String belongs) {
         if (!belongs.equals("전체"))
-            clubs = clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString(), belongs);
-        else if (!clubType.equals(ClubType.전체))
-            clubs = clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString());
-        else clubs = clubRepository.findClubRandomByCategories(campus.toString());
-        return clubs.stream()
-                .map(ClubPrevDTO::fromEntity)
-                .collect(Collectors.toList());
+            return clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString(), belongs);
+        if (!clubType.equals(ClubType.전체))
+            return clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString());
+        return clubRepository.findClubRandomByCategories(campus.toString());
     }
 
     public Optional<String> updateClub(Long clubId, Club club) {

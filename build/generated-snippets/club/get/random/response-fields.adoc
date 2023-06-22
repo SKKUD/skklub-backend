@@ -11,4 +11,9 @@
 |동아리 이름
 |정상적인 클럽 SKKULOL0
 
+|`+[]campus+`
+|STRING
+|캠퍼스 종류
+|link:common/campus-type.html[캠퍼스 종류,role="popup"]
+
 |===

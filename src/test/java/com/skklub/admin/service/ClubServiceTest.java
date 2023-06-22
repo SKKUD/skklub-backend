@@ -4,6 +4,8 @@ import com.skklub.admin.ClubTestDataRepository;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.enums.Campus;
+import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.LogoRepository;
@@ -16,16 +18,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
+import java.awt.print.Pageable;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 
 
 @Slf4j
@@ -140,10 +146,112 @@ class ClubServiceTest {
         Assertions.assertThat(clubName).isEmpty();
     }
 
+    @Test
+    public void getClubPrevsByCategories_belongsNot전체_fullQuery() throws Exception {
+        //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.준중앙동아리;
+        String belongs = "취미교양";
+        PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
 
-    private <T> void setIdReflection(Long logoId, T obj) throws Exception {
+        lenient().when(clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, request)).thenThrow(IllegalArgumentException.class);
+        lenient().when(clubRepository.findClubByCampusOrderByName(campus, request)).thenThrow(IllegalArgumentException.class);
+
+        //when
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getClubPrevsByCategories(campus, clubType, belongs, request));
+
+    }
+
+    @Test
+    public void getClubPrevsByCategories_clubTypeNot전체AndbelongsIs전체_findClubByCampusAndClubTypeOrderByName() throws Exception {
+        //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.준중앙동아리;
+        String belongs = "전체";
+        PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
+
+        lenient().when(clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, request)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubByCampusOrderByName(campus, request)).thenThrow(AssertionError.class);
+
+        //when
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getClubPrevsByCategories(campus, clubType, belongs, request));
+
+        //then
+
+    }
+
+    @Test
+    public void getClubPrevsByCategories_Both전체_findClubByCampusOrderByName() throws Exception {
+        //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.전체;
+        String belongs = "전체";
+        PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
+
+        lenient().when(clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, request)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, request)).thenThrow(AssertionError.class);
+
+        //when
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getClubPrevsByCategories(campus, clubType, belongs, request));
+
+        //then
+
+    }
+
+
+    @Test
+    public void getClubPrevsByKeyword_belongsNot전체_3Param() throws Exception {
+        //given
+         Campus campus = Campus.명륜;
+         ClubType clubType = ClubType.준중앙동아리;
+        String belongs = "취미교양";
+
+        lenient().when(clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString())).thenThrow(IllegalArgumentException.class);
+        lenient().when(clubRepository.findClubRandomByCategories(campus.toString())).thenThrow(IllegalArgumentException.class);
+
+        //when
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getRandomClubsByCategories(campus, clubType, belongs));
+
+    }
+
+    @Test
+    public void getClubPrevsByKeyword_clubTypeNot전체AndbelongsIs전체_2Param() throws Exception {
+        //given
+         Campus campus = Campus.명륜;
+         ClubType clubType = ClubType.준중앙동아리;
+        String belongs = "전체";
+
+        lenient().when(clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString(), belongs)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubRandomByCategories(campus.toString())).thenThrow(AssertionError.class);
+
+        //when
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getRandomClubsByCategories(campus, clubType, belongs));
+
+        //then
+
+    }
+
+    @Test
+    public void getClubPrevsByKeyword_Both전체_1Param() throws Exception {
+        //given
+         Campus campus = Campus.명륜;
+         ClubType clubType = ClubType.전체;
+        String belongs = "전체";
+
+        lenient().when(clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString(), belongs)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubRandomByCategories(campus.toString(), clubType.toString())).thenThrow(AssertionError.class);
+
+        //when
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getRandomClubsByCategories(campus, clubType, belongs));
+
+        //then
+
+    }
+
+
+    private <T> void setIdReflection(Long idVal, T obj) throws Exception {
         Field logoIdField = obj.getClass().getDeclaredField("id");
         logoIdField.setAccessible(true);
-        logoIdField.set(obj, logoId);
+        logoIdField.set(obj, idVal);
     }
 }

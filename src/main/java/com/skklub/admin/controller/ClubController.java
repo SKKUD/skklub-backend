@@ -82,7 +82,8 @@ public class ClubController {
                                                              @RequestParam(required = false, defaultValue = "전체") String belongs,
                                                              Pageable pageable) {
         ClubValidator.validateBelongs(campus, clubType, belongs);
-        Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
+        Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable)
+                .map(ClubPrevDTO::fromEntity);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
 
@@ -99,18 +100,19 @@ public class ClubController {
     //이름 검색 부분 일치
     @GetMapping("/club/search/prevs")
     public Page<ClubPrevResponseDTO> getClubPrevByKeyword(@RequestParam String keyword, Pageable pageable) {
-        Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByKeyword(keyword, pageable);
+        Page<ClubPrevDTO> clubPrevs = clubRepository.findClubByNameContainingOrderByName(keyword, pageable)
+                .map(ClubPrevDTO::fromEntity);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
 
     //오늘의 추천 동아리
     @GetMapping("/club/random")
-    public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@RequestParam Campus campus,
+    public List<RandomClubsResponse> getRandomClubNameAndIdByCategories(@RequestParam Campus campus,
                                                                      @RequestParam(required = false, defaultValue = "전체") ClubType clubType,
                                                                      @RequestParam(required = false, defaultValue = "전체") String belongs) {
         ClubValidator.validateBelongs(campus, clubType, belongs);
         return clubService.getRandomClubsByCategories(campus, clubType, belongs).stream()
-                .map(dto -> new ClubNameAndIdDTO(dto.getId(), dto.getName()))
+                .map(RandomClubsResponse::new)
                 .collect(Collectors.toList());
     }
 

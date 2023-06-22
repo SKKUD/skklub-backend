@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -188,7 +187,7 @@ class ClubRepositoryTest {
         PageRequest pageRequest = PageRequest.of(0, 3, Sort.Direction.ASC, "id");
 
         //when
-        Page<Club> clubPrevs = clubRepository.findClubPrevByCampusAndClubTypeAndBelongsOrderByName(Campus.명륜, ClubType.중앙동아리, "취미교양", pageRequest);
+        Page<Club> clubPrevs = clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(Campus.명륜, ClubType.중앙동아리, "취미교양", pageRequest);
 
         //then
         Assertions.assertThat(clubPrevs.getTotalElements()).isEqualTo(100);
@@ -205,7 +204,7 @@ class ClubRepositoryTest {
          PageRequest pageRequest = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
 
          //when
-         Page<Club> clubPrevs = clubRepository.findClubPrevByCampusAndClubTypeAndBelongsOrderByName(Campus.명륜, null, "취미교양", pageRequest);
+         Page<Club> clubPrevs = clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(Campus.명륜, null, "취미교양", pageRequest);
          //then
          Assertions.assertThat(clubPrevs.getContent().size()).isZero();
          Assertions.assertThat(clubPrevs.isFirst()).isTrue();

@@ -11,6 +11,7 @@ import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.InvalidBelongsException;
+import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +68,8 @@ class ClubControllerUpdateTest {
     private ClubService clubService;
     @MockBean
     private S3Transferer s3Transferer;
+    @MockBean
+    private ClubRepository clubRepository;
     @InjectMocks
     private ClubTestDataRepository clubTestDataRepository;
 

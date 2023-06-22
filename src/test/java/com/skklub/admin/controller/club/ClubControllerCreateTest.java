@@ -12,7 +12,9 @@ import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
+import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,7 @@ import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileInputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,6 +72,8 @@ class ClubControllerCreateTest {
     private MockMvc mockMvc;
     @MockBean
     private ClubService clubService;
+    @MockBean
+    private ClubRepository clubRepository;
     @MockBean
     private S3Transferer s3Transferer;
     @InjectMocks
@@ -165,9 +170,16 @@ class ClubControllerCreateTest {
     public void clubCreation_NullAtSomeNullables_Success() throws Exception {
         //given
         Long clubId = 0L;
+        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        Field establishAt = club.getClass().getDeclaredField("establishAt");
+        establishAt.setAccessible(true);
+        establishAt.set(club, null);
+        Field webLink2 = club.getClass().getDeclaredField("webLink2");
+        webLink2.setAccessible(true);
+        webLink2.set(club, null);
         FileNames logoFileName = clubTestDataRepository.getLogoFileName((int) (long)clubId);
         given(s3Transferer.uploadOne(any(MultipartFile.class))).willReturn(logoFileName);
-        given(clubService.createClub(any(Club.class), any(Logo.class))).willReturn(clubId);
+        given(clubService.createClub(eq(club), any(Logo.class))).willReturn(clubId);
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -183,13 +195,13 @@ class ClubControllerCreateTest {
                         .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
                         .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
                         .queryParam("establishDate", "") // Blank
-//                        .queryParam("headLine", )
-//                        .queryParam("mandatoryActivatePeriod", "4학기") // missing field
-//                        .queryParam("memberAmount", "60")
-//                        .queryParam("regularMeetingTime", "Thursday 19:00")
-//                        .queryParam("roomLocation", "학생회관 80210")
-//                        .queryParam("webLink1", "www.skklol.com")
-//                        .queryParam("webLink2", "www.skkulol.edu")
+                        .queryParam("headLine", club.getHeadLine())
+                        .queryParam("mandatoryActivatePeriod", "4학기")
+                        .queryParam("memberAmount", "60")
+                        .queryParam("regularMeetingTime", "Thursday 19:00")
+                        .queryParam("roomLocation", "학생회관 80210")
+                        .queryParam("webLink1", "www.skklol.com")
+//                        .queryParam("webLink2", "www.skkulol.edu") // missing field
         );
 
         //then
