@@ -24,10 +24,8 @@ public class Logo {
         this.uploadedName = uploadedName;
     }
 
-    public String update(String originalName, String savedName) {
-        String old = this.uploadedName;
-        this.originalName = originalName;
-        this.uploadedName = savedName;
-        return old;
+    public void update(Logo logo) {
+        this.originalName = logo.getOriginalName();
+        this.uploadedName = logo.getUploadedName();
     }
 }

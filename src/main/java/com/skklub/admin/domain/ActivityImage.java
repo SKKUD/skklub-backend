@@ -2,6 +2,7 @@ package com.skklub.admin.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import java.util.Map;
 
 @Entity
 @Getter
+@EqualsAndHashCode(exclude = "club")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ActivityImage {
     @Id @Column(name = "activity_image_id")

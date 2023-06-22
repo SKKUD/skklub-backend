@@ -148,11 +148,11 @@ public class ClubController {
     //로고 변경
     @PostMapping("/club/{clubId}/logo")
     public ResponseEntity<ClubIdAndLogoNameDTO> updateLogo(@PathVariable Long clubId, @RequestParam MultipartFile logo) {
-        FileNames fileNames = s3Transferer.uploadOne(logo);
-        return clubService.updateLogo(clubId, fileNames)
+        Logo logoUpdateInfo = s3Transferer.uploadOne(logo).toLogoEntity();
+        return clubService.updateLogo(clubId, logoUpdateInfo)
                 .map(oldLogoName -> {
                     if(!oldLogoName.equals(DEFAULT_LOGO_NAME)) s3Transferer.deleteOne(oldLogoName);
-                    return new ClubIdAndLogoNameDTO(clubId, fileNames.getOriginalName(), fileNames.getSavedName());
+                    return new ClubIdAndLogoNameDTO(clubId, logoUpdateInfo);
                 })
                 .map(ResponseEntity::ok)
                 .orElseThrow(ClubIdMisMatchException::new);

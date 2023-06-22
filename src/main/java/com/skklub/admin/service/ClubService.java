@@ -65,17 +65,21 @@ public class ClubService {
         return clubRepository.findClubRandomByCategories(campus.toString());
     }
 
-    public Optional<String> updateClub(Long clubId, Club club) {
-        return clubRepository.findDetailClubById(clubId)
-                .map(base -> {
-                    base.update(club);
-                    return base.getName();
+    public Optional<String> updateClub(Long clubId, Club clubUpdateInfo) {
+        return clubRepository.findById(clubId)
+                .map(baseClub -> {
+                    baseClub.update(clubUpdateInfo);
+                    return baseClub.getName();
                 });
     }
 
-    public Optional<String> updateLogo(Long clubId, FileNames fileNames) {
+    public Optional<String> updateLogo(Long clubId, Logo logoUpdateInfo) {
         return logoRepository.findByClubId(clubId)
-                .map(logo -> logo.update(fileNames.getOriginalName(), fileNames.getSavedName()));
+                .map(baseLogo -> {
+                    String oldUploadedName = baseLogo.getUploadedName();
+                    baseLogo.update(logoUpdateInfo);
+                    return oldUploadedName;
+                });
     }
 
     public Optional<String> deleteClub(Long clubId) throws DoubleClubDeletionException {

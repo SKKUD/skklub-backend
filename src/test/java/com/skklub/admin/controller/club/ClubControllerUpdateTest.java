@@ -7,6 +7,7 @@ import com.skklub.admin.ClubTestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
@@ -224,8 +225,9 @@ class ClubControllerUpdateTest {
         Long clubId = 0L;
         String oldLogoName = "savedOldLogo.jpg";
         FileNames fileNames = new FileNames("TestLogo.jpg", "savedTestLogo.jpg");
+        Logo logo = fileNames.toLogoEntity();
         given(s3Transferer.uploadOne(mockLogo)).willReturn(fileNames);
-        given(clubService.updateLogo(clubId, fileNames)).willReturn(Optional.of(oldLogoName));
+        given(clubService.updateLogo(clubId, logo)).willReturn(Optional.of(oldLogoName));
         doNothing().when(s3Transferer).deleteOne(oldLogoName);
 
         //when
@@ -267,7 +269,7 @@ class ClubControllerUpdateTest {
         String oldLogoName = "alt.jpg";
         FileNames fileNames = new FileNames("TestLogo.jpg", "savedTestLogo.jpg");
         given(s3Transferer.uploadOne(mockLogo)).willReturn(fileNames);
-        given(clubService.updateLogo(clubId, fileNames)).willReturn(Optional.of(oldLogoName));
+        given(clubService.updateLogo(clubId, fileNames.toLogoEntity())).willReturn(Optional.of(oldLogoName));
         doThrow(IllegalCallerException.class).when(s3Transferer).deleteOne(anyString());
 
         //when
@@ -292,7 +294,7 @@ class ClubControllerUpdateTest {
         Long clubId = -1L;
         FileNames fileNames = new FileNames("TestLogo.jpg", "savedTestLogo.jpg");
         given(s3Transferer.uploadOne(mockLogo)).willReturn(fileNames);
-        given(clubService.updateLogo(clubId, fileNames)).willReturn(Optional.empty());
+        given(clubService.updateLogo(clubId, fileNames.toLogoEntity())).willReturn(Optional.empty());
 
         //when
         MvcResult badIdResult = mockMvc.perform(

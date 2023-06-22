@@ -9,9 +9,11 @@ import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.LogoRepository;
+import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,6 +51,11 @@ class ClubServiceTest {
     private LogoRepository logoRepository;
     @Mock
     private ActivityImageRepository activityImageRepository;
+
+    @AfterEach
+    public void afterEach(){
+        clubTestDataRepository = new ClubTestDataRepository();
+    }
 
     /**
      * stub : save() id setting
@@ -247,6 +254,97 @@ class ClubServiceTest {
         //then
 
     }
+
+    @Test
+    public void updateClub_Default_SuccessAndKeepRelationsAndAliveness() throws Exception{
+        //given
+        Long clubId = 0L;
+        Long updateInfoClubId = 1L;
+        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        Club clubUpdateInfo = clubTestDataRepository.getClubs().get(updateInfoClubId.intValue());
+        setIdReflection(clubId, club);
+        ClubDetailInfoDto base = new ClubDetailInfoDto(clubTestDataRepository.getClubs().get(clubId.intValue()));
+        setIdReflection(clubId, base);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        Optional<String> updatedName = clubService.updateClub(clubId, clubUpdateInfo);
+
+        //then
+        Assertions.assertThat(club.getName()).isEqualTo(updatedName.get()).isEqualTo(clubUpdateInfo.getName());
+        Assertions.assertThat(club.getActivityDescription()).isEqualTo(clubUpdateInfo.getActivityDescription());
+        Assertions.assertThat(club.getBelongs()).isEqualTo(clubUpdateInfo.getBelongs());
+        Assertions.assertThat(club.getClubType()).isEqualTo(clubUpdateInfo.getClubType());
+        Assertions.assertThat(club.getBriefActivityDescription()).isEqualTo(clubUpdateInfo.getBriefActivityDescription());
+        Assertions.assertThat(club.getCampus()).isEqualTo(clubUpdateInfo.getCampus());
+        Assertions.assertThat(club.getClubDescription()).isEqualTo(clubUpdateInfo.getClubDescription());
+        Assertions.assertThat(club.getEstablishAt()).isEqualTo(clubUpdateInfo.getEstablishAt());
+        Assertions.assertThat(club.getHeadLine()).isEqualTo(clubUpdateInfo.getHeadLine());
+        Assertions.assertThat(club.getMandatoryActivatePeriod()).isEqualTo(clubUpdateInfo.getMandatoryActivatePeriod());
+        Assertions.assertThat(club.getMemberAmount()).isEqualTo(clubUpdateInfo.getMemberAmount());
+        Assertions.assertThat(club.getLogo()).isEqualTo(base.getLogo().toLogoEntity()).isNotEqualTo(clubUpdateInfo.getLogo());
+        Assertions.assertThat(club.getActivityImages().size()).isEqualTo(base.getActivityImages().size());
+        Assertions.assertThat(club.getActivityImages()).isEqualTo(base.getActivityImages().stream().map(FileNames::toActivityImageEntity).collect(Collectors.toList())).isNotEqualTo(clubUpdateInfo.getActivityImages());
+        Assertions.assertThat(club.getPresident()).isNotEqualTo(clubUpdateInfo.getPresident());
+        Assertions.assertThat(club.getPresident().getName()).isEqualTo(base.getPresidentName());
+        Assertions.assertThat(club.getPresident().getContact()).isEqualTo(base.getPresidentContact());
+        Assertions.assertThat(club.getRecruit()).isEqualTo(base.getRecruit().get().toEntity()).isNotEqualTo(clubUpdateInfo.getRecruit());
+     }
+
+     @Test
+     public void updateClub_badClubId_ReturnOptionalEmpty() throws Exception{
+         //given
+         Long clubId = 0L;
+         Long updateInfoClubId = 1L;
+         Club clubUpdateInfo = clubTestDataRepository.getClubs().get(updateInfoClubId.intValue());
+         given(clubRepository.findById(clubId)).willReturn(Optional.empty());
+
+         //when
+         Optional<String> NameShouldNull = clubService.updateClub(clubId, clubUpdateInfo);
+
+         //then
+         Assertions.assertThat(NameShouldNull).isEmpty();
+      }
+
+      @Test
+      public void updateLogo_Default_ChangeOnlyNames() throws Exception{
+          //given
+          Long clubId = 0L;
+          Logo logo = clubTestDataRepository.getClubs().get(clubId.intValue()).getLogo();
+          Logo baseLogo = new Logo(logo.getOriginalName(), logo.getUploadedName());
+          setIdReflection(clubId, logo);
+          setIdReflection(clubId, baseLogo);
+          Long updateLogoInfoClubId = 1L;
+          Logo logoUpdateInfo = clubTestDataRepository.getClubs().get(updateLogoInfoClubId.intValue()).getLogo();
+          given(logoRepository.findByClubId(clubId)).willReturn(Optional.ofNullable(logo));
+
+          //when
+          Optional<String> oldSavedName = clubService.updateLogo(clubId, logoUpdateInfo);
+
+          //then
+          Assertions.assertThat(baseLogo.getId()).isEqualTo(logo.getId())
+                  .isNotEqualTo(logoUpdateInfo.getId());
+          Assertions.assertThat(logo.getOriginalName()).isEqualTo(logoUpdateInfo.getOriginalName())
+                  .isNotEqualTo(baseLogo.getOriginalName());
+          Assertions.assertThat(logo.getUploadedName()).isEqualTo(logoUpdateInfo.getUploadedName())
+                  .isNotEqualTo(baseLogo.getUploadedName());
+          Assertions.assertThat(oldSavedName).isNotEmpty();
+          Assertions.assertThat(oldSavedName.get()).isEqualTo(baseLogo.getUploadedName());
+       }
+
+       @Test
+       public void updateLogo_badClubId_ReturnOptionalEmpty() throws Exception{
+           //given
+           Long clubId = 0L;
+           given(logoRepository.findByClubId(clubId)).willReturn(Optional.empty());
+           Logo logoUpdateInfo = clubTestDataRepository.getClubs().get(clubId.intValue()).getLogo();
+
+           //when
+           Optional<String> nameShouldEmpty = clubService.updateLogo(clubId, logoUpdateInfo);
+
+           //then
+           Assertions.assertThat(nameShouldEmpty).isEmpty();
+        }
 
 
     private <T> void setIdReflection(Long idVal, T obj) throws Exception {
