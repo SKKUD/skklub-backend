@@ -94,10 +94,7 @@ class ClubServiceTest {
         //given
         Long clubId = 0L;
         int clubIndex = 0;
-        List<ActivityImage> activityImages = clubTestDataRepository.getActivityImgFileNames(clubIndex)
-                .stream()
-                .map(FileNames::toActivityImageEntity)
-                .collect(Collectors.toList());
+        List<ActivityImage> activityImages = clubTestDataRepository.getActivityImgFileNames(clubIndex).stream().map(FileNames::toActivityImageEntity).collect(Collectors.toList());
         activityImages.stream().forEach(a -> Assertions.assertThat(a.getId()).isNull());
         Club club = clubTestDataRepository.getClubs().get(clubIndex);
         club.getActivityImages().clear();
@@ -136,10 +133,7 @@ class ClubServiceTest {
         //given
         Long clubId = -1L;
         given(clubRepository.findById(clubId)).willReturn(Optional.empty());
-        List<ActivityImage> activityImages = clubTestDataRepository.getActivityImgFileNames(0)
-                .stream()
-                .map(FileNames::toActivityImageEntity)
-                .collect(Collectors.toList());
+        List<ActivityImage> activityImages = clubTestDataRepository.getActivityImgFileNames(0).stream().map(FileNames::toActivityImageEntity).collect(Collectors.toList());
 
         //when
         Optional<String> clubName = clubService.appendActivityImages(clubId, activityImages);
@@ -321,12 +315,9 @@ class ClubServiceTest {
         Optional<String> oldSavedName = clubService.updateLogo(clubId, logoUpdateInfo);
 
         //then
-        Assertions.assertThat(baseLogo.getId()).isEqualTo(logo.getId())
-                .isNotEqualTo(logoUpdateInfo.getId());
-        Assertions.assertThat(logo.getOriginalName()).isEqualTo(logoUpdateInfo.getOriginalName())
-                .isNotEqualTo(baseLogo.getOriginalName());
-        Assertions.assertThat(logo.getUploadedName()).isEqualTo(logoUpdateInfo.getUploadedName())
-                .isNotEqualTo(baseLogo.getUploadedName());
+        Assertions.assertThat(baseLogo.getId()).isEqualTo(logo.getId()).isNotEqualTo(logoUpdateInfo.getId());
+        Assertions.assertThat(logo.getOriginalName()).isEqualTo(logoUpdateInfo.getOriginalName()).isNotEqualTo(baseLogo.getOriginalName());
+        Assertions.assertThat(logo.getUploadedName()).isEqualTo(logoUpdateInfo.getUploadedName()).isNotEqualTo(baseLogo.getUploadedName());
         Assertions.assertThat(oldSavedName).isNotEmpty();
         Assertions.assertThat(oldSavedName.get()).isEqualTo(baseLogo.getUploadedName());
     }
@@ -344,9 +335,9 @@ class ClubServiceTest {
         //then
         Assertions.assertThat(nameShouldEmpty).isEmpty();
     }
-    
+
     @Test
-    public void deleteClub_Default_AlivenessToFalse() throws Exception{
+    public void deleteClub_Default_AlivenessToFalse() throws Exception {
         //given
         Long clubId = 0L;
         Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
@@ -359,113 +350,112 @@ class ClubServiceTest {
         Assertions.assertThat(deletedClubName).isNotEmpty();
         Assertions.assertThat(deletedClubName.get()).isEqualTo(club.getName());
         Assertions.assertThat(club.isAlive()).isFalse();
-     }
+    }
 
-     @Test
-     public void deleteClub_BadClubId_ReturnOptionalEmtpy() throws Exception{
-         //given
-         Long clubId = 0L;
-         given(clubRepository.findById(clubId)).willReturn(Optional.empty());
+    @Test
+    public void deleteClub_BadClubId_ReturnOptionalEmtpy() throws Exception {
+        //given
+        Long clubId = 0L;
+        given(clubRepository.findById(clubId)).willReturn(Optional.empty());
 
-         //when
-         Optional<String> nameShouldEmpty = clubService.deleteClub(clubId);
+        //when
+        Optional<String> nameShouldEmpty = clubService.deleteClub(clubId);
 
-         //then
-         Assertions.assertThat(nameShouldEmpty).isEmpty();
-      }
+        //then
+        Assertions.assertThat(nameShouldEmpty).isEmpty();
+    }
 
-      @Test
-      public void deleteClub_AlreadyRemoved_DoubleClubDeletionException() throws Exception{
-          //given
-          Long clubId = 0L;
-          Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
-          club.remove();
-          given(clubRepository.findById(clubId)).willReturn(Optional.ofNullable(club));
+    @Test
+    public void deleteClub_AlreadyRemoved_DoubleClubDeletionException() throws Exception {
+        //given
+        Long clubId = 0L;
+        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        club.remove();
+        given(clubRepository.findById(clubId)).willReturn(Optional.ofNullable(club));
 
-          //when
-          org.junit.jupiter.api.Assertions.assertThrows(DoubleClubDeletionException.class, () -> clubService.deleteClub(clubId));
-       }
+        //when
+        org.junit.jupiter.api.Assertions.assertThrows(DoubleClubDeletionException.class, () -> clubService.deleteClub(clubId));
+    }
 
-       @Test
-       public void reviveClub_Default_AlivenessToTrue() throws Exception{
-           //given
-           Long clubId = 0L;
-           Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
-           club.remove();
-           given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+    @Test
+    public void reviveClub_Default_AlivenessToTrue() throws Exception {
+        //given
+        Long clubId = 0L;
+        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        club.remove();
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
 
-           //when
-           Optional<String> reviveClubName = clubService.reviveClub(clubId);
+        //when
+        Optional<String> reviveClubName = clubService.reviveClub(clubId);
 
-           //then
-           Assertions.assertThat(reviveClubName).isNotEmpty();
-           Assertions.assertThat(reviveClubName.get()).isEqualTo(club.getName());
-           Assertions.assertThat(club.isAlive()).isTrue();
-        }
-        
-        @Test
-        public void reviveClub_BadClubId_ReturnOptionalEmtpy() throws Exception{
-            //given
-            Long clubId = 0L;
-            given(clubRepository.findById(clubId)).willReturn(Optional.empty());
+        //then
+        Assertions.assertThat(reviveClubName).isNotEmpty();
+        Assertions.assertThat(reviveClubName.get()).isEqualTo(club.getName());
+        Assertions.assertThat(club.isAlive()).isTrue();
+    }
 
-            //when
-            Optional<String> nameShouldEmpty = clubService.reviveClub(clubId);
+    @Test
+    public void reviveClub_BadClubId_ReturnOptionalEmtpy() throws Exception {
+        //given
+        Long clubId = 0L;
+        given(clubRepository.findById(clubId)).willReturn(Optional.empty());
 
-            //then
-            Assertions.assertThat(nameShouldEmpty).isEmpty();
-         }
+        //when
+        Optional<String> nameShouldEmpty = clubService.reviveClub(clubId);
 
-         @Test
-         public void reviveClub_AlreadyAlive_AlreadyAliveClubException() throws Exception{
-             //given
-             Long clubId = 0L;
-             Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
-             given(clubRepository.findById(clubId)).willReturn(Optional.ofNullable(club));
+        //then
+        Assertions.assertThat(nameShouldEmpty).isEmpty();
+    }
 
-             //when
-             org.junit.jupiter.api.Assertions.assertThrows(AlreadyAliveClubException.class, () -> clubService.reviveClub(clubId));
-         }
+    @Test
+    public void reviveClub_AlreadyAlive_AlreadyAliveClubException() throws Exception {
+        //given
+        Long clubId = 0L;
+        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        given(clubRepository.findById(clubId)).willReturn(Optional.ofNullable(club));
 
-         @Test
-         public void deleteActivityImage_Default_ReduceClubActivityImgsSizeAndNotFound() throws Exception{
-             //given
-             Long clubId = 0L;
-             Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
-             int activityImageIndex = 0;
-             ActivityImage activityImage = club.getActivityImages().get(activityImageIndex);
-             int size = club.getActivityImages().size();
-             setIdReflection(0L, activityImage);
-             given(activityImageRepository.findByClubIdAndOriginalName(clubId, activityImage.getOriginalName()))
-                     .willReturn(Optional.of(activityImage));
-             doAnswer(invocation -> {
-                 club.getActivityImages().remove(activityImage);
-                 return null;
-             }).when(activityImageRepository).delete(activityImage);
+        //when
+        org.junit.jupiter.api.Assertions.assertThrows(AlreadyAliveClubException.class, () -> clubService.reviveClub(clubId));
+    }
 
-             //when
-             Optional<String> deletedActivityImageOriginalName = clubService.deleteActivityImage(clubId, activityImage.getOriginalName());
+    @Test
+    public void deleteActivityImage_Default_ReduceClubActivityImgsSizeAndNotFound() throws Exception {
+        //given
+        Long clubId = 0L;
+        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        int activityImageIndex = 0;
+        ActivityImage activityImage = club.getActivityImages().get(activityImageIndex);
+        int size = club.getActivityImages().size();
+        setIdReflection(0L, activityImage);
+        given(activityImageRepository.findByClubIdAndOriginalName(clubId, activityImage.getOriginalName())).willReturn(Optional.of(activityImage));
+        doAnswer(invocation -> {
+            club.getActivityImages().remove(activityImage);
+            return null;
+        }).when(activityImageRepository).delete(activityImage);
 
-             //then
-             Assertions.assertThat(deletedActivityImageOriginalName).isNotEmpty();
-             Assertions.assertThat(deletedActivityImageOriginalName.get()).isEqualTo(activityImage.getUploadedName());
-             Assertions.assertThat(club.getActivityImages().size()).isEqualTo(size - 1);
-             Assertions.assertThat(club.getActivityImages().contains(activityImage)).isFalse();
-          }
+        //when
+        Optional<String> deletedActivityImageOriginalName = clubService.deleteActivityImage(clubId, activityImage.getOriginalName());
 
-          @Test
-          public void deleteActivityImage_badClubIdOrNoMatchAcImgName_ReturnOptionalEmpty() throws Exception{
-              //given
-              Long clubId = 0L;
-              String badActivityImgName = "badActivityImgName";
-              given(activityImageRepository.findByClubIdAndOriginalName(clubId, badActivityImgName)).willReturn(Optional.empty());
+        //then
+        Assertions.assertThat(deletedActivityImageOriginalName).isNotEmpty();
+        Assertions.assertThat(deletedActivityImageOriginalName.get()).isEqualTo(activityImage.getUploadedName());
+        Assertions.assertThat(club.getActivityImages().size()).isEqualTo(size - 1);
+        Assertions.assertThat(club.getActivityImages().contains(activityImage)).isFalse();
+    }
 
-              //when
-              Optional<String> nameShouldEmpty = clubService.deleteActivityImage(clubId, badActivityImgName);
+    @Test
+    public void deleteActivityImage_badClubIdOrNoMatchAcImgName_ReturnOptionalEmpty() throws Exception {
+        //given
+        Long clubId = 0L;
+        String badActivityImgName = "badActivityImgName";
+        given(activityImageRepository.findByClubIdAndOriginalName(clubId, badActivityImgName)).willReturn(Optional.empty());
 
-              //then
-              Assertions.assertThat(nameShouldEmpty).isEmpty();
-          }
+        //when
+        Optional<String> nameShouldEmpty = clubService.deleteActivityImage(clubId, badActivityImgName);
+
+        //then
+        Assertions.assertThat(nameShouldEmpty).isEmpty();
+    }
 
     private <T> void setIdReflection(Long idVal, T obj) throws Exception {
         Field logoIdField = obj.getClass().getDeclaredField("id");
