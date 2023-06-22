@@ -10,8 +10,6 @@ import com.skklub.admin.error.exception.DoubleClubDeletionException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.LogoRepository;
-import com.skklub.admin.service.dto.ClubPrevDTO;
-import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -99,7 +96,7 @@ public class ClubService {
     }
 
     public Optional<String> deleteActivityImage(Long clubId, String activityImageName) {
-        return activityImageRepository.findByOriginalNameAndClubId(activityImageName, clubId)
+        return activityImageRepository.findByClubIdAndOriginalName(clubId, activityImageName)
                 .map(img -> {
                     activityImageRepository.delete(img);
                     return img.getUploadedName();
