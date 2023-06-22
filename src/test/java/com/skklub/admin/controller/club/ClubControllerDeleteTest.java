@@ -7,6 +7,7 @@ import com.skklub.admin.error.exception.ActivityImageMisMatchException;
 import com.skklub.admin.error.exception.AlreadyAliveClubException;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.DoubleClubDeletionException;
+import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -44,6 +45,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ClubControllerDeleteTest {
     @MockBean
     private ClubService clubService;
+    @MockBean
+    private ClubRepository clubRepository;
 
     @MockBean
     private S3Transferer s3Transferer;

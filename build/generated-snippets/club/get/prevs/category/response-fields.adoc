@@ -19,7 +19,7 @@
 |`+content[].briefActivityDescription+`
 |STRING
 |클럽 
-|E-SPORTS
+|E-SPORTS0
 
 |`+content[].logo.id+`
 |INT64

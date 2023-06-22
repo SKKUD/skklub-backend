@@ -2,11 +2,13 @@ package com.skklub.admin.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Logo {
     @Id @Column(name = "logo_id")
@@ -22,10 +24,8 @@ public class Logo {
         this.uploadedName = uploadedName;
     }
 
-    public String update(String originalName, String savedName) {
-        String old = this.uploadedName;
-        this.originalName = originalName;
-        this.uploadedName = savedName;
-        return old;
+    public void update(Logo logo) {
+        this.originalName = logo.getOriginalName();
+        this.uploadedName = logo.getUploadedName();
     }
 }

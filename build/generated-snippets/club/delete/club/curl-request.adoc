@@ -1,5 +1,5 @@
 [source,bash]
 ----
 $ curl 'http://localhost:8080/club/0' -i -X DELETE \
-    -d '_csrf=KoXBtKz1HHJBgVnnjPT5efM5D4k2a0FFo6ALCQzkbtB3E4LOTrzyjZnEJUFstziDvdnNHZFcIugBCHJokpQ-bz2AW-dAcuev'
+    -d '_csrf=s-6gFC1UIhTnyfD0V93CtDr3VNENBiAiaZjllcLkTzb2pZRnh9eQdUliF3XKrJWVbvD21wuSeek-N0EPWa6GoKCALATHwfBQ'
 ----

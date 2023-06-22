@@ -1,4 +1,4 @@
-package com.skklub.admin.controller;
+package com.skklub.admin;
 
 import com.skklub.admin.controller.dto.ClubResponseDTO;
 import com.skklub.admin.controller.dto.S3DownloadDto;
@@ -11,6 +11,8 @@ import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
-@Component
+@TestComponent
 public class ClubTestDataRepository {
 
     private final int recruitCnt = 6;
@@ -35,8 +37,7 @@ public class ClubTestDataRepository {
     private final List<Recruit> recruits = new ArrayList<>();
     private final List<User> users = new ArrayList<>();
 
-    @PostConstruct
-    public void postConstruct() {
+    public ClubTestDataRepository() {
         readyUser();
         readyRecruit();
         readyLogo();
@@ -93,8 +94,6 @@ public class ClubTestDataRepository {
         List<FileNames> fileNames = clubs.get(clubIndex).getActivityImages().stream()
                 .map(FileNames::new)
                 .collect(Collectors.toList());
-        for(long i = 0; i < activityImgPerClub; i++)
-            fileNames.get((int) i).setId(i);
         return fileNames;
     }
 
@@ -108,20 +107,20 @@ public class ClubTestDataRepository {
         for (int i = 0; i < clubCnt; i++) {
             Club club = new Club(
                     "정상적인 클럽 SKKULOL" + i
-                    , "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다."
+                    , "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다." + i
                     , "취미교양"
                     , ClubType.중앙동아리
-                    , "E-SPORTS"
+                    , "E-SPORTS" + i
                     , Campus.명륜
-                    , "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^"
-                    , 2023
-                    , "명륜 게임 동아리입니다"
-                    , "4학기"
-                    , 60
-                    , "Thursday 19:00"
-                    , "학생회관 80210"
-                    , "www.skklol.com"
-                    , "www.skkulol.edu");
+                    , "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^" + i
+                    , 2023 + i
+                    , "명륜 게임 동아리입니다" + i
+                    , "4학기" + i
+                    , 60 + i
+                    , "Thursday 19:00" + i
+                    , "학생회관 80210" + i
+                    , "www.skklol.com" + i
+                    , "www.skkulol.edu" + i);
             Optional.ofNullable(logos.get(i)).ifPresent(club::changeLogo);
             List<ActivityImage> activityImagesTemp = new ArrayList<>();
             for (int j = 0; j < activityImgPerClub; j++) {

@@ -47,7 +47,7 @@ public class Club extends BaseEntity {
     private String activityDescription;
 
     //Files
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "logo")
     private Logo logo;
     @OneToMany(mappedBy = "club", orphanRemoval = true)
@@ -95,16 +95,17 @@ public class Club extends BaseEntity {
         this.roomLocation = roomLocation;
         this.webLink1 = webLink1;
         this.webLink2 = webLink2;
+        alive = true;
     }
 
     public void update(Club updateInfo
     ) {
         this.name = updateInfo.name;
-        this.activityDescription = updateInfo.activityDescription;
-        this.belongs = updateInfo.belongs;
-        this.clubType = updateInfo.clubType;
-        this.briefActivityDescription = updateInfo.briefActivityDescription;
         this.campus = updateInfo.campus;
+        this.clubType = updateInfo.clubType;
+        this.belongs = updateInfo.belongs;
+        this.activityDescription = updateInfo.activityDescription;
+        this.briefActivityDescription = updateInfo.briefActivityDescription;
         this.clubDescription = updateInfo.clubDescription;
         this.establishAt = updateInfo.establishAt;
         this.headLine = updateInfo.headLine;

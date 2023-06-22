@@ -1,6 +1,8 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
+import com.skklub.admin.domain.ActivityImage;
+import com.skklub.admin.domain.Logo;
 import com.skklub.admin.error.exception.ActivityImageMisMatchException;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.ClubNameMisMatchException;
@@ -8,6 +10,7 @@ import com.skklub.admin.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
@@ -31,6 +34,7 @@ import java.util.stream.Collectors;
 public class ClubController {
 
     private final ClubService clubService;
+    private final ClubRepository clubRepository;
     private final S3Transferer s3Transferer;
     private final static String DEFAULT_LOGO_NAME = "alt.jpg";
 
@@ -42,14 +46,17 @@ public class ClubController {
         ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
         FileNames uploadedLogo = Optional.ofNullable(logo).map(s3Transferer::uploadOne).orElse(new FileNames(DEFAULT_LOGO_NAME, DEFAULT_LOGO_NAME));
         Club club = clubCreateRequestDTO.toEntity();
-        Long id = clubService.createClub(club, uploadedLogo.getOriginalName(), uploadedLogo.getSavedName());
+        Logo logoAfterUpload = uploadedLogo.toLogoEntity();
+        Long id = clubService.createClub(club, logoAfterUpload);
         return new ClubNameAndIdDTO(id, club.getName());
     }
 
     //활동 사진 등록(LIST)
     @PostMapping("/club/{clubId}/activityImage")
     public ResponseEntity<ClubNameAndIdDTO> uploadActivityImages(@PathVariable Long clubId, @RequestParam List<MultipartFile> activityImages) {
-        List<FileNames> savedActivityImages = s3Transferer.uploadAll(activityImages);
+        List<ActivityImage> savedActivityImages = s3Transferer.uploadAll(activityImages).stream()
+                .map(FileNames::toActivityImageEntity)
+                .collect(Collectors.toList());
         return clubService.appendActivityImages(clubId, savedActivityImages)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
@@ -61,7 +68,8 @@ public class ClubController {
     //세부 정보 조회 by ID
     @GetMapping("/club/{clubId}")
     public ResponseEntity<ClubResponseDTO> getClubById(@PathVariable Long clubId) {
-        return clubService.getClubDetailInfoById(clubId)
+        return clubRepository.findDetailClubById(clubId)
+                .map(ClubDetailInfoDto::new)
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
                 .orElseThrow(ClubIdMisMatchException::new);
@@ -74,14 +82,16 @@ public class ClubController {
                                                              @RequestParam(required = false, defaultValue = "전체") String belongs,
                                                              Pageable pageable) {
         ClubValidator.validateBelongs(campus, clubType, belongs);
-        Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
+        Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable)
+                .map(ClubPrevDTO::fromEntity);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
 
     //이름 검색 완전 일치
     @GetMapping("/club/search")
     public ResponseEntity<ClubResponseDTO> getClubByName(@RequestParam String name) {
-        return clubService.getClubDetailInfoByName(name)
+        return clubRepository.findDetailClubByName(name)
+                .map(ClubDetailInfoDto::new)
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
                 .orElseThrow(ClubNameMisMatchException::new);
@@ -90,18 +100,19 @@ public class ClubController {
     //이름 검색 부분 일치
     @GetMapping("/club/search/prevs")
     public Page<ClubPrevResponseDTO> getClubPrevByKeyword(@RequestParam String keyword, Pageable pageable) {
-        Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByKeyword(keyword, pageable);
+        Page<ClubPrevDTO> clubPrevs = clubRepository.findClubByNameContainingOrderByName(keyword, pageable)
+                .map(ClubPrevDTO::fromEntity);
         return convertClubPrevsLogoToFile(clubPrevs);
     }
 
     //오늘의 추천 동아리
     @GetMapping("/club/random")
-    public List<ClubNameAndIdDTO> getRandomClubNameAndIdByCategories(@RequestParam Campus campus,
+    public List<RandomClubsResponse> getRandomClubNameAndIdByCategories(@RequestParam Campus campus,
                                                                      @RequestParam(required = false, defaultValue = "전체") ClubType clubType,
                                                                      @RequestParam(required = false, defaultValue = "전체") String belongs) {
         ClubValidator.validateBelongs(campus, clubType, belongs);
         return clubService.getRandomClubsByCategories(campus, clubType, belongs).stream()
-                .map(dto -> new ClubNameAndIdDTO(dto.getId(), dto.getName()))
+                .map(RandomClubsResponse::new)
                 .collect(Collectors.toList());
     }
 
@@ -137,11 +148,11 @@ public class ClubController {
     //로고 변경
     @PostMapping("/club/{clubId}/logo")
     public ResponseEntity<ClubIdAndLogoNameDTO> updateLogo(@PathVariable Long clubId, @RequestParam MultipartFile logo) {
-        FileNames fileNames = s3Transferer.uploadOne(logo);
-        return clubService.updateLogo(clubId, fileNames)
+        Logo logoUpdateInfo = s3Transferer.uploadOne(logo).toLogoEntity();
+        return clubService.updateLogo(clubId, logoUpdateInfo)
                 .map(oldLogoName -> {
                     if(!oldLogoName.equals(DEFAULT_LOGO_NAME)) s3Transferer.deleteOne(oldLogoName);
-                    return new ClubIdAndLogoNameDTO(clubId, fileNames.getOriginalName(), fileNames.getSavedName());
+                    return new ClubIdAndLogoNameDTO(clubId, logoUpdateInfo);
                 })
                 .map(ResponseEntity::ok)
                 .orElseThrow(ClubIdMisMatchException::new);

@@ -24,7 +24,7 @@
 |`+briefActivityDescription+`
 |STRING
 |분류 - 활동 설명
-|E-SPORTS
+|E-SPORTS0
 
 |`+name+`
 |STRING
@@ -34,7 +34,7 @@
 |`+headLine+`
 |STRING
 |한줄 소개
-|명륜 게임 동아리입니다
+|명륜 게임 동아리입니다0
 
 |`+establishAt+`
 |STRING
@@ -44,7 +44,7 @@
 |`+roomLocation+`
 |STRING
 |동아리 방 위치
-|학생회관 80210
+|학생회관 802100
 
 |`+memberAmount+`
 |STRING
@@ -54,32 +54,32 @@
 |`+regularMeetingTime+`
 |STRING
 |정규 모임 시간
-|Thursday 19:00
+|Thursday 19:000
 
 |`+mandatoryActivatePeriod+`
 |STRING
 |의무 활동 기간
-|4학기
+|4학기0
 
 |`+clubDescription+`
 |STRING
 |자세한 동아리 설명
-|여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^
+|여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^0
 
 |`+activityDescription+`
 |STRING
 |자세한 활동 설명
-|1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.
+|1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.0
 
 |`+webLink1+`
 |STRING
 |관련 사이트 주소 1
-|www.skklol.com
+|www.skklol.com0
 
 |`+webLink2+`
 |STRING
 |관련 사이트 주소 2
-|www.skkulol.edu
+|www.skkulol.edu0
 
 |`+recruit.recruitStartAt+`
 |STRING

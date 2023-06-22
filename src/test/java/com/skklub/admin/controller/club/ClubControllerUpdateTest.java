@@ -3,14 +3,16 @@ package com.skklub.admin.controller.club;
 
 import akka.protobuf.WireFormat;
 import com.skklub.admin.controller.ClubController;
-import com.skklub.admin.controller.ClubTestDataRepository;
+import com.skklub.admin.ClubTestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.InvalidBelongsException;
+import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import org.apache.http.entity.ContentType;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -66,7 +69,9 @@ class ClubControllerUpdateTest {
     private ClubService clubService;
     @MockBean
     private S3Transferer s3Transferer;
-    @Autowired
+    @MockBean
+    private ClubRepository clubRepository;
+    @InjectMocks
     private ClubTestDataRepository clubTestDataRepository;
 
     private MockMultipartFile mockLogo;
@@ -220,8 +225,9 @@ class ClubControllerUpdateTest {
         Long clubId = 0L;
         String oldLogoName = "savedOldLogo.jpg";
         FileNames fileNames = new FileNames("TestLogo.jpg", "savedTestLogo.jpg");
+        Logo logo = fileNames.toLogoEntity();
         given(s3Transferer.uploadOne(mockLogo)).willReturn(fileNames);
-        given(clubService.updateLogo(clubId, fileNames)).willReturn(Optional.of(oldLogoName));
+        given(clubService.updateLogo(clubId, logo)).willReturn(Optional.of(oldLogoName));
         doNothing().when(s3Transferer).deleteOne(oldLogoName);
 
         //when
@@ -263,7 +269,7 @@ class ClubControllerUpdateTest {
         String oldLogoName = "alt.jpg";
         FileNames fileNames = new FileNames("TestLogo.jpg", "savedTestLogo.jpg");
         given(s3Transferer.uploadOne(mockLogo)).willReturn(fileNames);
-        given(clubService.updateLogo(clubId, fileNames)).willReturn(Optional.of(oldLogoName));
+        given(clubService.updateLogo(clubId, fileNames.toLogoEntity())).willReturn(Optional.of(oldLogoName));
         doThrow(IllegalCallerException.class).when(s3Transferer).deleteOne(anyString());
 
         //when
@@ -288,7 +294,7 @@ class ClubControllerUpdateTest {
         Long clubId = -1L;
         FileNames fileNames = new FileNames("TestLogo.jpg", "savedTestLogo.jpg");
         given(s3Transferer.uploadOne(mockLogo)).willReturn(fileNames);
-        given(clubService.updateLogo(clubId, fileNames)).willReturn(Optional.empty());
+        given(clubService.updateLogo(clubId, fileNames.toLogoEntity())).willReturn(Optional.empty());
 
         //when
         MvcResult badIdResult = mockMvc.perform(
