@@ -50,16 +50,6 @@ public class ClubService {
         );
     }
 
-    public Optional<ClubDetailInfoDto> getClubDetailInfoById(Long clubId) {
-        return clubRepository.findDetailClubById(clubId)
-                .map(ClubDetailInfoDto::new);
-    }
-
-    public Optional<ClubDetailInfoDto> getClubDetailInfoByName(String name) {
-        return clubRepository.findDetailClubByName(name)
-                .map(c -> new ClubDetailInfoDto(c));
-    }
-
     public Page<ClubPrevDTO> getClubPrevsByCategories(Campus campus, ClubType clubType, String belongs, Pageable pageable) {
         if (!belongs.equals("전체"))
             return clubRepository.findClubPrevByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, pageable).map(ClubPrevDTO::fromEntity);
@@ -72,14 +62,6 @@ public class ClubService {
         return clubRepository.findClubPrevByNameContainingOrderByName(keyword, pageable).map(ClubPrevDTO::fromEntity);
     }
 
-    public Optional<String> updateClub(Long clubId, Club club) {
-        return clubRepository.findDetailClubById(clubId)
-                .map(base -> {
-                    base.update(club);
-                    return base.getName();
-                });
-    }
-
     public List<ClubPrevDTO> getRandomClubsByCategories(Campus campus, ClubType clubType, String belongs) {
         List<Club> clubs;
         if (!belongs.equals("전체"))
@@ -90,6 +72,19 @@ public class ClubService {
         return clubs.stream()
                 .map(ClubPrevDTO::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    public Optional<String> updateClub(Long clubId, Club club) {
+        return clubRepository.findDetailClubById(clubId)
+                .map(base -> {
+                    base.update(club);
+                    return base.getName();
+                });
+    }
+
+    public Optional<String> updateLogo(Long clubId, FileNames fileNames) {
+        return logoRepository.findByClubId(clubId)
+                .map(logo -> logo.update(fileNames.getOriginalName(), fileNames.getSavedName()));
     }
 
     public Optional<String> deleteClub(Long clubId) throws DoubleClubDeletionException {
@@ -114,11 +109,6 @@ public class ClubService {
                     activityImageRepository.delete(img);
                     return img.getUploadedName();
                 });
-    }
-
-    public Optional<String> updateLogo(Long clubId, FileNames fileNames) {
-        return logoRepository.findByClubId(clubId)
-                .map(logo -> logo.update(fileNames.getOriginalName(), fileNames.getSavedName()));
     }
 
 }

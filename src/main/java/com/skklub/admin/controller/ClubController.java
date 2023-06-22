@@ -10,6 +10,7 @@ import com.skklub.admin.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 public class ClubController {
 
     private final ClubService clubService;
+    private final ClubRepository clubRepository;
     private final S3Transferer s3Transferer;
     private final static String DEFAULT_LOGO_NAME = "alt.jpg";
 
@@ -66,7 +68,8 @@ public class ClubController {
     //세부 정보 조회 by ID
     @GetMapping("/club/{clubId}")
     public ResponseEntity<ClubResponseDTO> getClubById(@PathVariable Long clubId) {
-        return clubService.getClubDetailInfoById(clubId)
+        return clubRepository.findDetailClubById(clubId)
+                .map(ClubDetailInfoDto::new)
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
                 .orElseThrow(ClubIdMisMatchException::new);
@@ -86,7 +89,8 @@ public class ClubController {
     //이름 검색 완전 일치
     @GetMapping("/club/search")
     public ResponseEntity<ClubResponseDTO> getClubByName(@RequestParam String name) {
-        return clubService.getClubDetailInfoByName(name)
+        return clubRepository.findDetailClubByName(name)
+                .map(ClubDetailInfoDto::new)
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
                 .orElseThrow(ClubNameMisMatchException::new);

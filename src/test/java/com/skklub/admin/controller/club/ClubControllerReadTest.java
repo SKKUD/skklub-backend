@@ -13,6 +13,7 @@ import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
@@ -37,12 +38,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static com.skklub.admin.controller.RestDocsUtils.*;
 import static java.time.LocalTime.now;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -65,6 +68,8 @@ class ClubControllerReadTest {
     private MockMvc mockMvc;
     @MockBean
     private ClubService clubService;
+    @MockBean
+    private ClubRepository clubRepository;
 
     @MockBean
     private S3Transferer s3Transferer;
@@ -76,10 +81,14 @@ class ClubControllerReadTest {
     public void getClubById_Default_Success() throws Exception{
         //given
         long clubId = 0L;
+        Club club = clubTestDataRepository.getClubs().get((int) clubId);
+        Field id = club.getClass().getDeclaredField("id");
+        id.setAccessible(true);
+        id.set(club, clubId);
         ClubDetailInfoDto clubDetailInfoDto = clubTestDataRepository.getClubDetailInfoDtos().get((int) clubId);
         S3DownloadDto logoS3DownloadDto = clubTestDataRepository.getLogoS3DownloadDto((int) clubId);
         List<S3DownloadDto> activityImgS3DownloadDtos = clubTestDataRepository.getActivityImgS3DownloadDtos((int) clubId);
-        given(clubService.getClubDetailInfoById(clubId)).willReturn(Optional.of(clubDetailInfoDto));
+        given(clubRepository.findDetailClubById(clubId)).willReturn(Optional.of(club));
         given(s3Transferer.downloadOne(clubDetailInfoDto.getLogo())).willReturn(logoS3DownloadDto);
         given(s3Transferer.downloadAll(clubDetailInfoDto.getActivityImages())).willReturn(activityImgS3DownloadDtos);
 
@@ -167,7 +176,7 @@ class ClubControllerReadTest {
      public void getClubById_IllegalClubId_ClubIdMisMatchException() throws Exception{
          //given
          Long clubId = -1L;
-         given(clubService.getClubDetailInfoById(clubId)).willReturn(Optional.empty());
+         given(clubRepository.findDetailClubById(clubId)).willReturn(Optional.empty());
 
          //when
          MvcResult badIdResult = mockMvc.perform(
@@ -184,11 +193,15 @@ class ClubControllerReadTest {
     public void getClubByName_Default_Success() throws Exception{
         //given
         long clubId = 0L;
+        Club club = clubTestDataRepository.getClubs().get((int) clubId);
+        Field id = club.getClass().getDeclaredField("id");
+        id.setAccessible(true);
+        id.set(club, clubId);
         ClubDetailInfoDto clubDetailInfoDto = clubTestDataRepository.getClubDetailInfoDtos().get((int) clubId);
         String clubName = clubDetailInfoDto.getName();
         S3DownloadDto logoS3DownloadDto = clubTestDataRepository.getLogoS3DownloadDto((int) clubId);
         List<S3DownloadDto> activityImgS3DownloadDtos = clubTestDataRepository.getActivityImgS3DownloadDtos((int) clubId);
-        given(clubService.getClubDetailInfoByName(clubName)).willReturn(Optional.of(clubDetailInfoDto));
+        given(clubRepository.findDetailClubByName(clubName)).willReturn(Optional.of(club));
         given(s3Transferer.downloadOne(clubDetailInfoDto.getLogo())).willReturn(logoS3DownloadDto);
         given(s3Transferer.downloadAll(clubDetailInfoDto.getActivityImages())).willReturn(activityImgS3DownloadDtos);
 
@@ -277,7 +290,7 @@ class ClubControllerReadTest {
     public void getClubByName_NoMatchClubName_ClubNameMisMatchException() throws Exception{
         //given
         String clubName = "이 이름은 절대로 없을꺼야 ㅋㅋ";
-        given(clubService.getClubDetailInfoByName(clubName)).willReturn(Optional.empty());
+        given(clubRepository.findDetailClubByName(clubName)).willReturn(Optional.empty());
 
         //when
         MvcResult badNameResult = mockMvc.perform(
