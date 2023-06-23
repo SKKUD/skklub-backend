@@ -25,11 +25,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.skklub.admin.TestUtils.setIdReflection;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
@@ -457,9 +457,4 @@ class ClubServiceTest {
         Assertions.assertThat(nameShouldEmpty).isEmpty();
     }
 
-    private <T> void setIdReflection(Long idVal, T obj) throws Exception {
-        Field logoIdField = obj.getClass().getDeclaredField("id");
-        logoIdField.setAccessible(true);
-        logoIdField.set(obj, idVal);
-    }
 }

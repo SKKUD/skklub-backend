@@ -41,6 +41,4 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
     @Query(value = "Select * from club where campus = :campus order by rand() limit 3", nativeQuery = true)
     List<Club> findClubRandomByCategories(@Param("campus") String campus);
 
-    @EntityGraph(attributePaths = {"logo"})
-    Optional<Club> findWithLogoById(Long id);
 }
