@@ -134,10 +134,6 @@ public class Club extends BaseEntity {
     public void startRecruit(Recruit recruit) {
         this.recruit = recruit;
     }
-    public void endRecruit(){
-        this.recruit = null;
-    }
-
 
     public boolean remove() {
         if(alive) {

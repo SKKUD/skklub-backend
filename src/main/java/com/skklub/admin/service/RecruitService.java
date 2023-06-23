@@ -30,16 +30,17 @@ public class RecruitService {
     }
 
 
-    public Optional<Long> updateRecruit(Long recruitId, Recruit recruit) {
+    public Optional<Long> updateRecruit(Long recruitId, Recruit updateInfo) {
         return recruitRepository.findById(recruitId)
                 .map(recruitBase -> {
-                    recruitBase.update(recruit);
-                    return recruit.getId();
+                    recruitBase.update(updateInfo);
+                    return recruitBase.getId();
                 });
     }
 
     public void endRecruit(Long recruitId) throws RecruitIdMisMatchException{
         recruitRepository.findById(recruitId)
-                .ifPresentOrElse(recruitRepository::delete, RecruitIdMisMatchException::new);
+                .ifPresentOrElse(recruitRepository::delete, () -> {
+                    throw new RecruitIdMisMatchException();});
     }
 }
