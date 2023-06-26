@@ -39,8 +39,8 @@ public class ClubService {
     public Optional<String> appendActivityImages(Long clubId, List<ActivityImage> activityImages) {
         return clubRepository.findById(clubId)
                 .map(c -> {
-                    activityImageRepository.saveAll(activityImages);
                     c.appendActivityImages(activityImages);
+                    activityImageRepository.saveAll(activityImages);
                     return c.getName();
                 }
         );

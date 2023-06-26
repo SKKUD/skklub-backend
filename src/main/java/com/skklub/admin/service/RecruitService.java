@@ -1,6 +1,8 @@
 package com.skklub.admin.service;
 
 import com.skklub.admin.error.exception.AlreadyRecruitingException;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.NotRecruitingException;
 import com.skklub.admin.error.exception.RecruitIdMisMatchException;
 import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.repository.ClubRepository;
@@ -23,8 +25,8 @@ public class RecruitService {
         return clubRepository.findById(clubId)
                 .map(club -> {
                     if(club.onRecruit()) throw new AlreadyRecruitingException();
-                    recruitRepository.save(recruit);
                     club.startRecruit(recruit);
+                    recruitRepository.save(recruit);
                     return club.getName();
                 });
     }
@@ -38,9 +40,15 @@ public class RecruitService {
                 });
     }
 
-    public void endRecruit(Long recruitId) throws RecruitIdMisMatchException{
-        recruitRepository.findById(recruitId)
-                .ifPresentOrElse(recruitRepository::delete, () -> {
-                    throw new RecruitIdMisMatchException();});
+    public void endRecruit(Long clubId) throws RecruitIdMisMatchException, NotRecruitingException{
+        clubRepository.findById(clubId)
+                .ifPresentOrElse(
+                        club -> {
+                            if (!club.onRecruit()) throw new NotRecruitingException();
+                            club.endRecruit();
+                        },
+                        () -> {
+                            throw new ClubIdMisMatchException();
+                        });
     }
 }

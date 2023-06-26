@@ -9,14 +9,10 @@ import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.FileNames;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 
-import java.io.File;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -26,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @TestComponent
-public class ClubTestDataRepository {
+public class TestDataRepository {
 
     private final int recruitCnt = 6;
     private final int clubCnt = 10;
@@ -37,7 +33,7 @@ public class ClubTestDataRepository {
     private final List<Recruit> recruits = new ArrayList<>();
     private final List<User> users = new ArrayList<>();
 
-    public ClubTestDataRepository() {
+    public TestDataRepository() {
         readyUser();
         readyRecruit();
         readyLogo();
@@ -45,12 +41,21 @@ public class ClubTestDataRepository {
         readyClub();
     }
 
-    public List<ClubResponseDTO> getClubResponseDTOs(){
-        return getClubDetailInfoDtos().stream()
-                .map(detail -> new ClubResponseDTO(detail,
-                        getLogoS3DownloadDto((int)(long)detail.getId()),
-                        getActivityImgS3DownloadDtos((int)(long)detail.getId())
-                )).collect(Collectors.toList());
+    public List<ActivityImage> getActivityImages(int clubIndex){
+        return activityImages.subList(0 + activityImgPerClub * clubIndex, activityImgPerClub + activityImgPerClub * clubIndex);
+    }
+
+    public Club getCleanClub(int index) throws NoSuchFieldException, IllegalAccessException {
+        Club club = clubs.get(index);
+        club.setUser(null);
+        club.getActivityImages().clear();
+        Field logoField = club.getClass().getDeclaredField("logo");
+        logoField.setAccessible(true);
+        logoField.set(club, null);
+        Field recruitField = club.getClass().getDeclaredField("recruit");
+        recruitField.setAccessible(true);
+        recruitField.set(club, null);
+        return club;
     }
 
     public List<ClubDetailInfoDto> getClubDetailInfoDtos(){
@@ -59,16 +64,6 @@ public class ClubTestDataRepository {
             ClubDetailInfoDto dto = new ClubDetailInfoDto(clubs.get((int)i));
             dto.setId(i);
             r.add(dto);
-        }
-        return r;
-    }
-
-    public List<ClubPrevDTO> getClubPrevDTOs() {
-        List<ClubPrevDTO> r = new ArrayList<>();
-        for (int i = 0; i < clubs.size(); i++) {
-            ClubPrevDTO prevDTO = ClubPrevDTO.fromEntity(clubs.get(i));
-            prevDTO.setId((long) i);
-            r.add(prevDTO);
         }
         return r;
     }

@@ -122,4 +122,14 @@ public class ClubExceptionHandler {
                 .build();
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
     }
+
+    @ExceptionHandler(NotRecruitingException.class)
+    public ResponseEntity<ErrorResponse> notRecruitingException(NotRecruitingException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("clubId")
+                .given("path variable")
+                .reasonMessage("모집 정보가 존재하지 않는 동아리 입니다.")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
 }

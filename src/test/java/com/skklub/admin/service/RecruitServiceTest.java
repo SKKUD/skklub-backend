@@ -1,9 +1,10 @@
 package com.skklub.admin.service;
 
-import com.skklub.admin.ClubTestDataRepository;
+import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.error.exception.AlreadyRecruitingException;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.RecruitIdMisMatchException;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.RecruitRepository;
@@ -26,12 +27,12 @@ import static org.mockito.Mockito.doAnswer;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-@Import(ClubTestDataRepository.class)
+@Import(TestDataRepository.class)
 class RecruitServiceTest {
     @InjectMocks
     private RecruitService recruitService;
     @InjectMocks
-    private ClubTestDataRepository clubTestDataRepository;
+    private TestDataRepository testDataRepository;
     @Mock
     private ClubRepository clubRepository;
     @Mock
@@ -39,7 +40,7 @@ class RecruitServiceTest {
 
     @AfterEach
     public void afterEach() {
-        clubTestDataRepository = new ClubTestDataRepository();
+        testDataRepository = new TestDataRepository();
     }
 
     @Test
@@ -47,12 +48,12 @@ class RecruitServiceTest {
         //given
         Long clubId = 0L;
         Long recruitId = 9999L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
         Field recruitField = club.getClass().getDeclaredField("recruit");
         recruitField.setAccessible(true);
         recruitField.set(club, null);
         Assertions.assertThat(club.getRecruit()).isNull();
-        Recruit recruit = clubTestDataRepository.getRecruits().get(0);
+        Recruit recruit = testDataRepository.getRecruits().get(0);
         given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
         doAnswer(invocation -> {
             setIdReflection(recruitId, recruit);
@@ -74,7 +75,7 @@ class RecruitServiceTest {
     public void startRecruit_BadClubId_ReturnOptionalEmpty() throws Exception {
         //given
         Long clubId = -1L;
-        Recruit recruit = clubTestDataRepository.getRecruits().get(0);
+        Recruit recruit = testDataRepository.getRecruits().get(0);
         given(clubRepository.findById(clubId)).willReturn(Optional.empty());
 
 
@@ -89,10 +90,10 @@ class RecruitServiceTest {
     public void startRecruit_AlreadyRecruiting_AlreadyRecruitingException() throws Exception {
         //given
         Long clubId = 0L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
         Assertions.assertThat(club.getRecruit()).isNotNull();
         Long recruitId = 2L;
-        Recruit recruit = clubTestDataRepository.getRecruits().get(recruitId.intValue());
+        Recruit recruit = testDataRepository.getRecruits().get(recruitId.intValue());
         Assertions.assertThat(club.getRecruit()).isNotEqualTo(recruit);
         given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
 
@@ -106,9 +107,9 @@ class RecruitServiceTest {
         //given
         Long baseRecruitId = 0L;
         Long updateRecruitInfoId = 1L;
-        Recruit baseRecruit = clubTestDataRepository.getRecruits().get(baseRecruitId.intValue());
+        Recruit baseRecruit = testDataRepository.getRecruits().get(baseRecruitId.intValue());
         setIdReflection(baseRecruitId, baseRecruit);
-        Recruit updateRecruitInfo = clubTestDataRepository.getRecruits().get(updateRecruitInfoId.intValue());
+        Recruit updateRecruitInfo = testDataRepository.getRecruits().get(updateRecruitInfoId.intValue());
         setIdReflection(null, updateRecruitInfo);
         given(recruitRepository.findById(baseRecruitId)).willReturn(Optional.ofNullable(baseRecruit));
 
@@ -140,13 +141,13 @@ class RecruitServiceTest {
     }
 
     @Test
-    public void endRecruit_BadRecruitId_RecruitIdMisMatchException() throws Exception{
+    public void endRecruit_BadRecruitId_ClubIdMisMatchException() throws Exception{
         //given
         Long recruitId = -1L;
         given(recruitRepository.findById(recruitId)).willReturn(Optional.empty());
 
         //when
-        org.junit.jupiter.api.Assertions.assertThrows(RecruitIdMisMatchException.class,
+        org.junit.jupiter.api.Assertions.assertThrows(ClubIdMisMatchException.class,
                 () -> recruitService.endRecruit(recruitId));
 
         //then

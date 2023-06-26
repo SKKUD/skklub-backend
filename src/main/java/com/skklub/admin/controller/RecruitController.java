@@ -42,9 +42,9 @@ public class RecruitController {
     }
 
     //모집 종료
-    @DeleteMapping("/recruit/{recruitId}")
-    public Long endRecruit(@PathVariable Long recruitId) {
-        recruitService.endRecruit(recruitId);
-        return recruitId;
+    @DeleteMapping("/recruit/{clubId}")
+    public Long endRecruit(@PathVariable Long clubId) {
+        recruitService.endRecruit(clubId);
+        return clubId;
     }
 }

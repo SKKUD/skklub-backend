@@ -2,12 +2,11 @@ package com.skklub.admin.controller.club;
 
 import akka.protobuf.WireFormat;
 import com.skklub.admin.controller.ClubController;
-import com.skklub.admin.ClubTestDataRepository;
+import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.controller.dto.S3DownloadDto;
-import com.skklub.admin.domain.Logo;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.ClubNameMisMatchException;
 import com.skklub.admin.error.exception.InvalidBelongsException;
@@ -63,7 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
-@Import(ClubTestDataRepository.class)
+@Import(TestDataRepository.class)
 @WebMvcTest(controllers = ClubController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 class ClubControllerReadTest {
@@ -78,19 +77,19 @@ class ClubControllerReadTest {
     private S3Transferer s3Transferer;
 
     @InjectMocks
-    private ClubTestDataRepository clubTestDataRepository;
+    private TestDataRepository testDataRepository;
 
     @Test
     public void getClubById_Default_Success() throws Exception{
         //given
         long clubId = 0L;
-        Club club = clubTestDataRepository.getClubs().get((int) clubId);
+        Club club = testDataRepository.getClubs().get((int) clubId);
         Field id = club.getClass().getDeclaredField("id");
         id.setAccessible(true);
         id.set(club, clubId);
-        ClubDetailInfoDto clubDetailInfoDto = clubTestDataRepository.getClubDetailInfoDtos().get((int) clubId);
-        S3DownloadDto logoS3DownloadDto = clubTestDataRepository.getLogoS3DownloadDto((int) clubId);
-        List<S3DownloadDto> activityImgS3DownloadDtos = clubTestDataRepository.getActivityImgS3DownloadDtos((int) clubId);
+        ClubDetailInfoDto clubDetailInfoDto = testDataRepository.getClubDetailInfoDtos().get((int) clubId);
+        S3DownloadDto logoS3DownloadDto = testDataRepository.getLogoS3DownloadDto((int) clubId);
+        List<S3DownloadDto> activityImgS3DownloadDtos = testDataRepository.getActivityImgS3DownloadDtos((int) clubId);
         given(clubRepository.findDetailClubById(clubId)).willReturn(Optional.of(club));
         given(s3Transferer.downloadOne(clubDetailInfoDto.getLogo())).willReturn(logoS3DownloadDto);
         given(s3Transferer.downloadAll(clubDetailInfoDto.getActivityImages())).willReturn(activityImgS3DownloadDtos);
@@ -131,7 +130,7 @@ class ClubControllerReadTest {
                         e.printStackTrace();
                     }
                 });
-                for(int i = 0; i < clubTestDataRepository.getActivityImgPerClub(); i++) {
+                for(int i = 0; i < testDataRepository.getActivityImgPerClub(); i++) {
                     checkActivityImagesResponseJson(actions, i, activityImgS3DownloadDtos);
                 }
         actions.andDo(
@@ -156,8 +155,8 @@ class ClubControllerReadTest {
                                 fieldWithPath("activityDescription").type(WireFormat.FieldType.STRING).description("자세한 활동 설명").attributes(example(clubDetailInfoDto.getActivityDescription())),
                                 fieldWithPath("webLink1").type(WireFormat.FieldType.STRING).description("관련 사이트 주소 1").attributes(example(clubDetailInfoDto.getWebLink1())),
                                 fieldWithPath("webLink2").type(WireFormat.FieldType.STRING).description("관련 사이트 주소 2").attributes(example(clubDetailInfoDto.getWebLink2())),
-                                fieldWithPath("recruit.recruitStartAt").type(WireFormat.FieldType.STRING).description("모집 시작일").attributes(example("yyyy-MM-ddTHH:mm (null when not recruting)")),
-                                fieldWithPath("recruit.recruitEndAt").type(WireFormat.FieldType.STRING).description("모집 종료일").attributes(example("yyyy-MM-ddTHH:mm (null when not recruting)")),
+                                fieldWithPath("recruit.recruitStartAt").type(WireFormat.FieldType.STRING).description("모집 시작일 (* 상시 모집의 경우엔 NULL)").attributes(example("yyyy-MM-ddTHH:mm (null when not recruting)")),
+                                fieldWithPath("recruit.recruitEndAt").type(WireFormat.FieldType.STRING).description("모집 종료일 (* 상시 모집의 경우엔 NULL)").attributes(example("yyyy-MM-ddTHH:mm (null when not recruting)")),
                                 fieldWithPath("recruit.recruitQuota").type(WireFormat.FieldType.STRING).description("모집 인원").attributes(example("10 ~ 30명 - Can Any Format(null when not recruting)")),
                                 fieldWithPath("recruit.recruitProcessDescription").type(WireFormat.FieldType.STRING).description("모집 절차 설명").attributes(example("Test Recruit Format(null when not recruting)")),
                                 fieldWithPath("recruit.recruitContact").type(WireFormat.FieldType.STRING).description("모집 문의처").attributes(example("010-1234-1234 or recruit@asd.asd - Can Any Format(null when not recruting)")),
@@ -196,14 +195,14 @@ class ClubControllerReadTest {
     public void getClubByName_Default_Success() throws Exception{
         //given
         long clubId = 0L;
-        Club club = clubTestDataRepository.getClubs().get((int) clubId);
+        Club club = testDataRepository.getClubs().get((int) clubId);
         Field id = club.getClass().getDeclaredField("id");
         id.setAccessible(true);
         id.set(club, clubId);
-        ClubDetailInfoDto clubDetailInfoDto = clubTestDataRepository.getClubDetailInfoDtos().get((int) clubId);
+        ClubDetailInfoDto clubDetailInfoDto = testDataRepository.getClubDetailInfoDtos().get((int) clubId);
         String clubName = clubDetailInfoDto.getName();
-        S3DownloadDto logoS3DownloadDto = clubTestDataRepository.getLogoS3DownloadDto((int) clubId);
-        List<S3DownloadDto> activityImgS3DownloadDtos = clubTestDataRepository.getActivityImgS3DownloadDtos((int) clubId);
+        S3DownloadDto logoS3DownloadDto = testDataRepository.getLogoS3DownloadDto((int) clubId);
+        List<S3DownloadDto> activityImgS3DownloadDtos = testDataRepository.getActivityImgS3DownloadDtos((int) clubId);
         given(clubRepository.findDetailClubByName(clubName)).willReturn(Optional.of(club));
         given(s3Transferer.downloadOne(clubDetailInfoDto.getLogo())).willReturn(logoS3DownloadDto);
         given(s3Transferer.downloadAll(clubDetailInfoDto.getActivityImages())).willReturn(activityImgS3DownloadDtos);
@@ -245,7 +244,7 @@ class ClubControllerReadTest {
                 e.printStackTrace();
             }
         });
-        for(int i = 0; i < clubTestDataRepository.getActivityImgPerClub(); i++) {
+        for(int i = 0; i < testDataRepository.getActivityImgPerClub(); i++) {
             checkActivityImagesResponseJson(actions, i, activityImgS3DownloadDtos);
         }
         actions.andDo(
@@ -270,8 +269,8 @@ class ClubControllerReadTest {
                                 fieldWithPath("activityDescription").type(WireFormat.FieldType.STRING).description("자세한 활동 설명").attributes(example(clubDetailInfoDto.getActivityDescription())),
                                 fieldWithPath("webLink1").type(WireFormat.FieldType.STRING).description("관련 사이트 주소 1").attributes(example(clubDetailInfoDto.getWebLink1())),
                                 fieldWithPath("webLink2").type(WireFormat.FieldType.STRING).description("관련 사이트 주소 2").attributes(example(clubDetailInfoDto.getWebLink2())),
-                                fieldWithPath("recruit.recruitStartAt").type(WireFormat.FieldType.STRING).description("모집 시작일").attributes(example("yyyy-MM-ddTHH:mm (null when not recruting)")),
-                                fieldWithPath("recruit.recruitEndAt").type(WireFormat.FieldType.STRING).description("모집 종료일").attributes(example("yyyy-MM-ddTHH:mm (null when not recruting)")),
+                                fieldWithPath("recruit.recruitStartAt").type(WireFormat.FieldType.STRING).description("모집 시작일 (* 상시 모집의 경우엔 NULL)").attributes(example("yyyy-MM-ddTHH:mm (null when not recruting)")),
+                                fieldWithPath("recruit.recruitEndAt").type(WireFormat.FieldType.STRING).description("모집 종료일 (* 상시 모집의 경우엔 NULL)").attributes(example("yyyy-MM-ddTHH:mm (null when not recruting)")),
                                 fieldWithPath("recruit.recruitQuota").type(WireFormat.FieldType.STRING).description("모집 인원").attributes(example("10 ~ 30명 - Can Any Format(null when not recruting)")),
                                 fieldWithPath("recruit.recruitProcessDescription").type(WireFormat.FieldType.STRING).description("모집 절차 설명").attributes(example("Test Recruit Format(null when not recruting)")),
                                 fieldWithPath("recruit.recruitContact").type(WireFormat.FieldType.STRING).description("모집 문의처").attributes(example("010-1234-1234 or recruit@asd.asd - Can Any Format(null when not recruting)")),
@@ -314,14 +313,14 @@ class ClubControllerReadTest {
         String belongs = "취미교양";
         int clubPerPage = 5;
         PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
-        List<Club> clubs = clubTestDataRepository.getClubs();
+        List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
         List<ClubPrevDTO> clubPrevs = clubs.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
 
         given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPage);
         clubs.stream()
-                .forEach(club -> given(s3Transferer.downloadOne(new FileNames(club.getLogo()))).willReturn(clubTestDataRepository.getLogoS3DownloadDto(club.getId().intValue())));
+                .forEach(club -> given(s3Transferer.downloadOne(new FileNames(club.getLogo()))).willReturn(testDataRepository.getLogoS3DownloadDto(club.getId().intValue())));
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/prev")
@@ -348,9 +347,9 @@ class ClubControllerReadTest {
         pageableResponseFields.add(fieldWithPath("content[].name").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(clubPrevs.get(0).getName())));
         pageableResponseFields.add(fieldWithPath("content[].belongs").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명").attributes(example(clubPrevs.get(0).getBelongs())));
         pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("클럽 ").attributes(example(clubPrevs.get(0).getBriefActivityDescription())));
-        pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디").attributes(example(clubTestDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getId().toString())));
-        pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명").attributes(example(clubTestDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getFileName())));
-        pageableResponseFields.add(fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트").attributes(example(clubTestDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getBytes())));
+        pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getId().toString())));
+        pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getFileName())));
+        pageableResponseFields.add(fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getBytes())));
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(
@@ -386,14 +385,14 @@ class ClubControllerReadTest {
         String belongs = "전체";
         int clubPerPage = 5;
         PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
-        List<Club> clubs = clubTestDataRepository.getClubs();
+        List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
         List<ClubPrevDTO> clubPrevs = clubs.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
 
         given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPage);
         clubPrevs.stream()
-                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(clubTestDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
+                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/prev")
@@ -423,14 +422,14 @@ class ClubControllerReadTest {
         String belongs = "AnyBelongsString";
         int clubPerPage = 5;
         PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
-        List<Club> clubs = clubTestDataRepository.getClubs();
+        List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
         List<ClubPrevDTO> clubPrevs = clubs.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
 
         given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPage);
         clubPrevs.stream()
-                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(clubTestDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
+                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -461,14 +460,14 @@ class ClubControllerReadTest {
         String belongs = "전체";
         int clubPerPage = 5;
         PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
-        List<Club> clubs = clubTestDataRepository.getClubs();
+        List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
         List<ClubPrevDTO> clubPrevs = clubs.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
 
         given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPage);
         clubPrevs.stream()
-                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(clubTestDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
+                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -519,13 +518,13 @@ class ClubControllerReadTest {
         String keyword = "SKKU";
         int clubPerPage = 5;
         PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
-        List<Club> clubs = clubTestDataRepository.getClubs();
+        List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
         List<ClubPrevDTO> clubPrevDTOs = clubs.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
         given(clubRepository.findClubByNameContainingOrderByName(keyword, request)).willReturn(clubPage);
         clubPrevDTOs.stream()
-                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(clubTestDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
+                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -577,7 +576,7 @@ class ClubControllerReadTest {
          Campus campus = Campus.명륜;
          ClubType clubType = ClubType.중앙동아리;
          String belongs = "취미교양";
-         List<Club> clubs = clubTestDataRepository.getClubs().subList(0, 3);
+         List<Club> clubs = testDataRepository.getClubs().subList(0, 3);
          setClubIds(clubs);
          given(clubService.getRandomClubsByCategories(campus, clubType, belongs)).willReturn(clubs);
 
@@ -650,8 +649,8 @@ class ClubControllerReadTest {
                 .andExpect(jsonPath("$.recruit.recruitWebLink").value(recruitDto.getRecruitWebLink()));
     }
     private ResultActions buildPageableResponseContentChecker(ResultActions actions, int index) throws Exception {
-        Club club = clubTestDataRepository.getClubs().get(index);
-        S3DownloadDto s3Dto = clubTestDataRepository.getLogoS3DownloadDto(index);
+        Club club = testDataRepository.getClubs().get(index);
+        S3DownloadDto s3Dto = testDataRepository.getLogoS3DownloadDto(index);
         return actions
                 .andExpect(jsonPath("$.content[" + index + "].id").value(index))
                 .andExpect(jsonPath("$.content[" + index + "].name").value(club.getName()))

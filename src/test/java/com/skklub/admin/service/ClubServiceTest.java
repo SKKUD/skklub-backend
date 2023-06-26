@@ -1,6 +1,6 @@
 package com.skklub.admin.service;
 
-import com.skklub.admin.ClubTestDataRepository;
+import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
@@ -36,12 +36,12 @@ import static org.mockito.Mockito.lenient;
 
 
 @Slf4j
-@Import(ClubTestDataRepository.class)
+@Import(TestDataRepository.class)
 @ExtendWith(MockitoExtension.class)
 class ClubServiceTest {
 
     @InjectMocks
-    private ClubTestDataRepository clubTestDataRepository;
+    private TestDataRepository testDataRepository;
     @InjectMocks
     private ClubService clubService;
     @Mock
@@ -53,7 +53,7 @@ class ClubServiceTest {
 
     @AfterEach
     public void afterEach() {
-        clubTestDataRepository = new ClubTestDataRepository();
+        testDataRepository = new TestDataRepository();
     }
 
     /**
@@ -66,8 +66,8 @@ class ClubServiceTest {
         Long logoId = -9999L;
         Long clubId = -1111L;
         int clubIndex = 0;
-        Club club = clubTestDataRepository.getClubs().get(clubIndex);
-        Logo logo = clubTestDataRepository.getLogos().get(clubIndex);
+        Club club = testDataRepository.getClubs().get(clubIndex);
+        Logo logo = testDataRepository.getLogos().get(clubIndex);
         Assertions.assertThat(logo.getId()).isNull();
         doAnswer(invocation -> {
             setIdReflection(clubId, club);
@@ -94,9 +94,9 @@ class ClubServiceTest {
         //given
         Long clubId = 0L;
         int clubIndex = 0;
-        List<ActivityImage> activityImages = clubTestDataRepository.getActivityImgFileNames(clubIndex).stream().map(FileNames::toActivityImageEntity).collect(Collectors.toList());
+        List<ActivityImage> activityImages = testDataRepository.getActivityImgFileNames(clubIndex).stream().map(FileNames::toActivityImageEntity).collect(Collectors.toList());
         activityImages.stream().forEach(a -> Assertions.assertThat(a.getId()).isNull());
-        Club club = clubTestDataRepository.getClubs().get(clubIndex);
+        Club club = testDataRepository.getClubs().get(clubIndex);
         club.getActivityImages().clear();
         setIdReflection(clubId, club);
         given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
@@ -133,7 +133,7 @@ class ClubServiceTest {
         //given
         Long clubId = -1L;
         given(clubRepository.findById(clubId)).willReturn(Optional.empty());
-        List<ActivityImage> activityImages = clubTestDataRepository.getActivityImgFileNames(0).stream().map(FileNames::toActivityImageEntity).collect(Collectors.toList());
+        List<ActivityImage> activityImages = testDataRepository.getActivityImgFileNames(0).stream().map(FileNames::toActivityImageEntity).collect(Collectors.toList());
 
         //when
         Optional<String> clubName = clubService.appendActivityImages(clubId, activityImages);
@@ -253,10 +253,10 @@ class ClubServiceTest {
         //given
         Long clubId = 0L;
         Long updateInfoClubId = 1L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
-        Club clubUpdateInfo = clubTestDataRepository.getClubs().get(updateInfoClubId.intValue());
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
+        Club clubUpdateInfo = testDataRepository.getClubs().get(updateInfoClubId.intValue());
         setIdReflection(clubId, club);
-        ClubDetailInfoDto base = new ClubDetailInfoDto(clubTestDataRepository.getClubs().get(clubId.intValue()));
+        ClubDetailInfoDto base = new ClubDetailInfoDto(testDataRepository.getClubs().get(clubId.intValue()));
         setIdReflection(clubId, base);
         given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
 
@@ -289,7 +289,7 @@ class ClubServiceTest {
         //given
         Long clubId = 0L;
         Long updateInfoClubId = 1L;
-        Club clubUpdateInfo = clubTestDataRepository.getClubs().get(updateInfoClubId.intValue());
+        Club clubUpdateInfo = testDataRepository.getClubs().get(updateInfoClubId.intValue());
         given(clubRepository.findById(clubId)).willReturn(Optional.empty());
 
         //when
@@ -303,12 +303,12 @@ class ClubServiceTest {
     public void updateLogo_Default_ChangeOnlyNames() throws Exception {
         //given
         Long clubId = 0L;
-        Logo logo = clubTestDataRepository.getClubs().get(clubId.intValue()).getLogo();
+        Logo logo = testDataRepository.getClubs().get(clubId.intValue()).getLogo();
         Logo baseLogo = new Logo(logo.getOriginalName(), logo.getUploadedName());
         setIdReflection(clubId, logo);
         setIdReflection(clubId, baseLogo);
         Long updateLogoInfoClubId = 1L;
-        Logo logoUpdateInfo = clubTestDataRepository.getClubs().get(updateLogoInfoClubId.intValue()).getLogo();
+        Logo logoUpdateInfo = testDataRepository.getClubs().get(updateLogoInfoClubId.intValue()).getLogo();
         given(logoRepository.findByClubId(clubId)).willReturn(Optional.ofNullable(logo));
 
         //when
@@ -327,7 +327,7 @@ class ClubServiceTest {
         //given
         Long clubId = 0L;
         given(logoRepository.findByClubId(clubId)).willReturn(Optional.empty());
-        Logo logoUpdateInfo = clubTestDataRepository.getClubs().get(clubId.intValue()).getLogo();
+        Logo logoUpdateInfo = testDataRepository.getClubs().get(clubId.intValue()).getLogo();
 
         //when
         Optional<String> nameShouldEmpty = clubService.updateLogo(clubId, logoUpdateInfo);
@@ -340,7 +340,7 @@ class ClubServiceTest {
     public void deleteClub_Default_AlivenessToFalse() throws Exception {
         //given
         Long clubId = 0L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
         given(clubRepository.findById(clubId)).willReturn(Optional.ofNullable(club));
 
         //when
@@ -369,7 +369,7 @@ class ClubServiceTest {
     public void deleteClub_AlreadyRemoved_DoubleClubDeletionException() throws Exception {
         //given
         Long clubId = 0L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
         club.remove();
         given(clubRepository.findById(clubId)).willReturn(Optional.ofNullable(club));
 
@@ -381,7 +381,7 @@ class ClubServiceTest {
     public void reviveClub_Default_AlivenessToTrue() throws Exception {
         //given
         Long clubId = 0L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
         club.remove();
         given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
 
@@ -411,7 +411,7 @@ class ClubServiceTest {
     public void reviveClub_AlreadyAlive_AlreadyAliveClubException() throws Exception {
         //given
         Long clubId = 0L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
         given(clubRepository.findById(clubId)).willReturn(Optional.ofNullable(club));
 
         //when
@@ -422,7 +422,7 @@ class ClubServiceTest {
     public void deleteActivityImage_Default_ReduceClubActivityImgsSizeAndNotFound() throws Exception {
         //given
         Long clubId = 0L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
         int activityImageIndex = 0;
         ActivityImage activityImage = club.getActivityImages().get(activityImageIndex);
         int size = club.getActivityImages().size();

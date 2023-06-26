@@ -3,7 +3,7 @@ package com.skklub.admin.controller.club;
 
 import akka.protobuf.WireFormat;
 import com.skklub.admin.controller.ClubController;
-import com.skklub.admin.ClubTestDataRepository;
+import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.domain.Club;
@@ -59,7 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
-@Import(ClubTestDataRepository.class)
+@Import(TestDataRepository.class)
 @WebMvcTest(controllers = ClubController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 class ClubControllerUpdateTest {
@@ -72,7 +72,7 @@ class ClubControllerUpdateTest {
     @MockBean
     private ClubRepository clubRepository;
     @InjectMocks
-    private ClubTestDataRepository clubTestDataRepository;
+    private TestDataRepository testDataRepository;
 
     private MockMultipartFile mockLogo;
 
@@ -91,8 +91,8 @@ class ClubControllerUpdateTest {
         //given
         Long clubId = 0L;
         Long changeToId = 1L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
-        Club changeTo = clubTestDataRepository.getClubs().get(changeToId.intValue());
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
+        Club changeTo = testDataRepository.getClubs().get(changeToId.intValue());
         given(clubService.updateClub(eq(clubId), any(Club.class))).willReturn(Optional.ofNullable(changeTo.getName()));
 
         //when
@@ -156,7 +156,7 @@ class ClubControllerUpdateTest {
         //given
         Long clubId = 0L;
         Long changeToId = 1L;
-        Club changeTo = clubTestDataRepository.getClubs().get(changeToId.intValue());
+        Club changeTo = testDataRepository.getClubs().get(changeToId.intValue());
 
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
@@ -192,7 +192,7 @@ class ClubControllerUpdateTest {
     public void updateClub_IllegalClubId_ClubIdMisMatchException() throws Exception {
         //given
         Long clubId = -1L;
-        Club club = clubTestDataRepository.getClubs().get(0);
+        Club club = testDataRepository.getClubs().get(0);
         given(clubService.updateClub(eq(clubId), any(Club.class))).willReturn(Optional.empty());
 
         //when

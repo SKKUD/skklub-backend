@@ -2,7 +2,7 @@ package com.skklub.admin.controller.club;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.controller.ClubController;
-import com.skklub.admin.ClubTestDataRepository;
+import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.domain.ActivityImage;
@@ -14,7 +14,6 @@ import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
-import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
-@Import(ClubTestDataRepository.class)
+@Import(TestDataRepository.class)
 @WebMvcTest(controllers = ClubController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 @WithMockUser
@@ -77,7 +76,7 @@ class ClubControllerCreateTest {
     @MockBean
     private S3Transferer s3Transferer;
     @InjectMocks
-    private ClubTestDataRepository clubTestDataRepository;
+    private TestDataRepository testDataRepository;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -170,14 +169,14 @@ class ClubControllerCreateTest {
     public void clubCreation_NullAtSomeNullables_Success() throws Exception {
         //given
         Long clubId = 0L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
         Field establishAt = club.getClass().getDeclaredField("establishAt");
         establishAt.setAccessible(true);
         establishAt.set(club, null);
         Field webLink2 = club.getClass().getDeclaredField("webLink2");
         webLink2.setAccessible(true);
         webLink2.set(club, null);
-        FileNames logoFileName = clubTestDataRepository.getLogoFileName((int) (long)clubId);
+        FileNames logoFileName = testDataRepository.getLogoFileName((int) (long)clubId);
         given(s3Transferer.uploadOne(any(MultipartFile.class))).willReturn(logoFileName);
         given(clubService.createClub(eq(club), any(Logo.class))).willReturn(clubId);
 

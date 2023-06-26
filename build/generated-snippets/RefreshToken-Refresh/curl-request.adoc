@@ -1,6 +1,6 @@
 [source,bash]
 ----
-$ curl 'http://localhost:8080/refresh?_csrf=i1zps817qv_E3eXCBwF2FDgWJ_9iBJEwPVZ5AFZsjM1CsmlvuD-L1_pJmJ3p74DxYyxCcA0vCp1SNacdCTJON2EKu_kghlla' -i -X GET \
+$ curl 'http://localhost:8080/refresh?_csrf=Lq581hO6J1JjD4PRRx9juolF7WDbGX5_HkmlBVk7yZeTU8lpT59P7ieLEmdOOeLodTJXjuokwFi9fUtSK3GVM28KqPbxZP8P' -i -X GET \
     -H 'Content-Type: application/json' \
     -H 'Authorization: Bearer access_token' \
     -H 'Refresh-Token: Bearer refresh_token'

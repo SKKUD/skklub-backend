@@ -83,12 +83,12 @@
 
 |`+recruit.recruitStartAt+`
 |STRING
-|모집 시작일
+|모집 시작일 (* 상시 모집의 경우엔 NULL)
 |yyyy-MM-ddTHH:mm (null when not recruting)
 
 |`+recruit.recruitEndAt+`
 |STRING
-|모집 종료일
+|모집 종료일 (* 상시 모집의 경우엔 NULL)
 |yyyy-MM-ddTHH:mm (null when not recruting)
 
 |`+recruit.recruitQuota+`
