@@ -144,14 +144,6 @@ public class Club extends BaseEntity {
         return false;
     }
 
-    public boolean revive() {
-        if (alive) {
-            return false;
-        }
-        alive = true;
-        return true;
-    }
-
     //Must be Removed
     public void setUser(User user) {
         this.president = user;

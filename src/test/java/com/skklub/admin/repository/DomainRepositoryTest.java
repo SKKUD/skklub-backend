@@ -1,10 +1,7 @@
 package com.skklub.admin.repository;
 
 import com.skklub.admin.TestDataRepository;
-import com.skklub.admin.domain.ActivityImage;
-import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Logo;
-import com.skklub.admin.domain.Recruit;
+import com.skklub.admin.domain.*;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -40,6 +37,8 @@ public class DomainRepositoryTest {
     private LogoRepository logoRepository;
     @Autowired
     private RecruitRepository recruitRepository;
+    @Autowired
+    private DeletedClubRepository deletedClubRepository;
 
     @BeforeEach
     public void beforeEach(){
@@ -289,7 +288,7 @@ public class DomainRepositoryTest {
     }
 
     @Test
-    public void clubReviveRemove_GivenClub_() throws Exception{
+    public void clubRemove_GivenClub_movedFromClubTableToDeletedClubTable() throws Exception{
         //given
         Club club = testDataRepository.getCleanClub(0);
         clubRepository.save(club);
@@ -301,12 +300,45 @@ public class DomainRepositoryTest {
         findedClub.ifPresent(Club::remove);
         //1 Update
         em.flush();
-        findedClub.ifPresent(Club::revive);
-        //1 Update
-        em.flush();
-
+        em.clear();
 
         //then
+        Optional<Club> afterDeletion = clubRepository.findById(club.getId());
+        Assertions.assertThat(afterDeletion).isEmpty();
+        Optional<DeletedClub> findedDeletedClub = deletedClubRepository.findById(club.getId());
+        Assertions.assertThat(findedDeletedClub).isEqualTo(club);
+    }
+
+    @Test
+    public void clubRevive_GivenDeletedClub_movedFromDeletedClubTableToClubTable() throws Exception{
+        //given
+        Club club = testDataRepository.getCleanClub(0);
+        clubRepository.save(club);
+        em.flush();
+        em.clear();
+        Optional<Club> findedClub = clubRepository.findById(club.getId());
+        findedClub.ifPresent(Club::remove);
+        em.flush();
+        em.clear();
+
+        //when
+        Optional<DeletedClub> findedDeletedClub = deletedClubRepository.findById(club.getId());
+        findedDeletedClub.ifPresent(DeletedClub::revive);
+        //1 update
+        em.flush();
+        em.clear();
+
+        //then
+        Optional<DeletedClub> afterReviveDeletedClub = deletedClubRepository.findById(club.getId());
+        Assertions.assertThat(afterReviveDeletedClub).isEmpty();
+        Optional<Club> afterReviveClub = clubRepository.findById(club.getId());
+        Assertions.assertThat(afterReviveClub).isNotEmpty();
+        afterReviveClub.ifPresent(
+                c -> {
+                    Assertions.assertThat(c.getRecruit()).isNull();
+                    Assertions.assertThat(c).isEqualTo(club);
+                }
+        );
 
     }
 }

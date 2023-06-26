@@ -9,6 +9,7 @@ import com.skklub.admin.error.exception.AlreadyAliveClubException;
 import com.skklub.admin.error.exception.DoubleClubDeletionException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
+import com.skklub.admin.repository.DeletedClubRepository;
 import com.skklub.admin.repository.LogoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +27,11 @@ import java.util.Optional;
 @Transactional
 public class ClubService {
 
-    public final ClubRepository clubRepository;
-    public final LogoRepository logoRepository;
-    public final ActivityImageRepository activityImageRepository;
+    private final ClubRepository clubRepository;
+    private final LogoRepository logoRepository;
+    private final ActivityImageRepository activityImageRepository;
+    private final DeletedClubRepository deletedClubRepository;
+
 
     public Long createClub(Club club, Logo logo) {
         club.changeLogo(logo);
@@ -88,7 +91,7 @@ public class ClubService {
     }
 
     public Optional<String> reviveClub(Long clubId) throws AlreadyAliveClubException {
-        return clubRepository.findById(clubId)
+        return deletedClubRepository.findById(clubId)
                 .map(club -> {
                     if (club.revive()) return club.getName();
                     throw new AlreadyAliveClubException();

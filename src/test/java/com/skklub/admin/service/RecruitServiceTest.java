@@ -24,6 +24,7 @@ import java.util.Optional;
 import static com.skklub.admin.TestUtils.setIdReflection;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -144,7 +145,7 @@ class RecruitServiceTest {
     public void endRecruit_BadRecruitId_ClubIdMisMatchException() throws Exception{
         //given
         Long recruitId = -1L;
-        given(recruitRepository.findById(recruitId)).willReturn(Optional.empty());
+        lenient().when(recruitRepository.findById(recruitId)).thenReturn(Optional.empty());
 
         //when
         org.junit.jupiter.api.Assertions.assertThrows(ClubIdMisMatchException.class,
