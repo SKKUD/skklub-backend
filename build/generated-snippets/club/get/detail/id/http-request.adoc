@@ -1,6 +1,6 @@
 [source,http,options="nowrap"]
 ----
-GET /club/0?_csrf=E-fiGV706hffKwQFXZmO-HYOrWFzV6N4JYo0CVGhfahyc7dTJtaBID_B3SPySTVgOLS6mUQ9gANHYMFVF-gDOmmVG5sTRNMy HTTP/1.1
+GET /club/0?_csrf=xXX54x7O8dqFpMjPQkTGEsBFTiDvsnEgrpevIPOiPWoos1288RHO1Xj9w-uox_H-I2nyI6NyYxjb0UkNmKSdE8SaC1oah2WK HTTP/1.1
 Host: localhost:8080
 
 ----

@@ -2,15 +2,12 @@ package com.skklub.admin.controller.recruit;
 
 import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skklub.admin.ClubTestDataRepository;
+import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.RecruitController;
 import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Recruit;
-import com.skklub.admin.error.exception.AllTimeRecruitTimeFormattingException;
-import com.skklub.admin.error.exception.AlreadyRecruitingException;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.error.exception.RecruitIdMisMatchException;
+import com.skklub.admin.error.exception.*;
 import com.skklub.admin.service.RecruitService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -49,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
-@Import(ClubTestDataRepository.class)
+@Import(TestDataRepository.class)
 @WebMvcTest(controllers = RecruitController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 @WithMockUser
@@ -59,7 +56,7 @@ class RecruitControllerTest {
     @MockBean
     private RecruitService recruitService;
     @InjectMocks
-    private ClubTestDataRepository clubTestDataRepository;
+    private TestDataRepository testDataRepository;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -69,8 +66,8 @@ class RecruitControllerTest {
         //given
         Long clubId = 0L;
         Long recruitId = 0L;
-        Club club = clubTestDataRepository.getClubs().get(clubId.intValue());
-        RecruitDto recruitDto = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        Club club = testDataRepository.getClubs().get(clubId.intValue());
+        RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         Recruit recruit = recruitDto.toEntity();
         String recruitDtoJson = objectMapper.writeValueAsString(recruitDto);
         given(recruitService.startRecruit(clubId, recruit)).willReturn(Optional.of(club.getName()));
@@ -115,7 +112,7 @@ class RecruitControllerTest {
         //given
         Long clubId = -1L;
         Long recruitId = 0L;
-        RecruitDto recruitDto = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         Recruit recruit = recruitDto.toEntity();
         String recruitDtoJson = objectMapper.writeValueAsString(recruitDto);
         given(recruitService.startRecruit(clubId, recruit)).willReturn(Optional.empty());
@@ -137,7 +134,7 @@ class RecruitControllerTest {
         //given
         Long clubId = 0L;
         Long recruitId = 0L;
-        RecruitDto recruitDto = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         Recruit recruit = recruitDto.toEntity();
         String recruitDtoJson = objectMapper.writeValueAsString(recruitDto);
         given(recruitService.startRecruit(clubId, recruit)).willThrow(AlreadyRecruitingException.class);
@@ -163,9 +160,9 @@ class RecruitControllerTest {
         Long clubId = 0L;
         String clubName = "test";
         Long recruitId = 0L;
-        RecruitDto recruitDto1 = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto1 = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         String fullTime = objectMapper.writeValueAsString(recruitDto1);
-        RecruitDto recruitDto2 = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto2 = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         recruitDto2.setRecruitStartAt(null);
         recruitDto2.setRecruitEndAt(null);
         String bothNull = objectMapper.writeValueAsString(recruitDto2);
@@ -194,11 +191,11 @@ class RecruitControllerTest {
         Long clubId = 0L;
         String clubName = "test";
         Long recruitId = 0L;
-        RecruitDto recruitDto1 = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto1 = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         recruitDto1.setRecruitEndAt(null);
         String endTimeNull = objectMapper.writeValueAsString(recruitDto1);
 
-        RecruitDto recruitDto2 = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto2 = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         recruitDto2.setRecruitStartAt(null);
         String startTimeNull = objectMapper.writeValueAsString(recruitDto2);
         given(recruitService.startRecruit(eq(clubId), any(Recruit.class))).willReturn(Optional.of(clubName));
@@ -227,7 +224,7 @@ class RecruitControllerTest {
     public void updateRecruit_Default_Success() throws Exception {
         //given
         Long recruitId = 0L;
-        RecruitDto recruitDto = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         Recruit recruit = recruitDto.toEntity();
         String recruitDtoJson = objectMapper.writeValueAsString(recruitDto);
         given(recruitService.updateRecruit(recruitId, recruit)).willReturn(Optional.of(recruitId));
@@ -265,11 +262,11 @@ class RecruitControllerTest {
     public void updateRecruit_NullAtNotNull_MethodArgumentNotValidException() throws Exception {
         //given
         Long recruitId = 0L;
-        RecruitDto nullAtQuota = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto nullAtQuota = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         nullAtQuota.setRecruitQuota(null);
         String nullQuotaJson = objectMapper.writeValueAsString(nullAtQuota);
 
-        RecruitDto blankAtDescription = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto blankAtDescription = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         blankAtDescription.setRecruitProcessDescription("  ");
         String blankDescriptionJson = objectMapper.writeValueAsString(blankAtDescription);
 
@@ -298,9 +295,9 @@ class RecruitControllerTest {
     public void updateRecruit_BothTimeNullOrNotNUll_Success() throws Exception {
         //given
         Long recruitId = 0L;
-        RecruitDto recruitDto1 = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto1 = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         String fullTime = objectMapper.writeValueAsString(recruitDto1);
-        RecruitDto recruitDto2 = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto2 = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         recruitDto2.setRecruitStartAt(null);
         recruitDto2.setRecruitEndAt(null);
         String bothNull = objectMapper.writeValueAsString(recruitDto2);
@@ -327,11 +324,11 @@ class RecruitControllerTest {
     public void updateRecruit_OnlyOneTimeNull_AllTimeRecruitTimeFormattingException() throws Exception {
         //given
         Long recruitId = 0L;
-        RecruitDto recruitDto1 = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto1 = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         recruitDto1.setRecruitEndAt(null);
         String endTimeNull = objectMapper.writeValueAsString(recruitDto1);
 
-        RecruitDto recruitDto2 = new RecruitDto(clubTestDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto recruitDto2 = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         recruitDto2.setRecruitStartAt(null);
         String startTimeNull = objectMapper.writeValueAsString(recruitDto2);
         given(recruitService.updateRecruit(eq(recruitId), any(Recruit.class))).willReturn(Optional.of(recruitId));
@@ -359,22 +356,22 @@ class RecruitControllerTest {
     @Test
     public void endRecruit_Default_Success() throws Exception {
         //given
-        Long recruitId = 0L;
-        doNothing().when(recruitService).endRecruit(recruitId);
+        Long clubId = 0L;
+        doNothing().when(recruitService).endRecruit(clubId);
 
         //when
         ResultActions actions = mockMvc.perform(
-                delete("/recruit/{recruitId}", recruitId)
+                delete("/recruit/{clubId}", clubId)
                         .with(csrf())
         );
 
         //then
         actions.andExpect(status().isOk())
-                .andExpect(content().json(recruitId.toString()))
+                .andExpect(content().json(clubId.toString()))
                 .andDo(
                         document("recruit/delete",
                                 pathParameters(
-                                        parameterWithName("recruitId").description("모집 정보 ID").attributes(example("1"))
+                                        parameterWithName("clubId").description("동아리 ID").attributes(example("1"))
                                 )
                         ));
     }
@@ -382,17 +379,34 @@ class RecruitControllerTest {
     @Test
     public void endRecruit_IllegalRecruitId_RecruitIdMisMatchException() throws Exception {
         //given
-        Long recruitId = -1L;
-        doThrow(RecruitIdMisMatchException.class).when(recruitService).endRecruit(recruitId);
+        Long clubId = -1L;
+        doThrow(RecruitIdMisMatchException.class).when(recruitService).endRecruit(clubId);
 
         //when
         MvcResult result = mockMvc.perform(
-                delete("/recruit/{recruitId}", recruitId)
+                delete("/recruit/{clubId}", clubId)
                         .with(csrf())
         ).andReturn();
 
         //then
         Assertions.assertThat(result.getResolvedException()).isExactlyInstanceOf(RecruitIdMisMatchException.class);
+
+    }
+
+    @Test
+    public void endRecruit_OnRecruitNull_NotRecruitingException() throws Exception {
+        //given
+        Long clubId = -1L;
+        doThrow(NotRecruitingException.class).when(recruitService).endRecruit(clubId);
+
+        //when
+        MvcResult result = mockMvc.perform(
+                delete("/recruit/{clubId}", clubId)
+                        .with(csrf())
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(result.getResolvedException()).isExactlyInstanceOf(NotRecruitingException.class);
 
     }
 }

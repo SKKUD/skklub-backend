@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @Entity
 @Getter
+@EqualsAndHashCode(exclude = {"logo", "recruit", "president", "activityImages"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Club extends BaseEntity {
     @Id
@@ -59,7 +60,7 @@ public class Club extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User president;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "recruit_id")
     private Recruit recruit;
 
@@ -162,5 +163,9 @@ public class Club extends BaseEntity {
 
     public boolean isAlive() {
         return alive;
+    }
+
+    public void endRecruit() {
+        this.recruit = null;
     }
 }
