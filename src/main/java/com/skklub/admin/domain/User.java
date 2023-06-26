@@ -1,22 +1,28 @@
 package com.skklub.admin.domain;
 
+import com.skklub.admin.domain.enums.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
 
 @Entity
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseTimeEntity {
     @Id @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    //ㅋㅋ
-    private String externId;
+    private String username;
     private String password;
-
-    //Integer인게 굉장히 마음에 안듭니다.. 꼭 고쳐주세요
-    private Integer authority;
-
+    private Role role;
     private String name;
     private String contact;
+    public User(String username, String password, Role role, String name, String contact) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.name = name;
+        this.contact = contact;
+    }
+
 }
