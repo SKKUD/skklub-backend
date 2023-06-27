@@ -21,9 +21,9 @@ public class QExtraFile extends EntityPathBase<ExtraFile> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final StringPath name = createString("name");
+    public final StringPath originalName = createString("originalName");
 
-    public final StringPath src = createString("src");
+    public final StringPath savedName = createString("savedName");
 
     public QExtraFile(String variable) {
         super(ExtraFile.class, forVariable(variable));

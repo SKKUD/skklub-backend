@@ -21,4 +21,10 @@ public class Notice {
     private User writer;
 
     private String thumbnailSrc;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "extra_file_id")
+    private ExtraFile extraFile;
+
+
 }
