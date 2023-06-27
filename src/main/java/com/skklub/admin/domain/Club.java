@@ -49,7 +49,7 @@ public class Club extends BaseEntity {
 
     //Files
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "logo")
+    @JoinColumn(name = "logo_id")
     private Logo logo;
     @OneToMany(mappedBy = "club", orphanRemoval = true)
     private List<ActivityImage> activityImages = new ArrayList<>();

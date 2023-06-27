@@ -22,7 +22,7 @@ public class RecruitController {
 
     //모집 등록
     @PostMapping("/recruit/{clubId}")
-    public ResponseEntity<ClubNameAndIdDTO> startRecruit(@PathVariable Long clubId, @RequestBody @Valid RecruitDto recruitDto) {
+    public ResponseEntity<ClubNameAndIdDTO> startRecruit(@PathVariable Long clubId, @ModelAttribute @Valid RecruitDto recruitDto) {
         ClubValidator.validateRecruitTimeFormat(recruitDto);
         Recruit recruit = recruitDto.toEntity();
         return recruitService.startRecruit(clubId, recruit)
@@ -33,7 +33,7 @@ public class RecruitController {
 
     //모집 수정
     @PatchMapping("/recruit/{recruitId}")
-    public ResponseEntity<Long> updateRecruit(@PathVariable Long recruitId, @RequestBody @Valid RecruitDto recruitDto) {
+    public ResponseEntity<Long> updateRecruit(@PathVariable Long recruitId, @ModelAttribute @Valid RecruitDto recruitDto) {
         ClubValidator.validateRecruitTimeFormat(recruitDto);
         Recruit recruit = recruitDto.toEntity();
         return recruitService.updateRecruit(recruitId, recruit)

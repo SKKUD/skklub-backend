@@ -13,6 +13,11 @@ public class ExtraFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String src;
-    private String name;
+    private String originalName;
+    private String savedName;
+
+    public ExtraFile(String originalName, String savedName) {
+        this.originalName = originalName;
+        this.savedName = savedName;
+    }
 }

@@ -44,17 +44,11 @@ public class DeletedClub{
     private String activityDescription;
 
     //Files
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "logo")
-    private Logo logo;
-    @OneToMany(mappedBy = "club", orphanRemoval = true)
-    private List<ActivityImage> activityImages = new ArrayList<>();
+    private Long logo_id;
     private String webLink1;
     private String webLink2;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User president;
+    private Long user_id;
 
     //No Recruit Information!!!
 
@@ -87,10 +81,9 @@ public class DeletedClub{
         this.mandatoryActivatePeriod = club.getMandatoryActivatePeriod();
         this.clubDescription = club.getClubDescription();
         this.activityDescription = club.getActivityDescription();
-        this.logo = club.getLogo();
-        this.activityImages = club.getActivityImages();
+        this.logo_id = club.getLogo().getId();
         this.webLink1 = club.getWebLink1();
         this.webLink2 = club.getWebLink2();
-        this.president = club.getPresident();
+        this.user_id = club.getPresident().getId();
     }
 }
