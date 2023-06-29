@@ -3,9 +3,7 @@ package com.skklub.admin.controller;
 import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Logo;
-import com.skklub.admin.error.exception.ActivityImageMisMatchException;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.error.exception.ClubNameMisMatchException;
+import com.skklub.admin.error.exception.*;
 import com.skklub.admin.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
@@ -178,7 +176,7 @@ public class ClubController {
         return clubService.deleteClub(clubId)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseThrow(ClubIdMisMatchException::new);
+                .orElseThrow(MissingAliveClubException::new);
     }
 
     //삭제 취소 (복구)
@@ -187,7 +185,7 @@ public class ClubController {
         return clubService.reviveClub(clubId)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseThrow(ClubIdMisMatchException::new);
+                .orElseThrow(MissingDeletedClubException::new);
     }
 
 }

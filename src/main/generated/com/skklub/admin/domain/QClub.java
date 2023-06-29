@@ -28,8 +28,6 @@ public class QClub extends EntityPathBase<Club> {
 
     public final ListPath<ActivityImage, QActivityImage> activityImages = this.<ActivityImage, QActivityImage>createList("activityImages", ActivityImage.class, QActivityImage.class, PathInits.DIRECT2);
 
-    public final BooleanPath alive = createBoolean("alive");
-
     public final StringPath belongs = createString("belongs");
 
     public final StringPath briefActivityDescription = createString("briefActivityDescription");

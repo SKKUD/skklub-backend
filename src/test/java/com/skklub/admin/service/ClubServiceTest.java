@@ -7,8 +7,6 @@ import com.skklub.admin.domain.DeletedClub;
 import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
-import com.skklub.admin.error.exception.AlreadyAliveClubException;
-import com.skklub.admin.error.exception.DoubleClubDeletionException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.DeletedClubRepository;
@@ -27,14 +25,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.skklub.admin.TestUtils.setIdReflection;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.*;
 
 
 @Slf4j
@@ -341,7 +340,7 @@ class ClubServiceTest {
     }
 
     @Test
-    public void deleteClub_Default_AlivenessToFalse() throws Exception {
+    public void deleteClub_Default_ReturnName() throws Exception {
         //given
         Long clubId = 0L;
         Club club = testDataRepository.getClubs().get(clubId.intValue());
@@ -353,75 +352,54 @@ class ClubServiceTest {
         //then
         Assertions.assertThat(deletedClubName).isNotEmpty();
         Assertions.assertThat(deletedClubName.get()).isEqualTo(club.getName());
-        Assertions.assertThat(club.isAlive()).isFalse();
     }
 
     @Test
-    public void deleteClub_BadClubId_ReturnOptionalEmtpy() throws Exception {
+    public void deleteClub_AlreadyRemoved_ReturnEmpty() throws Exception {
         //given
         Long clubId = 0L;
         given(clubRepository.findById(clubId)).willReturn(Optional.empty());
 
         //when
-        Optional<String> nameShouldEmpty = clubService.deleteClub(clubId);
+        Optional<String> shouldBeEmpty = clubService.deleteClub(clubId);
 
         //then
-        Assertions.assertThat(nameShouldEmpty).isEmpty();
+        Assertions.assertThat(shouldBeEmpty).isEmpty();
     }
 
     @Test
-    public void deleteClub_AlreadyRemoved_DoubleClubDeletionException() throws Exception {
+    public void reviveClub_Default_ReturnName() throws Exception {
         //given
         Long clubId = 0L;
-        Club club = testDataRepository.getClubs().get(clubId.intValue());
-        club.remove();
-        given(clubRepository.findById(clubId)).willReturn(Optional.ofNullable(club));
+        Constructor<DeletedClub> constructor = DeletedClub.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        DeletedClub deletedClub = constructor.newInstance();
 
-        //when
-        org.junit.jupiter.api.Assertions.assertThrows(DoubleClubDeletionException.class, () -> clubService.deleteClub(clubId));
-    }
-
-    @Test
-    public void reviveClub_Default_AlivenessToTrue() throws Exception {
-        //given
-        Long clubId = 0L;
-        Club club = testDataRepository.getClubs().get(clubId.intValue());
-        club.remove();
-        DeletedClub deletedClub = new DeletedClub(club);
+        Field declaredField = deletedClub.getClass().getDeclaredField("name");
+        declaredField.setAccessible(true);
+        declaredField.set(deletedClub, "testName");
         given(deletedClubRepository.findById(clubId)).willReturn(Optional.of(deletedClub));
+        doNothing().when(deletedClubRepository).delete(deletedClub);
 
         //when
         Optional<String> reviveClubName = clubService.reviveClub(clubId);
 
         //then
         Assertions.assertThat(reviveClubName).isNotEmpty();
-        Assertions.assertThat(reviveClubName.get()).isEqualTo(club.getName());
-        Assertions.assertThat(deletedClub.isAlive()).isTrue();
+        Assertions.assertThat(reviveClubName.get()).isEqualTo("testName");
     }
 
     @Test
     public void reviveClub_BadClubId_ReturnOptionalEmtpy() throws Exception {
         //given
         Long clubId = 0L;
-        lenient().when(clubRepository.findById(clubId)).thenReturn(Optional.empty());
+        lenient().when(deletedClubRepository.findById(clubId)).thenReturn(Optional.empty());
 
         //when
         Optional<String> nameShouldEmpty = clubService.reviveClub(clubId);
 
         //then
         Assertions.assertThat(nameShouldEmpty).isEmpty();
-    }
-
-    @Test
-    public void reviveClub_AlreadyAlive_AlreadyAliveClubException() throws Exception {
-        //given
-        Long clubId = 0L;
-        Club club = testDataRepository.getClubs().get(clubId.intValue());
-        DeletedClub deletedClub = new DeletedClub(club);
-        given(deletedClubRepository.findById(clubId)).willReturn(Optional.ofNullable(deletedClub));
-
-        //when
-        org.junit.jupiter.api.Assertions.assertThrows(AlreadyAliveClubException.class, () -> clubService.reviveClub(clubId));
     }
 
     @Test

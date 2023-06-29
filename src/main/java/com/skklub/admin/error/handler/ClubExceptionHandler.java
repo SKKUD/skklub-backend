@@ -103,8 +103,8 @@ public class ClubExceptionHandler {
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
     }
 
-    @ExceptionHandler(DoubleClubDeletionException.class)
-    public ResponseEntity<ErrorResponse> doubleClubDeletionException(DoubleClubDeletionException e, HttpServletRequest request) {
+    @ExceptionHandler(MissingAliveClubException.class)
+    public ResponseEntity<ErrorResponse> doubleClubDeletionException(MissingAliveClubException e, HttpServletRequest request) {
         ErrorDetail errorDetail = ErrorDetail.builder()
                 .field("clubId")
                 .given("path variable")
@@ -113,8 +113,8 @@ public class ClubExceptionHandler {
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
     }
 
-    @ExceptionHandler(AlreadyAliveClubException.class)
-    public ResponseEntity<ErrorResponse> alreadyAliveClubException(AlreadyAliveClubException e, HttpServletRequest request) {
+    @ExceptionHandler(MissingDeletedClubException.class)
+    public ResponseEntity<ErrorResponse> alreadyAliveClubException(MissingDeletedClubException e, HttpServletRequest request) {
         ErrorDetail errorDetail = ErrorDetail.builder()
                 .field("clubId")
                 .given("path variable")
