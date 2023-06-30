@@ -72,7 +72,7 @@ public class TestDataRepository {
         List<ActivityImage> images = clubs.get(clubIndex).getActivityImages();
         List<S3DownloadDto> s3DownloadDtos = new ArrayList<>();
         for (int i = 0; i < activityImgPerClub; i++) {
-            s3DownloadDtos.add(new S3DownloadDto((long) i, images.get(i).getOriginalName(), "activityImgBytes" + i));
+            s3DownloadDtos.add(new S3DownloadDto((long) i, images.get(i).getOriginalName(), ("activityImgBytes" + i).getBytes()));
         }
         return s3DownloadDtos;
     }
@@ -81,7 +81,7 @@ public class TestDataRepository {
         return new S3DownloadDto(
                 (long) clubIndex,
                 clubs.get(clubIndex).getLogo().getOriginalName(),
-                "logoBytes"
+                "logoBytes".getBytes()
         );
     }
 

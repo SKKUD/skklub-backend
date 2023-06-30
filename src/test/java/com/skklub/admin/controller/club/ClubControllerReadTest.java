@@ -165,10 +165,10 @@ class ClubControllerReadTest {
                                 fieldWithPath("presidentContact").type(WireFormat.FieldType.STRING).description("회장 연락처").attributes(example(clubDetailInfoDto.getPresidentContact())),
                                 fieldWithPath("logo.id").type(WireFormat.FieldType.INT64).description("로고 ID").attributes(example(logoS3DownloadDto.getId().toString())),
                                 fieldWithPath("logo.fileName").type(WireFormat.FieldType.STRING).description("로고 파일명").attributes(example(logoS3DownloadDto.getFileName())),
-                                fieldWithPath("logo.bytes").type(WireFormat.FieldType.STRING).description("로고 바이트(파일)").attributes(example(logoS3DownloadDto.getBytes())),
+                                fieldWithPath("logo.bytes").type(WireFormat.FieldType.STRING).description("로고 바이트(파일)").attributes(example("바이트 배열")),
                                 fieldWithPath("activityImages[].id").type(WireFormat.FieldType.STRING).description("활동 사진 ID").attributes(example(activityImgS3DownloadDtos.get(0).getId().toString())),
                                 fieldWithPath("activityImages[].fileName").type(WireFormat.FieldType.STRING).description("활동 사진 파일명").attributes(example(activityImgS3DownloadDtos.get(0).getFileName())),
-                                fieldWithPath("activityImages.[]bytes").type(WireFormat.FieldType.STRING).description("활동 사진 바이트(파일)") .attributes(example(activityImgS3DownloadDtos.get(0).getBytes()))
+                                fieldWithPath("activityImages.[]bytes").type(WireFormat.FieldType.STRING).description("활동 사진 바이트(파일)") .attributes(example("바이트 배열"))
                         )
                 )
         );
@@ -279,10 +279,10 @@ class ClubControllerReadTest {
                                 fieldWithPath("presidentContact").type(WireFormat.FieldType.STRING).description("회장 연락처").attributes(example(clubDetailInfoDto.getPresidentContact())),
                                 fieldWithPath("logo.id").type(WireFormat.FieldType.INT64).description("로고 ID").attributes(example(logoS3DownloadDto.getId().toString())),
                                 fieldWithPath("logo.fileName").type(WireFormat.FieldType.STRING).description("로고 파일명").attributes(example(logoS3DownloadDto.getFileName())),
-                                fieldWithPath("logo.bytes").type(WireFormat.FieldType.STRING).description("로고 바이트(파일)").attributes(example(logoS3DownloadDto.getBytes())),
+                                fieldWithPath("logo.bytes").type(WireFormat.FieldType.STRING).description("로고 바이트(파일)").attributes(example("바이트 배열")),
                                 fieldWithPath("activityImages[].id").type(WireFormat.FieldType.STRING).description("활동 사진 ID").attributes(example(activityImgS3DownloadDtos.get(0).getId().toString())),
                                 fieldWithPath("activityImages[].fileName").type(WireFormat.FieldType.STRING).description("활동 사진 파일명").attributes(example(activityImgS3DownloadDtos.get(0).getFileName())),
-                                fieldWithPath("activityImages.[]bytes").type(WireFormat.FieldType.STRING).description("활동 사진 바이트(파일)") .attributes(example(activityImgS3DownloadDtos.get(0).getBytes()))
+                                fieldWithPath("activityImages.[]bytes").type(WireFormat.FieldType.STRING).description("활동 사진 바이트(파일)") .attributes(example("바이트 배열"))
                         )
                 )
         );
@@ -349,7 +349,7 @@ class ClubControllerReadTest {
         pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("클럽 ").attributes(example(clubPrevs.get(0).getBriefActivityDescription())));
         pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getId().toString())));
         pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getFileName())));
-        pageableResponseFields.add(fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getBytes())));
+        pageableResponseFields.add(fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트").attributes(example("바이트 배열")));
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(

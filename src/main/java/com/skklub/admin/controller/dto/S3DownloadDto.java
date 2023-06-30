@@ -14,14 +14,9 @@ import java.util.Base64;
 public class S3DownloadDto {
     private Long id;
     private String fileName;
-    private String bytes;
+    private byte[] bytes;
 
     public S3DownloadDto(byte[] bytes) {
-        byte[] encode = Base64.getEncoder().encode(bytes);
-        try {
-            this.bytes = new String(encode, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        this.bytes = bytes;
     }
 }
