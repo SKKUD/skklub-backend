@@ -1,5 +1,6 @@
-package com.skklub.admin;
+package com.skklub.admin.integration;
 
+import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
@@ -42,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 @Import(TestDataRepository.class)
-public class ClubIntegrationTest {
+public class ClubCreateIntegrationTest {
     @Autowired
     private ClubController clubController;
     @Autowired

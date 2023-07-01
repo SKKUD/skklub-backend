@@ -1,11 +1,13 @@
 package com.skklub.admin.controller;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +54,19 @@ public class S3Test {
 
         //then
         //"src/test/resources/img/defaultLogo.jpg" 경로 확인
+    }
+
+    @Test
+    public void download_WhenNoKey_AmazonS3Exception() throws Exception{
+        //given
+
+        //when
+        Assertions.assertThrows(
+                AmazonS3Exception.class,
+                () -> s3Transferer.downloadOne(new FileNames("test.jpg", "NeverSavedImage.jpg")));
+
+        //then
+
     }
 
     @Test
