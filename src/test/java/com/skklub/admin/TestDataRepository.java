@@ -1,5 +1,6 @@
 package com.skklub.admin;
 
+import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
 import com.skklub.admin.controller.dto.ClubResponseDTO;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.*;
@@ -39,6 +40,43 @@ public class TestDataRepository {
         readyLogo();
         readyActivityImages();
         readyClub();
+    }
+
+    public ClubCreateRequestDTO getClubCreateRequestDTO() {
+        String clubName = "testClubName";
+        String activityDescription = "testActivityDescription";
+        String briefActivityDescription = "testBriefActivityDescription";
+        String clubDescription = "testClubDescription";
+        String belongs = "평면예술";
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.중앙동아리;
+        Integer establishDate = 1398;
+        String headLine = "testHeadLine";
+        String mandatoryActivatePeriod = "testMandatoryActivatePeriod";
+        Integer memberAmount = 60;
+        String regularMeetingTime = "testRegularMeetingTime";
+        String roomLocation = "testRoomLocation";
+        String webLink1 = "testWebLink1";
+        String webLink2 = "testWebLink2";
+
+        ClubCreateRequestDTO clubCreateRequestDTO = ClubCreateRequestDTO.builder()
+                .clubName(clubName)
+                .activityDescription(activityDescription)
+                .briefActivityDescription(briefActivityDescription)
+                .clubDescription(clubDescription)
+                .belongs(belongs)
+                .campus(campus)
+                .clubType(clubType)
+                .establishDate(establishDate)
+                .headLine(headLine)
+                .mandatoryActivatePeriod(mandatoryActivatePeriod)
+                .memberAmount(memberAmount)
+                .regularMeetingTime(regularMeetingTime)
+                .roomLocation(roomLocation)
+                .webLink1(webLink1)
+                .webLink2(webLink2)
+                .build();
+        return clubCreateRequestDTO;
     }
 
     public List<ActivityImage> getActivityImages(int clubIndex){
