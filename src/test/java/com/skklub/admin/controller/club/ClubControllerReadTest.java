@@ -38,9 +38,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.result.ContentResultMatchers;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,7 +125,7 @@ class ClubControllerReadTest {
                 .andExpect(jsonPath("$.presidentContact").value(clubDetailInfoDto.getPresidentContact()))
                 .andExpect(jsonPath("$.logo.id").value(logoS3DownloadDto.getId()))
                 .andExpect(jsonPath("$.logo.fileName").value(logoS3DownloadDto.getFileName()))
-                .andExpect(jsonPath("$.logo.bytes").value(logoS3DownloadDto.getBytes()));
+                .andExpect(jsonPath("$.logo.bytes").value(new String(Base64.getEncoder().encode(logoS3DownloadDto.getBytes()))));
                 clubDetailInfoDto.getRecruit().ifPresent(r -> {
                     try {
                         checkRecruitResponseJson(actions, r);
@@ -236,7 +239,7 @@ class ClubControllerReadTest {
                 .andExpect(jsonPath("$.presidentContact").value(clubDetailInfoDto.getPresidentContact()))
                 .andExpect(jsonPath("$.logo.id").value(logoS3DownloadDto.getId()))
                 .andExpect(jsonPath("$.logo.fileName").value(logoS3DownloadDto.getFileName()))
-                .andExpect(jsonPath("$.logo.bytes").value(logoS3DownloadDto.getBytes()));
+                .andExpect(jsonPath("$.logo.bytes").value(new String(Base64.getEncoder().encode(logoS3DownloadDto.getBytes()))));
         clubDetailInfoDto.getRecruit().ifPresent(r -> {
             try {
                 checkRecruitResponseJson(actions, r);
@@ -637,7 +640,7 @@ class ClubControllerReadTest {
     private void checkActivityImagesResponseJson(ResultActions actions, int activityImgIndex, List<S3DownloadDto> activityImgS3DownloadDtos) throws Exception {
         actions.andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].id").value(activityImgS3DownloadDtos.get(activityImgIndex).getId()))
                 .andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].fileName").value(activityImgS3DownloadDtos.get(activityImgIndex).getFileName()))
-                .andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].bytes").value(activityImgS3DownloadDtos.get(activityImgIndex).getBytes()));
+                .andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].bytes").value(new String(Base64.getEncoder().encode(activityImgS3DownloadDtos.get(activityImgIndex).getBytes()))));
 
     }
     private void checkRecruitResponseJson(ResultActions actions, RecruitDto recruitDto) throws Exception {
@@ -658,7 +661,7 @@ class ClubControllerReadTest {
                 .andExpect(jsonPath("$.content[" + index + "].briefActivityDescription").value(club.getBriefActivityDescription()))
                 .andExpect(jsonPath("$.content[" + index + "].logo.id").value(s3Dto.getId()))
                 .andExpect(jsonPath("$.content[" + index + "].logo.fileName").value(s3Dto.getFileName()))
-                .andExpect(jsonPath("$.content[" + index + "].logo.bytes").value(s3Dto.getBytes()));
+                .andExpect(jsonPath("$.content[" + index + "].logo.bytes").value(new String(Base64.getEncoder().encode(s3Dto.getBytes()))));
     }
 
 }
