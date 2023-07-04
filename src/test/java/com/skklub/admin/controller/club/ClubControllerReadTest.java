@@ -144,7 +144,7 @@ class ClubControllerReadTest {
                         responseFields(
                                 fieldWithPath("id").type(WireFormat.FieldType.INT64).description("동아리 Id").attributes(example(clubDetailInfoDto.getId().toString())),
                                 fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("분류 - 캠퍼스").attributes(example(clubDetailInfoDto.getCampus().toString())),
-                                fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("분류 - 동아리 종류").attributes(example(clubDetailInfoDto.getClubType())),
+                                fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("분류 - 동아리 종류").attributes(example(clubDetailInfoDto.getClubType().toString())),
                                 fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("분류 - 동아리 분과").attributes(example(clubDetailInfoDto.getBelongs())),
                                 fieldWithPath("briefActivityDescription").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명").attributes(example(clubDetailInfoDto.getBriefActivityDescription())),
                                 fieldWithPath("name").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(clubDetailInfoDto.getName())),
@@ -258,7 +258,7 @@ class ClubControllerReadTest {
                         responseFields(
                                 fieldWithPath("id").type(WireFormat.FieldType.INT64).description("동아리 Id").attributes(example(clubDetailInfoDto.getId().toString())),
                                 fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("분류 - 캠퍼스").attributes(example(clubDetailInfoDto.getCampus().toString())),
-                                fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("분류 - 동아리 종류").attributes(example(clubDetailInfoDto.getClubType())),
+                                fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("분류 - 동아리 종류").attributes(example(clubDetailInfoDto.getClubType().toString())),
                                 fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("분류 - 동아리 분과").attributes(example(clubDetailInfoDto.getBelongs())),
                                 fieldWithPath("briefActivityDescription").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명").attributes(example(clubDetailInfoDto.getBriefActivityDescription())),
                                 fieldWithPath("name").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(clubDetailInfoDto.getName())),

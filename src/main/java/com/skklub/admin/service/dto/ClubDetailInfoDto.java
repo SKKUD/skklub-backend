@@ -3,6 +3,7 @@ package com.skklub.admin.service.dto;
 import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
+import com.skklub.admin.domain.enums.ClubType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,7 +20,7 @@ public class ClubDetailInfoDto {
     //============CLUB==============//
     //분류
     private Campus campus;
-    private String clubType;
+    private ClubType clubType;
     private String belongs;
     private String briefActivityDescription;
 
@@ -57,7 +58,7 @@ public class ClubDetailInfoDto {
         User user = club.getPresident();
         this.id = club.getId();
         this.campus = club.getCampus();
-        this.clubType = club.getClubType().toString();
+        this.clubType = club.getClubType();
         this.belongs = club.getBelongs();
         this.briefActivityDescription = club.getBriefActivityDescription();
         this.name = club.getName();

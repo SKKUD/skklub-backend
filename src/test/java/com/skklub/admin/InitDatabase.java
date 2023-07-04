@@ -4,24 +4,19 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
-import com.skklub.admin.domain.ActivityImage;
-import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Logo;
-import com.skklub.admin.domain.Recruit;
-import com.skklub.admin.domain.enums.Campus;
-import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.domain.*;
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,7 +32,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class TestConfig {
+public class InitDatabase {
 
     @Autowired
     private InitTestData initTestData;
@@ -53,6 +48,7 @@ public class TestConfig {
     }
 
     @Component
+    @Import(TestDataRepository.class)
     static class InitTestData {
         @PersistenceContext
         private EntityManager em;
@@ -63,6 +59,8 @@ public class TestConfig {
         private AmazonS3 amazonS3;
         @Value("${cloud.aws.s3.bucket}")
         private String bucket;
+        @Autowired
+        private TestDataRepository testDataRepository;
 
         @Transactional
         public void init() throws IOException {
@@ -70,9 +68,12 @@ public class TestConfig {
             for (int i = 0; i < clubCnt; i++) {
                 Logo logo = readyLogo(i);
                 Optional<Recruit> recruit = readyRecruit(i);
+                User user = readyUser(i);
                 Club club = readyClub(i);
                 List<ActivityImage> activityImages = readyActivityImages(i);
                 club.changeLogo(logo);
+                club.setUser(user);
+                em.persist(user);
                 club.appendActivityImages(activityImages);
                 recruit.ifPresent(r -> {
                             club.startRecruit(r);
@@ -82,6 +83,7 @@ public class TestConfig {
                 em.persist(club);
                 activityImages.stream().forEach(em::persist);
             }
+
         }
 
         private void readyDefaultLogoInS3() throws IOException {
@@ -117,39 +119,8 @@ public class TestConfig {
         }
 
         private Club readyClub(int index) {
-            String clubName = "testClubName" + index;
-            String activityDescription = "testActivityDescription" + index;
-            String briefActivityDescription = "testBriefActivityDescription" + index;
-            String clubDescription = "testClubDescription" + index;
-            String belongs = "평면예술";
-            Campus campus = Campus.명륜;
-            ClubType clubType = ClubType.중앙동아리;
-            Integer establishDate = 1398 + index;
-            String headLine = "testHeadLine" + index;
-            String mandatoryActivatePeriod = "testMandatoryActivatePeriod" + index;
-            Integer memberAmount = 60 + index;
-            String regularMeetingTime = "testRegularMeetingTime" + index;
-            String roomLocation = "testRoomLocation" + index;
-            String webLink1 = "testWebLink1_" + index;
-            String webLink2 = "testWebLink2_" + index;
+            ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO(index);
 
-            ClubCreateRequestDTO clubCreateRequestDTO = ClubCreateRequestDTO.builder()
-                    .clubName(clubName)
-                    .activityDescription(activityDescription)
-                    .briefActivityDescription(briefActivityDescription)
-                    .clubDescription(clubDescription)
-                    .belongs(belongs)
-                    .campus(campus)
-                    .clubType(clubType)
-                    .establishDate(establishDate)
-                    .headLine(headLine)
-                    .mandatoryActivatePeriod(mandatoryActivatePeriod)
-                    .memberAmount(memberAmount)
-                    .regularMeetingTime(regularMeetingTime)
-                    .roomLocation(roomLocation)
-                    .webLink1(webLink1)
-                    .webLink2(webLink2)
-                    .build();
             return clubCreateRequestDTO.toEntity();
         }
 
@@ -167,7 +138,14 @@ public class TestConfig {
                         default -> null;
                     }
             );
+        }
 
+        private User readyUser(int index) {
+            return new User("userId" + index,
+                    "password" + index,
+                    Role.ROLE_USER,
+                    "user_" + index,
+                    "user contact_" + index);
         }
 
         @Transactional

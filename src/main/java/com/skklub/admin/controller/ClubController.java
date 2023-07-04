@@ -127,7 +127,6 @@ public class ClubController {
 
     private ClubResponseDTO convertClubImagesToFile(ClubDetailInfoDto dto) {
         S3DownloadDto logo = s3Transferer.downloadOne(dto.getLogo());
-        log.info("logo: {}", logo.getFileName());
         List<S3DownloadDto> activityImages = s3Transferer.downloadAll(dto.getActivityImages());
         return new ClubResponseDTO(dto, logo, activityImages);
     }

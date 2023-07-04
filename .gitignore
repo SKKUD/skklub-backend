@@ -39,3 +39,4 @@ out/
 ### properties ###
 /src/main/resources/application.yml
 /src/main/resources/schema.sql
+/src/test/resources/application.yml
