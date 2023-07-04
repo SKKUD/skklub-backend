@@ -210,7 +210,7 @@ class ClubControllerCreateTest {
     }
 
      @Test
-     public void clubCreation_EnumMisMatch_MethodArgumentNotValidException() throws Exception{
+     public void clubCreation_EnumMisMatch_BindException() throws Exception{
          //given
          String wrongCampus = "안암";
          String wrongClubType = "중준중동아리";
@@ -244,8 +244,8 @@ class ClubControllerCreateTest {
          ).andReturn();
 
          //then
-         Assertions.assertThat(wrongCampusResult.getResolvedException()).isInstanceOf(BindException.class);
-         Assertions.assertThat(wrongClubTypeResult.getResolvedException()).isInstanceOf(BindException.class);
+         Assertions.assertThat(wrongCampusResult.getResolvedException()).isExactlyInstanceOf(BindException.class);
+         Assertions.assertThat(wrongClubTypeResult.getResolvedException()).isExactlyInstanceOf(BindException.class);
 
       }
 

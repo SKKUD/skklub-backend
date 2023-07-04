@@ -41,6 +41,7 @@ public class ClubController {
     //추가
     @PostMapping(value = "/club")
     public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam(required = false) MultipartFile logo) {
+        log.info("clubCreateRequestDTO.getClubType() : {}", clubCreateRequestDTO.getClubType());
         ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
         FileNames uploadedLogo = Optional.ofNullable(logo)
                 .map(s3Transferer::uploadOne)

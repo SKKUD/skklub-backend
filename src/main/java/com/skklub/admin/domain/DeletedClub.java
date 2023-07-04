@@ -49,5 +49,4 @@ public class DeletedClub extends BaseEntity{
     private Long userId;
 
     private Long recruitId;
-
 }

@@ -1,6 +1,7 @@
 package com.skklub.admin.service.dto;
 
 import com.skklub.admin.domain.ActivityImage;
+import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Logo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,9 @@ public class FileNames {
     }
     public ActivityImage toActivityImageEntity() {
         return new ActivityImage(originalName, savedName);
+    }
+    public ExtraFile toExtraFileEntity(){
+        return new ExtraFile(originalName, savedName);
     }
 
     public FileNames(String originalName, String savedName) {

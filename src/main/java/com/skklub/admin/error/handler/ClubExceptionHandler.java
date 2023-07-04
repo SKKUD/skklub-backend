@@ -9,6 +9,7 @@ import com.skklub.admin.error.handler.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,8 +19,8 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 @Slf4j
 @RestControllerAdvice(basePackageClasses = {ClubController.class, RecruitController.class})
 public class ClubExceptionHandler {
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<BindingErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<BindingErrorResponse> methodArgumentNotValidException(BindException e, HttpServletRequest request) {
         return ResponseEntity.badRequest().body(BindingErrorResponse.fromException(e, request));
     }
 
