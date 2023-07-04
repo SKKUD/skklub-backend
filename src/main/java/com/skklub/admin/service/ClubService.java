@@ -5,8 +5,8 @@ import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
-import com.skklub.admin.error.exception.AlreadyAliveClubException;
-import com.skklub.admin.error.exception.DoubleClubDeletionException;
+import com.skklub.admin.error.exception.MissingDeletedClubException;
+import com.skklub.admin.error.exception.MissingAliveClubException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.DeletedClubRepository;
@@ -82,19 +82,19 @@ public class ClubService {
                 });
     }
 
-    public Optional<String> deleteClub(Long clubId) throws DoubleClubDeletionException {
+    public Optional<String> deleteClub(Long clubId) throws MissingAliveClubException {
         return clubRepository.findById(clubId)
                 .map(club -> {
-                    if (club.remove()) return club.getName();
-                    throw new DoubleClubDeletionException();
+                    clubRepository.delete(club);
+                    return club.getName();
                 });
     }
 
-    public Optional<String> reviveClub(Long clubId) throws AlreadyAliveClubException {
+    public Optional<String> reviveClub(Long clubId) throws MissingDeletedClubException {
         return deletedClubRepository.findById(clubId)
                 .map(club -> {
-                    if (club.revive()) return club.getName();
-                    throw new AlreadyAliveClubException();
+                    deletedClubRepository.delete(club);
+                    return club.getName();
                 });
     }
 

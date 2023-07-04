@@ -32,13 +32,13 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
     @EntityGraph(attributePaths = {"logo"})
     Page<Club> findClubByNameContainingOrderByName(String name, Pageable pageable);
 
-    @Query(value = "Select * from club where campus = :campus and club_type = :clubType and belongs = :belongs order by rand() limit 3", nativeQuery = true)
+    @Query(value = "select * from club where campus = :campus and club_type = :clubType and belongs = :belongs order by rand() limit 3", nativeQuery = true)
     List<Club> findClubRandomByCategories(@Param("campus") String campus, @Param("clubType") String clubType, @Param("belongs") String belongs);
 
-    @Query(value = "Select * from club where campus = :campus and clubType = :clubType order by rand() limit 3", nativeQuery = true)
+    @Query(value = "select * from club where campus = :campus and club_type = :clubType order by rand() limit 3", nativeQuery = true)
     List<Club> findClubRandomByCategories(@Param("campus") String campus, @Param("clubType") String clubType);
 
-    @Query(value = "Select * from club where campus = :campus order by rand() limit 3", nativeQuery = true)
+    @Query(value = "select * from club where campus = :campus order by rand() limit 3", nativeQuery = true)
     List<Club> findClubRandomByCategories(@Param("campus") String campus);
 
 }

@@ -4,9 +4,9 @@ import akka.protobuf.WireFormat;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.error.exception.ActivityImageMisMatchException;
-import com.skklub.admin.error.exception.AlreadyAliveClubException;
+import com.skklub.admin.error.exception.MissingDeletedClubException;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.error.exception.DoubleClubDeletionException;
+import com.skklub.admin.error.exception.MissingAliveClubException;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +83,7 @@ class ClubControllerDeleteTest {
     }
 
     @Test
-    public void deleteClubById_NoClubExist_ClubIdMisMatchException() throws Exception{
+    public void deleteClubById_NoAliveClubExist_MissingAliveClubException() throws Exception{
         //given
         Long clubId = -1L;
         given(clubService.deleteClub(clubId)).willReturn(Optional.empty());
@@ -96,26 +96,8 @@ class ClubControllerDeleteTest {
                 .andReturn();
 
         //then
-        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
+        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(MissingAliveClubException.class);
      }
-     
-     @Test
-     public void deleteClubById_AlreadyDeletedClub_DoubleClubDeletionException() throws Exception{
-         //given
-         Long clubId = 0L;
-         given(clubService.deleteClub(clubId)).willThrow(DoubleClubDeletionException.class);
-         
-         //when
-         MvcResult doubleDeletionResult = mockMvc.perform(
-                         delete("/club/{clubId}", clubId)
-                                 .with(csrf())
-                 ).andExpect(status().isBadRequest())
-                 .andReturn();
-
-         //then
-         Assertions.assertThat(doubleDeletionResult.getResolvedException()).isExactlyInstanceOf(DoubleClubDeletionException.class);
-         
-      }
 
     @Test
     public void cancelClubDeletionById_Default_Success() throws Exception {
@@ -146,7 +128,7 @@ class ClubControllerDeleteTest {
     }
 
     @Test
-    public void cancelClubDeletionById_NoClubExist_ClubIdMisMatchException() throws Exception {
+    public void cancelClubDeletionById_NoDeletedClubExist_MissingDeletedClubException() throws Exception {
         Long clubId = -1L;
         given(clubService.reviveClub(clubId)).willReturn(Optional.empty());
 
@@ -158,24 +140,7 @@ class ClubControllerDeleteTest {
                 .andReturn();
 
         //then
-        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
-    }
-    
-    @Test
-    public void cancelClubDeletionById_ReviveToAlive_AlreadyAliveClubException() throws Exception{
-        //given
-        Long clubId = 0L;
-        given(clubService.reviveClub(clubId)).willThrow(AlreadyAliveClubException.class);
-
-        //when
-        MvcResult reviveToAliveResult = mockMvc.perform(
-                        delete("/club/{clubId}/cancel", clubId)
-                                .with(csrf())
-                ).andExpect(status().isBadRequest())
-                .andReturn();
-
-        //then
-        Assertions.assertThat(reviveToAliveResult.getResolvedException()).isExactlyInstanceOf(AlreadyAliveClubException.class);
+        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(MissingDeletedClubException.class);
     }
 
     @Test

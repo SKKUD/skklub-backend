@@ -19,9 +19,9 @@ public class QDeletedClub extends EntityPathBase<DeletedClub> {
 
     public static final QDeletedClub deletedClub = new QDeletedClub("deletedClub");
 
-    public final StringPath activityDescription = createString("activityDescription");
+    public final QBaseEntity _super = new QBaseEntity(this);
 
-    public final BooleanPath alive = createBoolean("alive");
+    public final StringPath activityDescription = createString("activityDescription");
 
     public final StringPath belongs = createString("belongs");
 
@@ -33,13 +33,25 @@ public class QDeletedClub extends EntityPathBase<DeletedClub> {
 
     public final EnumPath<com.skklub.admin.domain.enums.ClubType> clubType = createEnum("clubType", com.skklub.admin.domain.enums.ClubType.class);
 
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
+
     public final NumberPath<Integer> establishAt = createNumber("establishAt", Integer.class);
 
     public final StringPath headLine = createString("headLine");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final NumberPath<Long> logo_id = createNumber("logo_id", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> lastModifiedAt = _super.lastModifiedAt;
+
+    //inherited
+    public final StringPath lastModifiedBy = _super.lastModifiedBy;
+
+    public final NumberPath<Long> logoId = createNumber("logoId", Long.class);
 
     public final StringPath mandatoryActivatePeriod = createString("mandatoryActivatePeriod");
 
@@ -47,11 +59,13 @@ public class QDeletedClub extends EntityPathBase<DeletedClub> {
 
     public final StringPath name = createString("name");
 
+    public final NumberPath<Long> recruitId = createNumber("recruitId", Long.class);
+
     public final StringPath regularMeetingTime = createString("regularMeetingTime");
 
     public final StringPath roomLocation = createString("roomLocation");
 
-    public final NumberPath<Long> user_id = createNumber("user_id", Long.class);
+    public final NumberPath<Long> userId = createNumber("userId", Long.class);
 
     public final StringPath webLink1 = createString("webLink1");
 

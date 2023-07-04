@@ -17,6 +17,7 @@ public class User extends BaseTimeEntity {
     private Role role;
     private String name;
     private String contact;
+
     public User(String username, String password, Role role, String name, String contact) {
         this.username = username;
         this.password = password;

@@ -36,8 +36,8 @@ public class S3Transferer {
 
     private FileNames upload(MultipartFile multipartFile) {
         //이름 중복 확인
-        String ext = multipartFile.getOriginalFilename();
-        String fileName = multipartFile.getOriginalFilename() + ext;
+        String ext = "." + multipartFile.getOriginalFilename().split("\\.(?=[^\\.]+$)")[1];
+        String fileName = multipartFile.getOriginalFilename();
         String savedName = UUID.randomUUID() + ext;
 
 

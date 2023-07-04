@@ -38,9 +38,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.result.ContentResultMatchers;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,7 +125,7 @@ class ClubControllerReadTest {
                 .andExpect(jsonPath("$.presidentContact").value(clubDetailInfoDto.getPresidentContact()))
                 .andExpect(jsonPath("$.logo.id").value(logoS3DownloadDto.getId()))
                 .andExpect(jsonPath("$.logo.fileName").value(logoS3DownloadDto.getFileName()))
-                .andExpect(jsonPath("$.logo.bytes").value(logoS3DownloadDto.getBytes()));
+                .andExpect(jsonPath("$.logo.bytes").value(new String(Base64.getEncoder().encode(logoS3DownloadDto.getBytes()))));
                 clubDetailInfoDto.getRecruit().ifPresent(r -> {
                     try {
                         checkRecruitResponseJson(actions, r);
@@ -141,7 +144,7 @@ class ClubControllerReadTest {
                         responseFields(
                                 fieldWithPath("id").type(WireFormat.FieldType.INT64).description("동아리 Id").attributes(example(clubDetailInfoDto.getId().toString())),
                                 fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("분류 - 캠퍼스").attributes(example(clubDetailInfoDto.getCampus().toString())),
-                                fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("분류 - 동아리 종류").attributes(example(clubDetailInfoDto.getClubType())),
+                                fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("분류 - 동아리 종류").attributes(example(clubDetailInfoDto.getClubType().toString())),
                                 fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("분류 - 동아리 분과").attributes(example(clubDetailInfoDto.getBelongs())),
                                 fieldWithPath("briefActivityDescription").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명").attributes(example(clubDetailInfoDto.getBriefActivityDescription())),
                                 fieldWithPath("name").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(clubDetailInfoDto.getName())),
@@ -165,10 +168,10 @@ class ClubControllerReadTest {
                                 fieldWithPath("presidentContact").type(WireFormat.FieldType.STRING).description("회장 연락처").attributes(example(clubDetailInfoDto.getPresidentContact())),
                                 fieldWithPath("logo.id").type(WireFormat.FieldType.INT64).description("로고 ID").attributes(example(logoS3DownloadDto.getId().toString())),
                                 fieldWithPath("logo.fileName").type(WireFormat.FieldType.STRING).description("로고 파일명").attributes(example(logoS3DownloadDto.getFileName())),
-                                fieldWithPath("logo.bytes").type(WireFormat.FieldType.STRING).description("로고 바이트(파일)").attributes(example(logoS3DownloadDto.getBytes())),
+                                fieldWithPath("logo.bytes").type(WireFormat.FieldType.STRING).description("로고 바이트(파일)").attributes(example("바이트 배열")),
                                 fieldWithPath("activityImages[].id").type(WireFormat.FieldType.STRING).description("활동 사진 ID").attributes(example(activityImgS3DownloadDtos.get(0).getId().toString())),
                                 fieldWithPath("activityImages[].fileName").type(WireFormat.FieldType.STRING).description("활동 사진 파일명").attributes(example(activityImgS3DownloadDtos.get(0).getFileName())),
-                                fieldWithPath("activityImages.[]bytes").type(WireFormat.FieldType.STRING).description("활동 사진 바이트(파일)") .attributes(example(activityImgS3DownloadDtos.get(0).getBytes()))
+                                fieldWithPath("activityImages.[]bytes").type(WireFormat.FieldType.STRING).description("활동 사진 바이트(파일)") .attributes(example("바이트 배열"))
                         )
                 )
         );
@@ -236,7 +239,7 @@ class ClubControllerReadTest {
                 .andExpect(jsonPath("$.presidentContact").value(clubDetailInfoDto.getPresidentContact()))
                 .andExpect(jsonPath("$.logo.id").value(logoS3DownloadDto.getId()))
                 .andExpect(jsonPath("$.logo.fileName").value(logoS3DownloadDto.getFileName()))
-                .andExpect(jsonPath("$.logo.bytes").value(logoS3DownloadDto.getBytes()));
+                .andExpect(jsonPath("$.logo.bytes").value(new String(Base64.getEncoder().encode(logoS3DownloadDto.getBytes()))));
         clubDetailInfoDto.getRecruit().ifPresent(r -> {
             try {
                 checkRecruitResponseJson(actions, r);
@@ -255,7 +258,7 @@ class ClubControllerReadTest {
                         responseFields(
                                 fieldWithPath("id").type(WireFormat.FieldType.INT64).description("동아리 Id").attributes(example(clubDetailInfoDto.getId().toString())),
                                 fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("분류 - 캠퍼스").attributes(example(clubDetailInfoDto.getCampus().toString())),
-                                fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("분류 - 동아리 종류").attributes(example(clubDetailInfoDto.getClubType())),
+                                fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("분류 - 동아리 종류").attributes(example(clubDetailInfoDto.getClubType().toString())),
                                 fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("분류 - 동아리 분과").attributes(example(clubDetailInfoDto.getBelongs())),
                                 fieldWithPath("briefActivityDescription").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명").attributes(example(clubDetailInfoDto.getBriefActivityDescription())),
                                 fieldWithPath("name").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(clubDetailInfoDto.getName())),
@@ -279,10 +282,10 @@ class ClubControllerReadTest {
                                 fieldWithPath("presidentContact").type(WireFormat.FieldType.STRING).description("회장 연락처").attributes(example(clubDetailInfoDto.getPresidentContact())),
                                 fieldWithPath("logo.id").type(WireFormat.FieldType.INT64).description("로고 ID").attributes(example(logoS3DownloadDto.getId().toString())),
                                 fieldWithPath("logo.fileName").type(WireFormat.FieldType.STRING).description("로고 파일명").attributes(example(logoS3DownloadDto.getFileName())),
-                                fieldWithPath("logo.bytes").type(WireFormat.FieldType.STRING).description("로고 바이트(파일)").attributes(example(logoS3DownloadDto.getBytes())),
+                                fieldWithPath("logo.bytes").type(WireFormat.FieldType.STRING).description("로고 바이트(파일)").attributes(example("바이트 배열")),
                                 fieldWithPath("activityImages[].id").type(WireFormat.FieldType.STRING).description("활동 사진 ID").attributes(example(activityImgS3DownloadDtos.get(0).getId().toString())),
                                 fieldWithPath("activityImages[].fileName").type(WireFormat.FieldType.STRING).description("활동 사진 파일명").attributes(example(activityImgS3DownloadDtos.get(0).getFileName())),
-                                fieldWithPath("activityImages.[]bytes").type(WireFormat.FieldType.STRING).description("활동 사진 바이트(파일)") .attributes(example(activityImgS3DownloadDtos.get(0).getBytes()))
+                                fieldWithPath("activityImages.[]bytes").type(WireFormat.FieldType.STRING).description("활동 사진 바이트(파일)") .attributes(example("바이트 배열"))
                         )
                 )
         );
@@ -349,7 +352,7 @@ class ClubControllerReadTest {
         pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("클럽 ").attributes(example(clubPrevs.get(0).getBriefActivityDescription())));
         pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getId().toString())));
         pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getFileName())));
-        pageableResponseFields.add(fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getBytes())));
+        pageableResponseFields.add(fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트").attributes(example("바이트 배열")));
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(
@@ -637,7 +640,7 @@ class ClubControllerReadTest {
     private void checkActivityImagesResponseJson(ResultActions actions, int activityImgIndex, List<S3DownloadDto> activityImgS3DownloadDtos) throws Exception {
         actions.andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].id").value(activityImgS3DownloadDtos.get(activityImgIndex).getId()))
                 .andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].fileName").value(activityImgS3DownloadDtos.get(activityImgIndex).getFileName()))
-                .andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].bytes").value(activityImgS3DownloadDtos.get(activityImgIndex).getBytes()));
+                .andExpect(jsonPath("$.activityImages[" + activityImgIndex + "].bytes").value(new String(Base64.getEncoder().encode(activityImgS3DownloadDtos.get(activityImgIndex).getBytes()))));
 
     }
     private void checkRecruitResponseJson(ResultActions actions, RecruitDto recruitDto) throws Exception {
@@ -658,7 +661,7 @@ class ClubControllerReadTest {
                 .andExpect(jsonPath("$.content[" + index + "].briefActivityDescription").value(club.getBriefActivityDescription()))
                 .andExpect(jsonPath("$.content[" + index + "].logo.id").value(s3Dto.getId()))
                 .andExpect(jsonPath("$.content[" + index + "].logo.fileName").value(s3Dto.getFileName()))
-                .andExpect(jsonPath("$.content[" + index + "].logo.bytes").value(s3Dto.getBytes()));
+                .andExpect(jsonPath("$.content[" + index + "].logo.bytes").value(new String(Base64.getEncoder().encode(s3Dto.getBytes()))));
     }
 
 }

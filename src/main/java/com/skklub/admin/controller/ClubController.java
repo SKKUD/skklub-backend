@@ -3,9 +3,7 @@ package com.skklub.admin.controller;
 import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Logo;
-import com.skklub.admin.error.exception.ActivityImageMisMatchException;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.error.exception.ClubNameMisMatchException;
+import com.skklub.admin.error.exception.*;
 import com.skklub.admin.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
@@ -45,7 +43,9 @@ public class ClubController {
     public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam(required = false) MultipartFile logo) {
         log.info("clubCreateRequestDTO.getClubType() : {}", clubCreateRequestDTO.getClubType());
         ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
-        FileNames uploadedLogo = Optional.ofNullable(logo).map(s3Transferer::uploadOne).orElse(new FileNames(DEFAULT_LOGO_NAME, DEFAULT_LOGO_NAME));
+        FileNames uploadedLogo = Optional.ofNullable(logo)
+                .map(s3Transferer::uploadOne)
+                .orElse(new FileNames(DEFAULT_LOGO_NAME, DEFAULT_LOGO_NAME));
         Club club = clubCreateRequestDTO.toEntity();
         Logo logoAfterUpload = uploadedLogo.toLogoEntity();
         Long id = clubService.createClub(club, logoAfterUpload);
@@ -128,7 +128,6 @@ public class ClubController {
 
     private ClubResponseDTO convertClubImagesToFile(ClubDetailInfoDto dto) {
         S3DownloadDto logo = s3Transferer.downloadOne(dto.getLogo());
-        log.info("logo: {}", logo.getFileName());
         List<S3DownloadDto> activityImages = s3Transferer.downloadAll(dto.getActivityImages());
         return new ClubResponseDTO(dto, logo, activityImages);
     }
@@ -179,7 +178,7 @@ public class ClubController {
         return clubService.deleteClub(clubId)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseThrow(ClubIdMisMatchException::new);
+                .orElseThrow(MissingAliveClubException::new);
     }
 
     //삭제 취소 (복구)
@@ -188,7 +187,7 @@ public class ClubController {
         return clubService.reviveClub(clubId)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
-                .orElseThrow(ClubIdMisMatchException::new);
+                .orElseThrow(MissingDeletedClubException::new);
     }
 
 }

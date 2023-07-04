@@ -22,8 +22,6 @@ public class Club extends BaseEntity {
     @Column(name = "club_id")
     private Long id;
 
-    private Boolean alive; //Y N OX// Dead Alive
-
     //분류
     @Enumerated(EnumType.STRING)
     private Campus campus;
@@ -48,7 +46,7 @@ public class Club extends BaseEntity {
     private String activityDescription;
 
     //Files
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "logo_id")
     private Logo logo;
     @OneToMany(mappedBy = "club", orphanRemoval = true)
@@ -96,7 +94,6 @@ public class Club extends BaseEntity {
         this.roomLocation = roomLocation;
         this.webLink1 = webLink1;
         this.webLink2 = webLink2;
-        alive = true;
     }
 
     public void update(Club updateInfo
@@ -124,7 +121,6 @@ public class Club extends BaseEntity {
         return oldSavedName;
     }
 
-
     public void appendActivityImages(List<ActivityImage> activityImages) {
         for (ActivityImage activityImage : activityImages) {
             this.activityImages.add(activityImage);
@@ -136,14 +132,6 @@ public class Club extends BaseEntity {
         this.recruit = recruit;
     }
 
-    public boolean remove() {
-        if(alive) {
-            alive = false;
-            return true;
-        }
-        return false;
-    }
-
     //Must be Removed
     public void setUser(User user) {
         this.president = user;
@@ -151,10 +139,6 @@ public class Club extends BaseEntity {
 
     public boolean onRecruit() {
         return recruit != null;
-    }
-
-    public boolean isAlive() {
-        return alive;
     }
 
     public void endRecruit() {
