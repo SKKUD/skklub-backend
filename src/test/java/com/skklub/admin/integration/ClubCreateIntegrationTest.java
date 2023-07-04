@@ -23,12 +23,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 @Import(TestDataRepository.class)
+@ActiveProfiles("local")
 public class ClubCreateIntegrationTest {
     @Autowired
     private ClubController clubController;
@@ -153,6 +156,9 @@ public class ClubCreateIntegrationTest {
         //given
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
         MockMultipartFile logo = getLogoMockMultipartFile();
+        Field declaredField = clubCreateRequestDTO.getClass().getDeclaredField("belongs");
+        declaredField.setAccessible(true);
+        declaredField.set(clubCreateRequestDTO, "wrongBelongs");
 
         //when
         assertThrows(InvalidBelongsException.class, () -> clubController.createClub(clubCreateRequestDTO, logo));

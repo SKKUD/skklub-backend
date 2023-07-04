@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Files;
@@ -124,6 +125,7 @@ public class ClubUpdateIntegrationTest {
     }
     
     @Test
+    @Rollback(value = false)
     public void updateLogo_GivenSomeLogo_DeleteOldFromS3() throws Exception{
         //given
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
@@ -179,6 +181,9 @@ public class ClubUpdateIntegrationTest {
         byte[] newBytes = Files.readAllBytes(newPath);
         String newLogoName = "2.jpg";
         MockMultipartFile newLogo = new MockMultipartFile("logo", newLogoName, "image/jpeg", newBytes);
+        Long defaultLogoCount = em.createQuery("select count(l) from Logo l where l.originalName = :name", Long.class)
+                .setParameter("name", "alt.jpg")
+                .getSingleResult();
         em.flush();
         em.clear();
 
@@ -186,10 +191,10 @@ public class ClubUpdateIntegrationTest {
         ClubIdAndLogoNameDTO clubIdAndLogoNameDTO = clubController.updateLogo(nameAndId.getId(), newLogo).getBody();
 
         //then
-        List oldLogoResult = em.createQuery("select l from Logo l where l.originalName = :name")
+        Long afterUpdateDefaultLogoCount = em.createQuery("select count(l) from Logo l where l.originalName = :name", Long.class)
                 .setParameter("name", "alt.jpg")
-                .getResultList();
-        Assertions.assertThat(oldLogoResult.size()).isEqualTo(0);
+                .getSingleResult();
+        Assertions.assertThat(afterUpdateDefaultLogoCount).isEqualTo(defaultLogoCount - 1);
         Optional<Club> findedClub = clubRepository.findById(clubIdAndLogoNameDTO.getClubId());
         Assertions.assertThat(findedClub).isNotEmpty();
         Assertions.assertThat(findedClub.get().getLogo().getOriginalName())

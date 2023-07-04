@@ -9,6 +9,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface LogoRepository extends JpaRepository<Logo, Long> {
-    @Query("select l from Logo l inner join Club c where c.id = :clubId")
+    @Query("select l from Club c inner join c.logo l where c.id = :clubId")
     Optional<Logo> findByClubId(@Param("clubId") Long clubId);
 }
