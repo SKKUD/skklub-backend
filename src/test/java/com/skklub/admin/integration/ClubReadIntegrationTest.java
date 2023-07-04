@@ -1,35 +1,33 @@
 package com.skklub.admin.integration;
 
+import com.skklub.admin.InitDatabase;
 import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.repository.ClubRepository;
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @Transactional
 @SpringBootTest
-@Import(TestDataRepository.class)
+@Import({TestDataRepository.class, InitDatabase.class})
 public class ClubReadIntegrationTest {
     @Autowired
     private EntityManager em;
@@ -41,15 +39,15 @@ public class ClubReadIntegrationTest {
     private TestDataRepository testDataRepository;
 
     /**
-    select club_id, logo.original_name, count(activity_image_id), recruit_id, (start_at is null)
-     from club
-        left join logo using(logo_id)
-        left join activity_image using(club_id)
-        left join recruit using(recruit_id)
-     group by club_id
+     * select club_id, logo.original_name, count(activity_image_id), recruit_id, (start_at is null)
+     * from club
+     * left join logo using(logo_id)
+     * left join activity_image using(club_id)
+     * left join recruit using(recruit_id)
+     * group by club_id
      */
     @Test
-    public void getClubById_DefaultLogo() throws Exception{
+    public void getClubById_DefaultLogo() throws Exception {
         //given
 
         //when
@@ -78,7 +76,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubById_SomeLogo() throws Exception{
+    public void getClubById_SomeLogo() throws Exception {
         //given
 
         //when
@@ -108,7 +106,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubById_WithRecruit() throws Exception{
+    public void getClubById_WithRecruit() throws Exception {
         //given
         int recruitIndex = 2;
 
@@ -148,7 +146,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubById_AlwaysRecruit() throws Exception{
+    public void getClubById_AlwaysRecruit() throws Exception {
         //given
         int recruitIndex = 1;
 
@@ -188,7 +186,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubById_NoRecruit() throws Exception{
+    public void getClubById_NoRecruit() throws Exception {
         //given
 
         //when
@@ -216,7 +214,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubById_ManyActImg() throws Exception{
+    public void getClubById_ManyActImg() throws Exception {
         //given
 
         //when
@@ -253,7 +251,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubById_OneActImg() throws Exception{
+    public void getClubById_OneActImg() throws Exception {
         //given
 
         //when
@@ -290,7 +288,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubById_NoActImg() throws Exception{
+    public void getClubById_NoActImg() throws Exception {
         //given
 
         //when
@@ -319,7 +317,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubByName_DefaultLogo() throws Exception{
+    public void getClubByName_DefaultLogo() throws Exception {
         //given
 
         //when
@@ -348,7 +346,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubByName_SomeLogo() throws Exception{
+    public void getClubByName_SomeLogo() throws Exception {
         //given
 
         //when
@@ -378,7 +376,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubByName_WithRecruit() throws Exception{
+    public void getClubByName_WithRecruit() throws Exception {
         //given
         int recruitIndex = 2;
 
@@ -418,7 +416,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubByName_AlwaysRecruit() throws Exception{
+    public void getClubByName_AlwaysRecruit() throws Exception {
         //given
         int recruitIndex = 1;
 
@@ -458,7 +456,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubByName_NoRecruit() throws Exception{
+    public void getClubByName_NoRecruit() throws Exception {
         //given
 
         //when
@@ -486,7 +484,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubByName_ManyActImg() throws Exception{
+    public void getClubByName_ManyActImg() throws Exception {
         //given
 
         //when
@@ -523,7 +521,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubByName_OneActImg() throws Exception{
+    public void getClubByName_OneActImg() throws Exception {
         //given
 
         //when
@@ -560,7 +558,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubByName_NoActImg() throws Exception{
+    public void getClubByName_NoActImg() throws Exception {
         //given
 
         //when
@@ -604,7 +602,7 @@ public class ClubReadIntegrationTest {
      * and belongs = '취미교양' order by name;
      */
     @Test
-    public void getClubPrevByCategories_FullCategory() throws Exception{
+    public void getClubPrevByCategories_FullCategory() throws Exception {
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
@@ -636,7 +634,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubPrevByCategories_NoBelongs() throws Exception{
+    public void getClubPrevByCategories_NoBelongs() throws Exception {
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
@@ -666,7 +664,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubPrevByCategories_NoClubType() throws Exception{
+    public void getClubPrevByCategories_NoClubType() throws Exception {
         //given
         Campus campus = Campus.명륜;
 
@@ -693,9 +691,9 @@ public class ClubReadIntegrationTest {
                         }
                 );
     }
-    
+
     @Test
-    public void getClubPrevByKeyword_ExactlyOneMatch() throws Exception{
+    public void getClubPrevByKeyword_ExactlyOneMatch() throws Exception {
         //given
         String keyword = "testClubName0";
         PageRequest pageRequest = PageRequest.of(0, 10);
@@ -723,7 +721,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubPrevByKeyword_middleManyMatch() throws Exception{
+    public void getClubPrevByKeyword_middleManyMatch() throws Exception {
         //given
         String keyword = "2";
         PageRequest pageRequest = PageRequest.of(0, 3);
@@ -751,7 +749,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getClubPrevByKeyword_NoMatch() throws Exception{
+    public void getClubPrevByKeyword_NoMatch() throws Exception {
         //given
         String keyword = "NoMatch";
 
@@ -763,7 +761,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getRandomClubNameAndIdByCategories_FullCategory() throws Exception{
+    public void getRandomClubNameAndIdByCategories_FullCategory() throws Exception {
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
@@ -778,16 +776,18 @@ public class ClubReadIntegrationTest {
         Assertions.assertThat(randomPrevs1).hasSize(3);
         Assertions.assertThat(randomPrevs2).hasSize(3);
         Assertions.assertThat(randomPrevs3).hasSize(3);
+        boolean r = true;
         for (int i = 0; i < 3; i++) {
             boolean a = randomPrevs1.get(i).getId() == randomPrevs2.get(i).getId();
             boolean b = randomPrevs2.get(i).getId() == randomPrevs3.get(i).getId();
             boolean c = randomPrevs3.get(i).getId() == randomPrevs1.get(i).getId();
-            assertFalse(a && b && c);
+            r = r && (a && b && c);
         }
+        assertFalse(r);
     }
 
     @Test
-    public void getRandomClubNameAndIdByCategories_NoBelongs() throws Exception{
+    public void getRandomClubNameAndIdByCategories_NoBelongs() throws Exception {
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
@@ -810,7 +810,7 @@ public class ClubReadIntegrationTest {
     }
 
     @Test
-    public void getRandomClubNameAndIdByCategories_NoClubType() throws Exception{
+    public void getRandomClubNameAndIdByCategories_NoClubType() throws Exception {
         //given
         Campus campus = Campus.명륜;
 

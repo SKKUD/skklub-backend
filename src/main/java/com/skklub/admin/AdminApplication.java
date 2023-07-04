@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 @SpringBootApplication
-
 public class AdminApplication {
 
 	public static void main(String[] args) {

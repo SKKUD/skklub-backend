@@ -160,6 +160,11 @@ class ClubRepositoryTest {
     @Test
     public void findClubByCampusOrderByName_Default_FetchLogoAndOrderByNameFirst() throws Exception{
         //given
+        Campus campus = Campus.율전;
+        Long cnt = em.createQuery("select count(c) from Club c inner join c.logo l where c.campus = :campus", Long.class)
+                .setParameter("campus", campus)
+                .getSingleResult();
+        log.info("cnt : {}", cnt);
         for(int i = 0; i < 8; i++){
             Logo logo = testDataRepository.getLogos().get(i);
             Club club = testDataRepository.getCleanClub(i);
@@ -177,16 +182,18 @@ class ClubRepositoryTest {
         em.flush();
         em.clear();
         PageRequest request = PageRequest.of(0, 3, Sort.Direction.ASC, "id");
-        Campus campus = Campus.율전;
 
         //when
         Page<Club> clubs = clubRepository.findClubByCampusOrderByName(campus, request);
 
         //then
-        Assertions.assertThat(clubs.getTotalElements()).isEqualTo(4);
+        Assertions.assertThat(clubs.getTotalElements()).isEqualTo(cnt + 4);
         clubs.stream().forEach(c -> Assertions.assertThat(c.getCampus()).isEqualTo(Campus.율전));
         for(int i = 0; i < 2; i++){
-            Assertions.assertThat(clubs.getContent().get(i).getId()).isLessThan(clubs.getContent().get(i + 1).getId());
+            Assertions.assertThat(
+                            clubs.getContent().get(i).getName()
+                                    .compareTo(clubs.getContent().get(i + 1).getName()))
+                    .isLessThan(0);
         }
     }
 
@@ -202,7 +209,7 @@ class ClubRepositoryTest {
             if(i % 2 == 1){
                 Field declaredField = club.getClass().getDeclaredField("clubType");
                 declaredField.setAccessible(true);
-                declaredField.set(club, ClubType.준중앙동아리);
+                declaredField.set(club, ClubType.기타동아리);
             }
             recruit.ifPresent(recruitRepository::save);
             clubRepository.save(club);
@@ -211,7 +218,7 @@ class ClubRepositoryTest {
         em.clear();
         PageRequest request = PageRequest.of(0, 3, Sort.Direction.ASC, "id");
         Campus campus = Campus.명륜;
-        ClubType clubType = ClubType.준중앙동아리;
+        ClubType clubType = ClubType.기타동아리;
 
         //when
         Page<Club> clubs = clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, request);

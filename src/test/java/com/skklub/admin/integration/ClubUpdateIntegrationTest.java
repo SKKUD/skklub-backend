@@ -125,7 +125,6 @@ public class ClubUpdateIntegrationTest {
     }
     
     @Test
-    @Rollback(value = false)
     public void updateLogo_GivenSomeLogo_DeleteOldFromS3() throws Exception{
         //given
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
