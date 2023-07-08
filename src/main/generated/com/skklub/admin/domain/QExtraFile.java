@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -17,24 +18,37 @@ public class QExtraFile extends EntityPathBase<ExtraFile> {
 
     private static final long serialVersionUID = -903259428L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QExtraFile extraFile = new QExtraFile("extraFile");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    public final QNotice notice;
 
     public final StringPath originalName = createString("originalName");
 
     public final StringPath savedName = createString("savedName");
 
     public QExtraFile(String variable) {
-        super(ExtraFile.class, forVariable(variable));
+        this(ExtraFile.class, forVariable(variable), INITS);
     }
 
     public QExtraFile(Path<? extends ExtraFile> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
     public QExtraFile(PathMetadata metadata) {
-        super(ExtraFile.class, metadata);
+        this(metadata, PathInits.getFor(metadata, INITS));
+    }
+
+    public QExtraFile(PathMetadata metadata, PathInits inits) {
+        this(ExtraFile.class, metadata, inits);
+    }
+
+    public QExtraFile(Class<? extends ExtraFile> type, PathMetadata metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.notice = inits.isInitialized("notice") ? new QNotice(forProperty("notice"), inits.get("notice")) : null;
     }
 
 }

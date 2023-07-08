@@ -3,6 +3,7 @@ package com.skklub.admin.service.dto;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.Thumbnail;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,17 +25,20 @@ public class FileNames {
     public ExtraFile toExtraFileEntity(){
         return new ExtraFile(originalName, savedName);
     }
+    public Thumbnail toThumbnailEntity() {
+        return new Thumbnail(originalName, savedName);
+    }
 
     public FileNames(String originalName, String savedName) {
         this.originalName = originalName;
         this.savedName = savedName;
     }
-
     public FileNames(Logo logo) {
         this.id = logo.getId();
         this.originalName = logo.getOriginalName();
         this.savedName = logo.getUploadedName();
     }
+
     public FileNames(ActivityImage activityImage) {
         this.id = activityImage.getId();
         this.originalName = activityImage.getOriginalName();

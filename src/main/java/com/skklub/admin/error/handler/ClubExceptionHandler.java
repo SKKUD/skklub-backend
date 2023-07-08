@@ -1,6 +1,7 @@
 package com.skklub.admin.error.handler;
 
 import com.skklub.admin.controller.ClubController;
+import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.RecruitController;
 import com.skklub.admin.error.exception.*;
 import com.skklub.admin.error.handler.dto.BindingErrorResponse;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @Slf4j
-@RestControllerAdvice(basePackageClasses = {ClubController.class, RecruitController.class})
+@RestControllerAdvice(basePackageClasses = {ClubController.class, RecruitController.class, NoticeController.class})
 public class ClubExceptionHandler {
     @ExceptionHandler(BindException.class)
     public ResponseEntity<BindingErrorResponse> methodArgumentNotValidException(BindException e, HttpServletRequest request) {
@@ -130,6 +131,16 @@ public class ClubExceptionHandler {
                 .field("clubId")
                 .given("path variable")
                 .reasonMessage("모집 정보가 존재하지 않는 동아리 입니다.")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
+    @ExceptionHandler(NoticeIdMisMatchException.class)
+    public ResponseEntity<ErrorResponse> noticeIdMisMatchException(NoticeIdMisMatchException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("noticeId")
+                .given("path variable")
+                .reasonMessage("해당 ID값을 갖는 Notice가 존재하지 않습니다")
                 .build();
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
     }
