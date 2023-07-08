@@ -24,11 +24,11 @@ public class QNotice extends EntityPathBase<Notice> {
 
     public final StringPath content = createString("content");
 
-    public final QExtraFile extraFile;
+    public final ListPath<ExtraFile, QExtraFile> extraFiles = this.<ExtraFile, QExtraFile>createList("extraFiles", ExtraFile.class, QExtraFile.class, PathInits.DIRECT2);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final StringPath thumbnailSrc = createString("thumbnailSrc");
+    public final QThumbnail thumbnail;
 
     public final StringPath title = createString("title");
 
@@ -52,7 +52,7 @@ public class QNotice extends EntityPathBase<Notice> {
 
     public QNotice(Class<? extends Notice> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.extraFile = inits.isInitialized("extraFile") ? new QExtraFile(forProperty("extraFile")) : null;
+        this.thumbnail = inits.isInitialized("thumbnail") ? new QThumbnail(forProperty("thumbnail")) : null;
         this.writer = inits.isInitialized("writer") ? new QUser(forProperty("writer")) : null;
     }
 

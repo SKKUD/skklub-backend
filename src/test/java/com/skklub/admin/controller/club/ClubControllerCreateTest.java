@@ -307,11 +307,10 @@ class ClubControllerCreateTest {
     @Test
     public void uploadActivityImages_MultiImages_Success() throws Exception {
         //given
-        List<MultipartFile> multipartFiles = new ArrayList<>();
-        List<FileNames> activityImageDtos = new ArrayList<>();
-        List<ActivityImage> activityImages = activityImageDtos.stream()
-                .map(FileNames::toActivityImageEntity)
+        List<MultipartFile> multipartFiles = mockActivityImages.stream()
                 .collect(Collectors.toList());
+        List<FileNames> activityImageDtos = new ArrayList<>();
+        List<ActivityImage> activityImages = new ArrayList<>();
         given(s3Transferer.uploadAll(multipartFiles)).willReturn(activityImageDtos);
         given(clubService.appendActivityImages(0L, activityImages)).willReturn(Optional.of("ClubName"));
 

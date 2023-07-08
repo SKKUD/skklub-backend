@@ -5,6 +5,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,11 +23,25 @@ public class Notice {
     @JoinColumn(name = "user_id")
     private User writer;
 
-    private String thumbnailSrc;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "thumbnail_id")
+    private Thumbnail thumbnail;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "extra_file_id")
-    private ExtraFile extraFile;
+    @OneToMany(mappedBy = "notice", orphanRemoval = true)
+    private List<ExtraFile> extraFiles = new ArrayList<>();
 
+    public Notice(String title, String content, User writer, Thumbnail thumbnail) {
+        this.title = title;
+        this.content = content;
+        this.writer = writer;
+        this.thumbnail = thumbnail;
+    }
+
+    public void appendExtraFiles(List<ExtraFile> additionalExtraFiles) {
+        for (ExtraFile additionalExtraFile : additionalExtraFiles) {
+            additionalExtraFile.matchToNotice(this);
+            extraFiles.add(additionalExtraFile);
+        }
+    }
 
 }
