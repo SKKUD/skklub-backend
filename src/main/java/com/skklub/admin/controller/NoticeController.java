@@ -30,6 +30,8 @@ public class NoticeController {
     private final NoticeService noticeService;
     private final NoticeRepository noticeRepository;
 
+    private final String DEFAULT_THUMBNAIL = "default_thumb.png";
+
 //=====CREATE=====//
 
     //등록
@@ -39,7 +41,7 @@ public class NoticeController {
                                                                  @AuthenticationPrincipal UserDetails userDetails){
         Thumbnail thumbnail = Optional.ofNullable(thumbnailFile)
                 .map(s3Transferer::uploadOne)
-                .orElse(new FileNames("default_thumb.png", "default_thumb.png"))
+                .orElse(new FileNames(DEFAULT_THUMBNAIL, DEFAULT_THUMBNAIL))
                 .toThumbnailEntity();
         String userName = TokenProvider.getAuthentication(userDetails).getName();
         Long noticeId = noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), userName, thumbnail);
@@ -93,9 +95,14 @@ public class NoticeController {
         if (!noticeRepository.existsById(noticeId)) throw new NoticeIdMisMatchException();
         FileNames thumbnailFileName = s3Transferer.uploadOne(thumbnailFile);
         Thumbnail thumbnail = thumbnailFileName.toThumbnailEntity();
-        FileNames oldThumbnailFileName = noticeService.updateThumbnail(noticeId, thumbnail);
-        s3Transferer.deleteOne(oldThumbnailFileName.getSavedName());
-        return new NoticeIdAndFileNamesResponse(noticeId, oldThumbnailFileName.getOriginalName(), thumbnailFileName.getOriginalName());
+        return noticeService.updateThumbnail(noticeId, thumbnail)
+                .map(
+                        oldThumbnailFileName -> {
+                            if (!oldThumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
+                                s3Transferer.deleteOne(oldThumbnailFileName.getSavedName());
+                            return new NoticeIdAndFileNamesResponse(noticeId, oldThumbnailFileName.getOriginalName(), thumbnailFileName.getOriginalName());
+                        }
+                ).orElseThrow(NoticeIdMisMatchException::new);
     }
 
 //=====DELETE=====//
@@ -104,7 +111,17 @@ public class NoticeController {
     @DeleteMapping("/notice/{noticeId}")
     public NoticeIdAndTitleResponse deleteNotice(@PathVariable Long noticeId) {
         return noticeService.deleteNotice(noticeId)
-                .map(deletedNoticeName -> new NoticeIdAndTitleResponse(noticeId, deletedNoticeName))
+                .map(noticeDeletionDto -> {
+                            FileNames thumbnailFileName = noticeDeletionDto.getThumbnailFileName();
+                            List<FileNames> extraFileNames = noticeDeletionDto.getExtraFileNames();
+                            if (!thumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
+                                s3Transferer.deleteOne(thumbnailFileName.getSavedName());
+                            extraFileNames.stream()
+                                    .map(FileNames::getSavedName)
+                                    .forEach(s3Transferer::deleteOne);
+                            return new NoticeIdAndTitleResponse(noticeId, noticeDeletionDto.getNoticeTitle());
+                        }
+                )
                 .orElseThrow(NoticeIdMisMatchException::new);
     }
 

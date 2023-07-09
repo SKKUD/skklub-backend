@@ -7,9 +7,9 @@ import com.skklub.admin.domain.User;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.ExtraFileRepository;
 import com.skklub.admin.repository.NoticeRepository;
-import com.skklub.admin.repository.ThumbnailRepository;
 import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.service.dto.FileNames;
+import com.skklub.admin.service.dto.NoticeDeletionDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,7 +27,6 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final ExtraFileRepository extraFileRepository;
     private final UserRepository userRepository;
-    private final ThumbnailRepository thumbnailRepository;
 
     public Long createNotice(String title, String content, String userName, Thumbnail thumbnail) {
         User user = userRepository.findByUsername(userName);
@@ -52,7 +52,7 @@ public class NoticeService {
                 );
     }
 
-    public FileNames updateThumbnail(Long noticeId, Thumbnail changeInfo) {
+    public Optional<FileNames> updateThumbnail(Long noticeId, Thumbnail changeInfo) {
         return noticeRepository.findById(noticeId)
                 .map(
                         notice -> {
@@ -61,15 +61,24 @@ public class NoticeService {
                             thumbnail.update(changeInfo);
                             return fileNames;
                         }
-                ).orElseThrow(NoticeIdMisMatchException::new);
+                );
     }
 
-    public Optional<String> deleteNotice(Long noticeId) {
+    public Optional<NoticeDeletionDto> deleteNotice(Long noticeId) {
         return noticeRepository.findById(noticeId)
                 .map(
                         notice -> {
+                            NoticeDeletionDto noticeDeletionDto = NoticeDeletionDto.builder()
+                                    .noticeTitle(notice.getTitle())
+                                    .thumbnailFileName(new FileNames(notice.getThumbnail()))
+                                    .extraFileNames(notice.getExtraFiles()
+                                            .stream()
+                                            .map(FileNames::new)
+                                            .collect(Collectors.toList())
+                                    )
+                                    .build();
                             noticeRepository.delete(notice);
-                            return notice.getTitle();
+                            return noticeDeletionDto;
                         }
                 );
     }

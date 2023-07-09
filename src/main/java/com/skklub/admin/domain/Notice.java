@@ -23,7 +23,7 @@ public class Notice {
     @JoinColumn(name = "user_id")
     private User writer;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "thumbnail_id")
     private Thumbnail thumbnail;
 
