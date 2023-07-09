@@ -1,6 +1,5 @@
 package com.skklub.admin.controller.dto;
 
-import com.skklub.admin.domain.Notice;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,13 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NoticeCreateRequest {
+public class NoticeUpdateRequest {
     @NotBlank
     private String title;
     @NotBlank
     private String content;
-
-    public Notice toEntity() {
-        return new Notice(title, content, null, null);
-    }
 }

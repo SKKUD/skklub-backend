@@ -44,4 +44,8 @@ public class Notice {
         }
     }
 
+    public void update(Notice updateInfo) {
+        this.title = updateInfo.getTitle();
+        this.content = updateInfo.getContent();
+    }
 }

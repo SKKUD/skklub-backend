@@ -19,16 +19,17 @@ public class FileNames {
     public Logo toLogoEntity() {
         return new Logo(originalName, savedName);
     }
+
     public ActivityImage toActivityImageEntity() {
         return new ActivityImage(originalName, savedName);
     }
+
     public ExtraFile toExtraFileEntity(){
         return new ExtraFile(originalName, savedName);
     }
     public Thumbnail toThumbnailEntity() {
         return new Thumbnail(originalName, savedName);
     }
-
     public FileNames(String originalName, String savedName) {
         this.originalName = originalName;
         this.savedName = savedName;
@@ -43,5 +44,17 @@ public class FileNames {
         this.id = activityImage.getId();
         this.originalName = activityImage.getOriginalName();
         this.savedName = activityImage.getUploadedName();
+    }
+    public FileNames(Thumbnail thumbnail) {
+        this.id = thumbnail.getId();
+        this.originalName = thumbnail.getOriginalName();
+        this.savedName = thumbnail.getUploadedName();
+    }
+
+    public FileNames(ExtraFile extraFile) {
+        this.id = extraFile.getId();
+        this.originalName = extraFile.getOriginalName();
+        this.savedName = extraFile.getSavedName();
+
     }
 }
