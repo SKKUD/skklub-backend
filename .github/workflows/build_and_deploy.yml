@@ -9,9 +9,9 @@ name: Java CI with Gradle & Docker Deploy
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "develop" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "develop" ]
 
 permissions:
   contents: read
@@ -56,40 +56,8 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
       
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
-      with:
-        files: |
-          **/build/test-results/test/TEST-*.xml
     - name: Docker build & push
       run: |
         docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
         docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }} .
         docker push ${{ secrets.DOCKER_REPO }}
-    - name: Deploy
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ubuntu
-        key: ${{ secrets.PRIVATE_KEY }}
-        script: |
-          touch ./docker-compose.yml
-          echo "${{ secrets.DOCKER_COMPOSE }}" > ./docker-compose.yml
-          sudo docker rm -f $(docker ps -qa)
-          sudo docker pull ${{ secrets.DOCKER_REPO }}
-          sudo docker compose up -d
-          sudo docker image prune -f
-          
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-northeast-2
-
-    - name: Overwrite Api Document in S3
-      run: |
-        mkdir -p ./src/main/resources/static/docs
-        touch ./src/main/resources/static/docs/index.html
-        aws s3 cp ./src/main/resources/static/docs/index.html ${{ secrets.AWS_S3_API_DOCS }} --acl public-read
