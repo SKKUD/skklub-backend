@@ -4,6 +4,7 @@ import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
 import com.skklub.admin.domain.User;
+import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.ExtraFileRepository;
 import com.skklub.admin.repository.NoticeRepository;
 import com.skklub.admin.repository.UserRepository;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -158,7 +160,7 @@ public class NoticeServiceTest {
     @Test
     public void deleteExtraFile() throws Exception{
         //given
-        long extraFileId = 0L;
+        Long noticeId = 0L;
         Notice notice = new Notice("testTitle", "testContent", null, null);
         int fileCnt = 10;
         List<ExtraFile> extraFiles = new ArrayList<>();
@@ -166,15 +168,28 @@ public class NoticeServiceTest {
             extraFiles.add(new ExtraFile("Test_Ex" + i + ".png", "saved_Test_Ex" + i + ".png"));
         }
         notice.appendExtraFiles(extraFiles);
-        given(extraFileRepository.findByOriginalName("Test_Ex3.png")).willReturn(Optional.ofNullable(extraFiles.get(3)));
+        given(noticeRepository.findById(noticeId)).willReturn(Optional.of(notice));
+        given(extraFileRepository.findByOriginalNameAndNotice("Test_Ex3.png", notice)).willReturn(Optional.ofNullable(extraFiles.get(3)));
         doNothing().when(extraFileRepository).delete(extraFiles.get(3));
         
         //when
-        FileNames deletedFileName = noticeService.deleteExtraFile("Test_Ex3.png").get();
+        FileNames deletedFileName = noticeService.deleteExtraFile(noticeId, "Test_Ex3.png").get();
 
         //then
         Assertions.assertThat(deletedFileName.getOriginalName()).isEqualTo("Test_Ex3.png");
         Assertions.assertThat(deletedFileName.getSavedName()).isEqualTo("saved_Test_Ex3.png");
+    }
+
+    @Test
+    public void deleteExtraFile_BadNoticeId_NoticeIdMisMatchException() throws Exception{
+        //given
+        Long noticeId = -1L;
+        given(noticeRepository.findById(noticeId)).willReturn(Optional.empty());
+
+        //when
+        assertThrows(NoticeIdMisMatchException.class, () -> noticeService.deleteExtraFile(noticeId, "anyString"));
+
+        //then
 
     }
 

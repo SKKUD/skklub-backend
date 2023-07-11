@@ -59,6 +59,16 @@ class ClubServiceTest {
         testDataRepository = new TestDataRepository();
     }
 
+    @Test
+    public void asd() throws Exception{
+        //given
+
+        //when
+
+        //then
+        Assertions.assertThat(false).isTrue();
+    }
+
     /**
      * stub : save() id setting
      * check : relation mapping

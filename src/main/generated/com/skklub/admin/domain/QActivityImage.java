@@ -22,9 +22,17 @@ public class QActivityImage extends EntityPathBase<ActivityImage> {
 
     public static final QActivityImage activityImage = new QActivityImage("activityImage");
 
+    public final QBaseTimeEntity _super = new QBaseTimeEntity(this);
+
     public final QClub club;
 
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> lastModifiedAt = _super.lastModifiedAt;
 
     public final StringPath originalName = createString("originalName");
 

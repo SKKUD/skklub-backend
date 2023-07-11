@@ -30,7 +30,7 @@ public class NoticeController {
     private final NoticeService noticeService;
     private final NoticeRepository noticeRepository;
 
-    private final String DEFAULT_THUMBNAIL = "default_thumb.png";
+    private final static String DEFAULT_THUMBNAIL = "default_thumb.png";
 
 //=====CREATE=====//
 
@@ -90,7 +90,7 @@ public class NoticeController {
     }
 
     //썸네일(로고) 변경
-    @PatchMapping("/notice/thumbnail/{noticeId}")
+    @PostMapping("/notice/{noticeId}/thumbnail")
     public NoticeIdAndFileNamesResponse updateThumbnail(@PathVariable Long noticeId, @RequestParam MultipartFile thumbnailFile) {
         if (!noticeRepository.existsById(noticeId)) throw new NoticeIdMisMatchException();
         FileNames thumbnailFileName = s3Transferer.uploadOne(thumbnailFile);
@@ -128,8 +128,7 @@ public class NoticeController {
     //특정 파일 삭제
     @DeleteMapping("/notice/{noticeId}/{fileName}")
     public NoticeIdAndDeletedNameResponse deleteFileByOriginalName(@PathVariable Long noticeId, @PathVariable String fileName) {
-        if (!noticeRepository.existsById(noticeId)) throw new NoticeIdMisMatchException();
-        return noticeService.deleteExtraFile(fileName)
+        return noticeService.deleteExtraFile(noticeId, fileName)
                 .map(
                         deletedExtraFileNames -> {
                             s3Transferer.deleteOne(deletedExtraFileNames.getSavedName());
@@ -137,5 +136,4 @@ public class NoticeController {
                         }
                 ).orElseThrow(ExtraFileNameMisMatchException::new);
     }
-
 }

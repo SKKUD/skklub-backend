@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Thumbnail {
+public class Thumbnail extends BaseEntity{
     @Id
     @GeneratedValue
     @Column(name = "thumnail_id")

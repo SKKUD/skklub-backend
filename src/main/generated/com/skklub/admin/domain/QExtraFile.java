@@ -22,7 +22,15 @@ public class QExtraFile extends EntityPathBase<ExtraFile> {
 
     public static final QExtraFile extraFile = new QExtraFile("extraFile");
 
+    public final QBaseTimeEntity _super = new QBaseTimeEntity(this);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> lastModifiedAt = _super.lastModifiedAt;
 
     public final QNotice notice;
 

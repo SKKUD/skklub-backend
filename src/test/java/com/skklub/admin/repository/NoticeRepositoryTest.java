@@ -241,7 +241,34 @@ public class NoticeRepositoryTest {
                 .map(ExtraFile::getId)
                 .forEach(extraFilesId -> Assertions.assertThat(extraFileRepository.findById(extraFilesId).isEmpty()));
     }
-    
+
+    @Test
+    public void findByOriginalNameAndNotice_FileNameInAnotherNotice_ReturnEmpty() throws Exception{
+        //given
+        Notice noticeA = new Notice("testTitle", "testContent", null, null);
+        Notice noticeB = new Notice("testTitle", "testContent", null, null);
+        int fileCnt = 10;
+        List<ExtraFile> extraFiles = new ArrayList<>();
+        for (int i = 0; i < fileCnt; i++) {
+            extraFiles.add(new ExtraFile("Test_Ex" + i + ".png", "saved_Test_Ex" + i + ".png"));
+        }
+        noticeA.appendExtraFiles(extraFiles);
+        noticeRepository.save(noticeA);
+        noticeRepository.save(noticeB);
+        extraFileRepository.saveAll(extraFiles);
+        em.flush();
+        em.clear();
+
+        //when
+        Optional<ExtraFile> findedExtraFileFromA = extraFileRepository.findByOriginalNameAndNotice("Test_Ex3.png", noticeA);
+        Optional<ExtraFile> findedExtraFileFromB = extraFileRepository.findByOriginalNameAndNotice("Test_Ex3.png", noticeB);
+
+        //then
+        Assertions.assertThat(findedExtraFileFromA).isNotEmpty();
+        Assertions.assertThat(findedExtraFileFromB).isEmpty();
+
+    }
+
     @Test
     public void extraFileDelete_SavedNotice_CheckListSize() throws Exception{
         //given
@@ -252,13 +279,15 @@ public class NoticeRepositoryTest {
             extraFiles.add(new ExtraFile("Test_Ex" + i + ".png", "saved_Test_Ex" + i + ".png"));
         }
         notice.appendExtraFiles(extraFiles);
-        extraFileRepository.saveAll(extraFiles);
         noticeRepository.save(notice);
+        extraFileRepository.saveAll(extraFiles);
         em.flush();
         em.clear();
 
         //when
-        Optional<ExtraFile> findedExtraFile = extraFileRepository.findByOriginalName("Test_Ex3.png");
+        log.info("=============One Query===============");
+        Optional<ExtraFile> findedExtraFile = extraFileRepository.findByOriginalNameAndNotice("Test_Ex3.png", notice);
+        log.info("=============One Query===============");
         extraFileRepository.delete(findedExtraFile.get());
         em.flush();
         em.clear();

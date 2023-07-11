@@ -12,7 +12,7 @@ import java.util.Map;
 @Getter
 @EqualsAndHashCode(exclude = "club")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ActivityImage {
+public class ActivityImage extends BaseTimeEntity{
     @Id @Column(name = "activity_image_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

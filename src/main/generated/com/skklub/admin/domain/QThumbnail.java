@@ -19,7 +19,21 @@ public class QThumbnail extends EntityPathBase<Thumbnail> {
 
     public static final QThumbnail thumbnail = new QThumbnail("thumbnail");
 
+    public final QBaseEntity _super = new QBaseEntity(this);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> lastModifiedAt = _super.lastModifiedAt;
+
+    //inherited
+    public final StringPath lastModifiedBy = _super.lastModifiedBy;
 
     public final StringPath originalName = createString("originalName");
 

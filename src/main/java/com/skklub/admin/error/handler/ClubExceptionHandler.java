@@ -144,4 +144,15 @@ public class ClubExceptionHandler {
                 .build();
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
     }
+
+    @ExceptionHandler(ExtraFileNameMisMatchException.class)
+    public ResponseEntity<ErrorResponse> extraFileNameMisMatchException(ExtraFileNameMisMatchException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("fileName")
+                .given("path variable")
+                .reasonMessage("대상 공지글의 파일 중 입력된 파일명과 일치하는 파일이 존재하지 않습니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+
+    }
 }

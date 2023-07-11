@@ -83,8 +83,10 @@ public class NoticeService {
                 );
     }
 
-    public Optional<FileNames> deleteExtraFile(String fileName) {
-        return extraFileRepository.findByOriginalName(fileName)
+    public Optional<FileNames> deleteExtraFile(Long noticeId, String fileName) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(NoticeIdMisMatchException::new);
+        return extraFileRepository.findByOriginalNameAndNotice(fileName, notice)
                 .map(
                         extraFile -> {
                             extraFileRepository.delete(extraFile);

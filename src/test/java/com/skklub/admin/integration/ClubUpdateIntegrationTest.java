@@ -1,7 +1,6 @@
 package com.skklub.admin.integration;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.mysql.cj.exceptions.AssertionFailedException;
 import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;

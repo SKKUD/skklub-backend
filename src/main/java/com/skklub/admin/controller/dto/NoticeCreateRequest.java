@@ -2,13 +2,11 @@ package com.skklub.admin.controller.dto;
 
 import com.skklub.admin.domain.Notice;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Builder
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class NoticeCreateRequest {
