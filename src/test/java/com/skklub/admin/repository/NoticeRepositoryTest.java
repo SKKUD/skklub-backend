@@ -138,4 +138,175 @@ public class NoticeRepositoryTest {
         Assertions.assertThat(extraFilesFromNotice.size()).isEqualTo(fileCnt + beforeFileCnt);
         Assertions.assertThat(extraFilesFromNotice).containsAll(extraFiles);
     }
+
+    @Test
+    public void getThumbnail_FromFindedNotice_LazyCheck() throws Exception{
+        //given
+        String originalName = "testThumb.jpg";
+        String uploadedName = "savedTestThumb.jpg";
+        Thumbnail thumbnail = new Thumbnail(originalName, uploadedName);
+        Notice notice = new Notice("testTitle", "testContent", null, thumbnail);
+        em.persist(thumbnail);
+        em.persist(notice);
+        em.flush();
+        em.clear();
+
+        //when
+        Optional<Notice> findedNotice = noticeRepository.findById(notice.getId());
+        log.info("=======================Select For Lazy=============================");
+        Thumbnail findedThumbnail = findedNotice.get().getThumbnail();
+
+        //then
+        Assertions.assertThat(findedThumbnail.getOriginalName()).isEqualTo(originalName);
+        Assertions.assertThat(findedThumbnail.getUploadedName()).isEqualTo(uploadedName);
+    }
+
+    @Test
+    public void noticeUpdate_FromSavedNotice_Success() throws Exception{
+        //given
+        Notice notice = new Notice("testTitle", "testContent", null, null);
+        em.persist(notice);
+        em.flush();
+        em.clear();
+        Notice updateInfo = new Notice("testTitle", "testContent2", null, null);
+
+        //when
+        Optional<Notice> findedNotice = noticeRepository.findById(notice.getId());
+        findedNotice.get().update(updateInfo);
+        em.flush();
+        em.clear();
+
+        //then
+        Optional<Notice> afterChanged = noticeRepository.findById(notice.getId());
+        Assertions.assertThat(afterChanged.get().getTitle()).isEqualTo("testTitle");
+        Assertions.assertThat(afterChanged.get().getContent()).isEqualTo("testContent2");
+
+
+    }
+
+    @Test
+    public void thumbnailUpdate_FromSavedNotice_Success() throws Exception{
+        //given
+        String originalName = "testThumb.jpg";
+        String uploadedName = "savedTestThumb.jpg";
+        Thumbnail thumbnail = new Thumbnail(originalName, uploadedName);
+        Notice notice = new Notice("testTitle", "testContent", null, thumbnail);
+        em.persist(thumbnail);
+        em.persist(notice);
+        em.flush();
+        em.clear();
+        Thumbnail changeInfo = new Thumbnail("testThumb2.jpg", "savedThumb2.jpg");
+
+        //when
+        Optional<Notice> findedNotice = noticeRepository.findById(notice.getId());
+        Thumbnail findedThumbnail = findedNotice.get().getThumbnail();
+        findedThumbnail.update(changeInfo);
+        em.flush();
+        em.clear();
+
+        //then
+        Optional<Notice> noticeAfterChanged = noticeRepository.findById(notice.getId());
+        Thumbnail thumbnailAfterChanged = findedNotice.get().getThumbnail();
+        Assertions.assertThat(thumbnailAfterChanged.getId()).isEqualTo(thumbnail.getId());
+        Assertions.assertThat(thumbnailAfterChanged.getUploadedName()).isEqualTo(changeInfo.getUploadedName());
+        Assertions.assertThat(thumbnailAfterChanged.getOriginalName()).isEqualTo(changeInfo.getOriginalName());
+    }
+
+    @Test
+    public void noticeDelete_FromSavedNoticeWithFullFiles_CannotFind() throws Exception{
+        //given
+        Thumbnail thumbnail = new Thumbnail("testThumb.jpg", "savedTestThumb.jpg");
+        Notice notice = new Notice("testTitle", "testContent", null, thumbnail);
+        int fileCnt = 10;
+        List<ExtraFile> extraFiles = new ArrayList<>();
+        for (int i = 0; i < fileCnt; i++) {
+            extraFiles.add(new ExtraFile("Test_Ex" + i + ".png", "saved_Test_Ex" + i + ".png"));
+        }
+        notice.appendExtraFiles(extraFiles);
+        extraFileRepository.saveAll(extraFiles);
+        noticeRepository.save(notice);
+        em.flush();
+        em.clear();
+
+        //when
+        Notice savedNotice = noticeRepository.findById(notice.getId()).get();
+        noticeRepository.delete(savedNotice);
+        em.flush();
+        em.clear();
+
+        //then
+        Assertions.assertThat(noticeRepository.findById(notice.getId())).isEmpty();
+        Assertions.assertThat(em.find(Thumbnail.class, thumbnail.getId())).isNull();
+        extraFiles.stream()
+                .map(ExtraFile::getId)
+                .forEach(extraFilesId -> Assertions.assertThat(extraFileRepository.findById(extraFilesId).isEmpty()));
+    }
+
+    @Test
+    public void findByOriginalNameAndNotice_FileNameInAnotherNotice_ReturnEmpty() throws Exception{
+        //given
+        Notice noticeA = new Notice("testTitle", "testContent", null, null);
+        Notice noticeB = new Notice("testTitle", "testContent", null, null);
+        int fileCnt = 10;
+        List<ExtraFile> extraFiles = new ArrayList<>();
+        for (int i = 0; i < fileCnt; i++) {
+            extraFiles.add(new ExtraFile("Test_Ex" + i + ".png", "saved_Test_Ex" + i + ".png"));
+        }
+        noticeA.appendExtraFiles(extraFiles);
+        noticeRepository.save(noticeA);
+        noticeRepository.save(noticeB);
+        extraFileRepository.saveAll(extraFiles);
+        em.flush();
+        em.clear();
+
+        //when
+        Optional<ExtraFile> findedExtraFileFromA = extraFileRepository.findByOriginalNameAndNotice("Test_Ex3.png", noticeA);
+        Optional<ExtraFile> findedExtraFileFromB = extraFileRepository.findByOriginalNameAndNotice("Test_Ex3.png", noticeB);
+
+        //then
+        Assertions.assertThat(findedExtraFileFromA).isNotEmpty();
+        Assertions.assertThat(findedExtraFileFromB).isEmpty();
+
+    }
+
+    @Test
+    public void extraFileDelete_SavedNotice_CheckListSize() throws Exception{
+        //given
+        Notice notice = new Notice("testTitle", "testContent", null, null);
+        int fileCnt = 10;
+        List<ExtraFile> extraFiles = new ArrayList<>();
+        for (int i = 0; i < fileCnt; i++) {
+            extraFiles.add(new ExtraFile("Test_Ex" + i + ".png", "saved_Test_Ex" + i + ".png"));
+        }
+        notice.appendExtraFiles(extraFiles);
+        noticeRepository.save(notice);
+        extraFileRepository.saveAll(extraFiles);
+        em.flush();
+        em.clear();
+
+        //when
+        log.info("=============One Query===============");
+        Optional<ExtraFile> findedExtraFile = extraFileRepository.findByOriginalNameAndNotice("Test_Ex3.png", notice);
+        log.info("=============One Query===============");
+        extraFileRepository.delete(findedExtraFile.get());
+        em.flush();
+        em.clear();
+
+        //then
+        Optional<Notice> afterDeletionNotice = noticeRepository.findById(notice.getId());
+        Assertions.assertThat(afterDeletionNotice.get().getExtraFiles()).hasSize(fileCnt - 1);
+        Assertions.assertThat(afterDeletionNotice.get().getExtraFiles()).containsExactly(
+                extraFiles.get(0),
+                extraFiles.get(1),
+                extraFiles.get(2),
+                extraFiles.get(4),
+                extraFiles.get(5),
+                extraFiles.get(6),
+                extraFiles.get(7),
+                extraFiles.get(8),
+                extraFiles.get(9)
+        );
+
+
+    }
 }

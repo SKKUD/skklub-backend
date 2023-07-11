@@ -2,6 +2,7 @@ package com.skklub.admin.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Notice {
+public class Notice extends BaseEntity{
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "notice_id")
     private Long id;
@@ -23,7 +24,7 @@ public class Notice {
     @JoinColumn(name = "user_id")
     private User writer;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "thumbnail_id")
     private Thumbnail thumbnail;
 
@@ -44,4 +45,8 @@ public class Notice {
         }
     }
 
+    public void update(Notice updateInfo) {
+        this.title = updateInfo.getTitle();
+        this.content = updateInfo.getContent();
+    }
 }

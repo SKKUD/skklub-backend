@@ -1,5 +1,6 @@
 package com.skklub.admin;
 
+import ch.qos.logback.core.pattern.color.BoldCyanCompositeConverter;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.skklub.admin.controller.S3Transferer;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,6 +63,8 @@ public class InitDatabase {
         private String bucket;
         @Autowired
         private TestDataRepository testDataRepository;
+        @Autowired
+        private BCryptPasswordEncoder bCryptPasswordEncoder;
 
         @Transactional
         public void init() throws IOException {
@@ -141,11 +145,13 @@ public class InitDatabase {
         }
 
         private User readyUser(int index) {
+            String password = bCryptPasswordEncoder.encode("password" + index);
             return new User("userId" + index,
-                    "password" + index,
+                    password,
                     Role.ROLE_USER,
                     "user_" + index,
                     "user contact_" + index);
+
         }
 
         @Transactional
