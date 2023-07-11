@@ -156,10 +156,9 @@ public class InitDatabase {
 
         @Transactional
         public void cleanS3() {
-//            s3Transferer.deleteOne("alt.jpg");
-//            cleanLogoInS3();
-//            cleanActivityImagesInS3();
-            amazonS3.deleteBucket(bucket);
+            s3Transferer.deleteOne("alt.jpg");
+            cleanLogoInS3();
+            cleanActivityImagesInS3();
         }
 
         private void cleanActivityImagesInS3() {
