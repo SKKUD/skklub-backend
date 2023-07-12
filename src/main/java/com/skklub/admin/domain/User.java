@@ -6,7 +6,6 @@ import lombok.*;
 
 @Entity
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseTimeEntity {
     @Id @Column(name = "user_id")
@@ -24,6 +23,10 @@ public class User extends BaseTimeEntity {
         this.role = role;
         this.name = name;
         this.contact = contact;
+    }
+
+    public void update(User updateInfo) {
+
     }
 
 }

@@ -94,4 +94,12 @@ public class NoticeService {
                         }
                 );
     }
+
+    public Optional<Notice> findPreNotice(Notice notice) {
+        return noticeRepository.findTopByByCreatedAtLessThanEqualOrderByCreatedAtDesc(notice.getCreatedAt());
+    }
+
+    public Optional<Notice> findPostNotice(Notice notice) {
+        return noticeRepository.findTopByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(notice.getCreatedAt());
+    }
 }

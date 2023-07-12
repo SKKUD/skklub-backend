@@ -14,6 +14,7 @@ import com.skklub.admin.service.NoticeService;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -73,40 +74,43 @@ public class NoticeController {
     //세부 조회
     @GetMapping("/notice/{noticeId}")
     public NoticeDetailResponse getDetailNotice(@PathVariable Long noticeId) {
-
+        Notice notice = noticeRepository.findDetailById(noticeId).orElseThrow(NoticeIdMisMatchException::new);
+        Optional<Notice> preNotice = noticeService.findPreNotice(notice);
+        Optional<Notice> postNotice = noticeService.findPostNotice(notice);
+        return new NoticeDetailResponse(notice, preNotice, postNotice);
     }
 
-    //파일 조회
-    @GetMapping("/notice/file")
-    public S3DownloadDto getFile(@RequestParam String fileSavedName) {
-        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(null, fileSavedName));
-        return s3DownloadDto;
-    }
+//    //파일 조회
+//    @GetMapping("/notice/file")
+//    public Resource getFile(@RequestParam String fileSavedName) {
+//        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(null, fileSavedName));
+//        return s3DownloadDto;
+//    }
 
-    //목록 조회(with 썸네일)
-    @GetMapping("/notice/prev/thumbnail")
-    public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
-
-    }
-
-    //목록 조회(전체, 시간순)
-    @GetMapping("/notice/prev")
-    public Page<NoticePrevResponse> getNoticePrev(@RequestParam(required = false, defaultValue = "전체") Campus campus, Pageable pageable) {
-
-    }
-
-    //목록 조회(제목 검색, 시간순)
-    @GetMapping("/notice/prev/search/title")
-    public Page<NoticePrevResponse> getNoticePrevByTitle(@RequestParam String title, Pageable pageable) {
-
-    }
-
-
-    //목록 조회(작성자 검색, 시간순)
-    @GetMapping("/notice/prev/search/writer")
-    public Page<NoticePrevResponse> getNoticePrevByWriter(@RequestParam String writer, Pageable pageable) {
-
-    }
+//    //목록 조회(with 썸네일)
+//    @GetMapping("/notice/prev/thumbnail")
+//    public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
+//
+//    }
+//
+//    //목록 조회(전체, 시간순)
+//    @GetMapping("/notice/prev")
+//    public Page<NoticePrevResponse> getNoticePrev(@RequestParam(required = false, defaultValue = "전체") Campus campus, Pageable pageable) {
+//
+//    }
+//
+//    //목록 조회(제목 검색, 시간순)
+//    @GetMapping("/notice/prev/search/title")
+//    public Page<NoticePrevResponse> getNoticePrevByTitle(@RequestParam String title, Pageable pageable) {
+//
+//    }
+//
+//
+//    //목록 조회(작성자 검색, 시간순)
+//    @GetMapping("/notice/prev/search/writer")
+//    public Page<NoticePrevResponse> getNoticePrevByWriter(@RequestParam String writer, Pageable pageable) {
+//
+//    }
 
 
 //=====UPDATE=====//

@@ -7,6 +7,8 @@ import com.skklub.admin.controller.dto.NoticeCreateRequest;
 import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
+import com.skklub.admin.domain.User;
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.NoticeRepository;
 import com.skklub.admin.service.NoticeService;
@@ -32,9 +34,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,8 +48,7 @@ import java.util.stream.Collectors;
 import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -561,4 +565,247 @@ public class NoticeControllerTest {
         //then
         
     }
+    
+    @Test
+    public void getDetailNotice_HasPrePost_Success() throws Exception{
+        //given
+        Long noticeId = 0L;
+        User user = new User(null, null, Role.ROLE_ADMIN, "홍길동", null);
+        Notice notice = new Notice("Test Title", "Test Content", user, null);
+        settingCreatedAt(notice);
+        int fileCnt = 10;
+        List<ExtraFile> extraFiles = readyFileNames(fileCnt).stream()
+                .map(FileNames::toExtraFileEntity)
+                .collect(Collectors.toList());
+        Field extraFileIdField = extraFiles.get(0).getClass().getDeclaredField("id");
+        extraFileIdField.setAccessible(true);
+        for (int i = 0; i < fileCnt; i++) {
+            extraFileIdField.set(extraFiles.get(i), Long.valueOf(i));
+        }
+        notice.appendExtraFiles(extraFiles);
+        Optional<Notice> preNotice = Optional.of(new Notice("Test Pre Title", null, null, null));
+        Optional<Notice> postNotice = Optional.of(new Notice("Test Post Title", null, null, null));
+        Field idField = preNotice.get().getClass().getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(notice, noticeId);
+        idField.set(preNotice.get(), 1L);
+        idField.set(postNotice.get(), 1L);
+        given(noticeRepository.findDetailById(noticeId)).willReturn(Optional.of(notice));
+        given(noticeService.findPreNotice(notice)).willReturn(preNotice);
+        given(noticeService.findPostNotice(notice)).willReturn(postNotice);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/notice/{noticeId}", noticeId)
+                        .with(csrf())
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.noticeId").value(noticeId))
+                .andExpect(jsonPath("$.title").value(notice.getTitle()))
+                .andExpect(jsonPath("$.content").value(notice.getContent()))
+                .andExpect(jsonPath("$.writerName").value(user.getName()))
+                .andExpect(jsonPath("$.createdAt").value(notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()))
+                .andExpect(jsonPath("$.preNotice.id").value(preNotice.get().getId()))
+                .andExpect(jsonPath("$.preNotice.title").value(preNotice.get().getTitle()))
+                .andExpect(jsonPath("$.postNotice.id").value(postNotice.get().getId()))
+                .andExpect(jsonPath("$.postNotice.title").value(postNotice.get().getTitle()));
+        for (int i = 0; i < fileCnt; i++) {
+            actions.andExpect(jsonPath("$.extraFileNames[" + i + "].id").value(extraFiles.get(i).getId()))
+                    .andExpect(jsonPath("$.extraFileNames[" + i + "].originalName").value(extraFiles.get(i).getOriginalName()))
+                    .andExpect(jsonPath("$.extraFileNames[" + i + "].savedName").value(extraFiles.get(i).getSavedName()));
+        }
+        actions.andDo(
+                document(
+                        "notice/read/detail",
+                        pathParameters(
+                                parameterWithName("noticeId").description("공지 ID").attributes(example(noticeId.toString()))
+                        ),
+                        responseFields(
+                                fieldWithPath("noticeId").type(WireFormat.FieldType.INT64).description("공지 ID").attributes(example(noticeId.toString())),
+                                fieldWithPath("title").type(WireFormat.FieldType.STRING).description("공지사항 제목").attributes(example(notice.getTitle())),
+                                fieldWithPath("content").type(WireFormat.FieldType.STRING).description("공지사항 내용").attributes(example(notice.getContent())),
+                                fieldWithPath("writerName").type(WireFormat.FieldType.STRING).description("작성자").attributes(example(user.getName())),
+                                fieldWithPath("createdAt").type(WireFormat.FieldType.STRING).description("작성일자").attributes(example(notice.getCreatedAt().toString())),
+                                fieldWithPath("preNotice.id").type(WireFormat.FieldType.INT64).description("이전 공지 ID").attributes(example(preNotice.get().getId().toString())),
+                                fieldWithPath("preNotice.title").type(WireFormat.FieldType.STRING).description("이전 공지 제목").attributes(example(preNotice.get().getTitle())),
+                                fieldWithPath("postNotice.id").type(WireFormat.FieldType.INT64).description("다음 공지 ID").attributes(example(postNotice.get().getId().toString())),
+                                fieldWithPath("postNotice.title").type(WireFormat.FieldType.STRING).description("다음 공지 제목").attributes(example(postNotice.get().getTitle())),
+                                fieldWithPath("extraFileNames[].id").type(WireFormat.FieldType.INT64).description("첨부 파일 식별용 ID").attributes(example("1")),
+                                fieldWithPath("extraFileNames[].originalName").type(WireFormat.FieldType.STRING).description("첨부 파일 원 파일명").attributes(example(extraFiles.get(1).getOriginalName())),
+                                fieldWithPath("extraFileNames[].savedName").type(WireFormat.FieldType.STRING).description("첨부 파일 S3 저장명").attributes(example("eb0808d7-83ee-4ee6-aa1e-e0359dcb54b3.hwp"))
+                                )
+                )
+        );
+    }
+
+    private void settingCreatedAt(Notice notice) throws NoSuchFieldException, IllegalAccessException {
+        Field createdAtField = notice.getClass().getSuperclass().getSuperclass().getDeclaredField("createdAt");
+        createdAtField.setAccessible(true);
+        createdAtField.set(notice, LocalDateTime.now());
+    }
+
+    @Test
+    public void getDetailNotice_NoPre_Success() throws Exception{
+        //given
+        Long noticeId = 0L;
+        User user = new User(null, null, Role.ROLE_ADMIN, "홍길동", null);
+        Notice notice = new Notice("Test Title", "Test Content", user, null);
+        settingCreatedAt(notice);
+        int fileCnt = 10;
+        List<ExtraFile> extraFiles = readyFileNames(fileCnt).stream()
+                .map(FileNames::toExtraFileEntity)
+                .collect(Collectors.toList());
+        Field extraFileIdField = extraFiles.get(0).getClass().getDeclaredField("id");
+        extraFileIdField.setAccessible(true);
+        for (int i = 0; i < fileCnt; i++) {
+            extraFileIdField.set(extraFiles.get(i), Long.valueOf(i));
+        }
+        notice.appendExtraFiles(extraFiles);
+        Optional<Notice> postNotice = Optional.of(new Notice("Test Post Title", null, null, null));
+        Field idField = postNotice.get().getClass().getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(notice, noticeId);
+        idField.set(postNotice.get(), 1L);
+        given(noticeRepository.findDetailById(noticeId)).willReturn(Optional.of(notice));
+        given(noticeService.findPreNotice(notice)).willReturn(Optional.empty());
+        given(noticeService.findPostNotice(notice)).willReturn(postNotice);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/notice/{noticeId}", noticeId)
+                        .with(csrf())
+        );
+        
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.noticeId").value(noticeId))
+                .andExpect(jsonPath("$.title").value(notice.getTitle()))
+                .andExpect(jsonPath("$.content").value(notice.getContent()))
+                .andExpect(jsonPath("$.writerName").value(user.getName()))
+                .andExpect(jsonPath("$.createdAt").value(notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()))
+                .andExpect(jsonPath("$.preNotice").isEmpty())
+                .andExpect(jsonPath("$.postNotice.id").value(postNotice.get().getId()))
+                .andExpect(jsonPath("$.postNotice.title").value(postNotice.get().getTitle()));
+        for (int i = 0; i < fileCnt; i++) {
+            actions.andExpect(jsonPath("$.extraFileNames[" + i + "].id").value(extraFiles.get(i).getId()))
+                    .andExpect(jsonPath("$.extraFileNames[" + i + "].originalName").value(extraFiles.get(i).getOriginalName()))
+                    .andExpect(jsonPath("$.extraFileNames[" + i + "].savedName").value(extraFiles.get(i).getSavedName()));
+        }
+        
+    }
+
+    @Test
+    public void getDetailNotice_NoPost_Success() throws Exception{
+        //given
+        Long noticeId = 0L;
+        User user = new User(null, null, Role.ROLE_ADMIN, "홍길동", null);
+        Notice notice = new Notice("Test Title", "Test Content", user, null);
+        settingCreatedAt(notice);
+        int fileCnt = 10;
+        List<ExtraFile> extraFiles = readyFileNames(fileCnt).stream()
+                .map(FileNames::toExtraFileEntity)
+                .collect(Collectors.toList());
+        Field extraFileIdField = extraFiles.get(0).getClass().getDeclaredField("id");
+        extraFileIdField.setAccessible(true);
+        for (int i = 0; i < fileCnt; i++) {
+            extraFileIdField.set(extraFiles.get(i), Long.valueOf(i));
+        }
+        notice.appendExtraFiles(extraFiles);
+        Optional<Notice> preNotice = Optional.of(new Notice("Test Post Title", null, null, null));
+        Field idField = preNotice.get().getClass().getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(notice, noticeId);
+        idField.set(preNotice.get(), 1L);
+        given(noticeRepository.findDetailById(noticeId)).willReturn(Optional.of(notice));
+        given(noticeService.findPreNotice(notice)).willReturn(preNotice);
+        given(noticeService.findPostNotice(notice)).willReturn(Optional.empty());
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/notice/{noticeId}", noticeId)
+                        .with(csrf())
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.noticeId").value(noticeId))
+                .andExpect(jsonPath("$.title").value(notice.getTitle()))
+                .andExpect(jsonPath("$.content").value(notice.getContent()))
+                .andExpect(jsonPath("$.writerName").value(user.getName()))
+                .andExpect(jsonPath("$.createdAt").value(notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()))
+                .andExpect(jsonPath("$.preNotice.id").value(preNotice.get().getId()))
+                .andExpect(jsonPath("$.preNotice.title").value(preNotice.get().getTitle()))
+                .andExpect(jsonPath("$.postNotice").isEmpty());
+        for (int i = 0; i < fileCnt; i++) {
+            actions.andExpect(jsonPath("$.extraFileNames[" + i + "].id").value(extraFiles.get(i).getId()))
+                    .andExpect(jsonPath("$.extraFileNames[" + i + "].originalName").value(extraFiles.get(i).getOriginalName()))
+                    .andExpect(jsonPath("$.extraFileNames[" + i + "].savedName").value(extraFiles.get(i).getSavedName()));
+        }
+    }
+    
+    @Test
+    public void getDetailNotice_NoPreAndPost_Success() throws Exception{
+        //given
+        Long noticeId = 0L;
+        User user = new User(null, null, Role.ROLE_ADMIN, "홍길동", null);
+        Notice notice = new Notice("Test Title", "Test Content", user, null);
+        settingCreatedAt(notice);
+        int fileCnt = 10;
+        List<ExtraFile> extraFiles = readyFileNames(fileCnt).stream()
+                .map(FileNames::toExtraFileEntity)
+                .collect(Collectors.toList());
+        Field extraFileIdField = extraFiles.get(0).getClass().getDeclaredField("id");
+        extraFileIdField.setAccessible(true);
+        for (int i = 0; i < fileCnt; i++) {
+            extraFileIdField.set(extraFiles.get(i), Long.valueOf(i));
+        }
+        notice.appendExtraFiles(extraFiles);
+        Field idField = notice.getClass().getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(notice, noticeId);
+        given(noticeRepository.findDetailById(noticeId)).willReturn(Optional.of(notice));
+        given(noticeService.findPreNotice(notice)).willReturn(Optional.empty());
+        given(noticeService.findPostNotice(notice)).willReturn(Optional.empty());
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/notice/{noticeId}", noticeId)
+                        .with(csrf())
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.noticeId").value(noticeId))
+                .andExpect(jsonPath("$.title").value(notice.getTitle()))
+                .andExpect(jsonPath("$.content").value(notice.getContent()))
+                .andExpect(jsonPath("$.writerName").value(user.getName()))
+                .andExpect(jsonPath("$.createdAt").value(notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()))
+                .andExpect(jsonPath("$.preNotice").isEmpty())
+                .andExpect(jsonPath("$.postNotice").isEmpty());
+        for (int i = 0; i < fileCnt; i++) {
+            actions.andExpect(jsonPath("$.extraFileNames[" + i + "].id").value(extraFiles.get(i).getId()))
+                    .andExpect(jsonPath("$.extraFileNames[" + i + "].originalName").value(extraFiles.get(i).getOriginalName()))
+                    .andExpect(jsonPath("$.extraFileNames[" + i + "].savedName").value(extraFiles.get(i).getSavedName()));
+        }
+    }
+    
+    @Test
+    public void getDetailNotice_BadNoticeId_NoticeIdMisMatchException() throws Exception{
+        //given
+        Long noticeId = -1L;
+        given(noticeRepository.findDetailById(noticeId)).willReturn(Optional.empty());
+        
+        //when
+        MvcResult badIdResult = mockMvc.perform(
+                get("/notice/{noticeId}", noticeId)
+                        .with(csrf())
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
+    }
+
+
 }

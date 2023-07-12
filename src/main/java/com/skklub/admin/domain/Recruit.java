@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit;
 
 @Entity
 @Getter
-@EqualsAndHashCode(exclude = "club")
+@EqualsAndHashCode(exclude = {"id"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Recruit extends BaseEntity {
     @Id

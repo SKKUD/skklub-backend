@@ -4,9 +4,11 @@ import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
 import com.skklub.admin.domain.User;
+import com.skklub.admin.domain.enums.Role;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.hibernate.proxy.HibernateProxy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -223,8 +225,8 @@ public class NoticeRepositoryTest {
             extraFiles.add(new ExtraFile("Test_Ex" + i + ".png", "saved_Test_Ex" + i + ".png"));
         }
         notice.appendExtraFiles(extraFiles);
-        extraFileRepository.saveAll(extraFiles);
         noticeRepository.save(notice);
+        extraFileRepository.saveAll(extraFiles);
         em.flush();
         em.clear();
 
@@ -307,6 +309,41 @@ public class NoticeRepositoryTest {
                 extraFiles.get(9)
         );
 
+
+    }
+    
+    @Test
+    public void findDetailById_NoticeWithThumbnailAndUserAndExtraFiles_ThumbnailNotLoadedAndOneQuery() throws Exception{
+        //given
+        User user = new User("testUserId", "testUserPw", Role.ROLE_USER, "홍길동", "010-1111-1111");
+        Thumbnail thumbnail = new Thumbnail("testThumb.jpg", "savedTestThumb.jpg");
+        Notice notice = new Notice("testTitle", "testContent", user, thumbnail);
+        int fileCnt = 10;
+        List<ExtraFile> extraFiles = new ArrayList<>();
+        for (int i = 0; i < fileCnt; i++) {
+            extraFiles.add(new ExtraFile("Test_Ex" + i + ".png", "saved_Test_Ex" + i + ".png"));
+        }
+        notice.appendExtraFiles(extraFiles);
+        userRepository.save(user);
+        noticeRepository.save(notice);
+        extraFileRepository.saveAll(extraFiles);
+        em.flush();
+        em.clear();
+        
+        //when
+        Notice findedDetailNotice = noticeRepository.findDetailById(notice.getId()).get();
+
+        //then
+        log.info("=============================================");
+        Assertions.assertThat(findedDetailNotice.getTitle()).isEqualTo(notice.getTitle());
+        Assertions.assertThat(findedDetailNotice.getContent()).isEqualTo(notice.getContent());
+        Assertions.assertThat(findedDetailNotice.getThumbnail()).isInstanceOf(HibernateProxy.class);
+        Assertions.assertThat(findedDetailNotice.getWriter()).isNotInstanceOf(HibernateProxy.class);
+        Assertions.assertThat(findedDetailNotice.getWriter().getName()).isEqualTo(user.getName());
+        for (ExtraFile extraFile : findedDetailNotice.getExtraFiles()) {
+            Assertions.assertThat(extraFile).isNotInstanceOf(HibernateProxy.class);
+        }
+        Assertions.assertThat(findedDetailNotice.getExtraFiles()).containsAll(extraFiles);
 
     }
 }
