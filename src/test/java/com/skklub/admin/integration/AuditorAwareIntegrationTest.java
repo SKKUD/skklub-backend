@@ -56,7 +56,6 @@ public class AuditorAwareIntegrationTest {
         //then
         Assertions.assertThat(club.get().getCreatedBy()).isEqualTo("tester");
         Assertions.assertThat(club.get().getLastModifiedBy()).isEqualTo("tester");
-
     }
 
 }
