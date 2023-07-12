@@ -344,6 +344,103 @@ public class NoticeRepositoryTest {
             Assertions.assertThat(extraFile).isNotInstanceOf(HibernateProxy.class);
         }
         Assertions.assertThat(findedDetailNotice.getExtraFiles()).containsAll(extraFiles);
+    }
+    
+    @Test
+    public void findPreAndPost_10NoticeEverySecond_CheckIdOrder() throws Exception{
+        //given
+        int noticeCnt = 6;
+        List<Notice> notices = new ArrayList<>();
+        for(int i = 0; i < noticeCnt; i++){
+            notices.add(new Notice("test title " + i, "test content " + i, null, null));
+        }
+        for (Notice notice : notices) {
+            noticeRepository.save(notice);
+            Thread.sleep(1000);
+        }
+        em.flush();
+        em.clear();
 
+
+        //when
+        List<Notice> findedNotices = noticeRepository.findAllById(
+                notices.stream().map(Notice::getId).collect(Collectors.toList())
+        );
+        em.flush();
+        em.clear();
+        int standIndex = 3;
+        Optional<Notice> preNotice = noticeRepository.findPreByCreatedAt(findedNotices.get(standIndex).getCreatedAt());
+        Optional<Notice> postNotice = noticeRepository.findPostByCreatedAt(findedNotices.get(standIndex).getCreatedAt());
+
+        //then
+        Assertions.assertThat(preNotice).isNotEmpty();
+        Assertions.assertThat(postNotice).isNotEmpty();
+        Assertions.assertThat(preNotice.get().getId()).isEqualTo(findedNotices.get(standIndex - 1).getId());
+        Assertions.assertThat(postNotice.get().getId()).isEqualTo(findedNotices.get(standIndex + 1).getId());
+    }
+
+
+    @Test
+    public void findPreAndPost_NoPre_CheckIdOrder() throws Exception{
+        //given
+        int noticeCnt = 6;
+        List<Notice> notices = new ArrayList<>();
+        for(int i = 0; i < noticeCnt; i++){
+            notices.add(new Notice("test title " + i, "test content " + i, null, null));
+        }
+        for (Notice notice : notices) {
+            noticeRepository.save(notice);
+            Thread.sleep(1000);
+        }
+        em.flush();
+        em.clear();
+
+
+        //when
+        List<Notice> findedNotices = noticeRepository.findAllById(
+                notices.stream().map(Notice::getId).collect(Collectors.toList())
+        );
+        em.flush();
+        em.clear();
+        int standIndex = 0;
+        Optional<Notice> preNotice = noticeRepository.findPreByCreatedAt(findedNotices.get(standIndex).getCreatedAt());
+        Optional<Notice> postNotice = noticeRepository.findPostByCreatedAt(findedNotices.get(standIndex).getCreatedAt());
+
+        //then
+        Assertions.assertThat(preNotice).isEmpty();
+        Assertions.assertThat(postNotice).isNotEmpty();
+        Assertions.assertThat(postNotice.get().getId()).isEqualTo(findedNotices.get(standIndex + 1).getId());
+    }
+
+    @Test
+    public void findPreAndPost_NoPre_CheckIdOrder() throws Exception{
+        //given
+        int noticeCnt = 6;
+        List<Notice> notices = new ArrayList<>();
+        for(int i = 0; i < noticeCnt; i++){
+            notices.add(new Notice("test title " + i, "test content " + i, null, null));
+        }
+        for (Notice notice : notices) {
+            noticeRepository.save(notice);
+            Thread.sleep(1000);
+        }
+        em.flush();
+        em.clear();
+
+
+        //when
+        List<Notice> findedNotices = noticeRepository.findAllById(
+                notices.stream().map(Notice::getId).collect(Collectors.toList())
+        );
+        em.flush();
+        em.clear();
+        int standIndex = noticeCnt - 1;
+        Optional<Notice> preNotice = noticeRepository.findPreByCreatedAt(findedNotices.get(standIndex).getCreatedAt());
+        Optional<Notice> postNotice = noticeRepository.findPostByCreatedAt(findedNotices.get(standIndex).getCreatedAt());
+
+        //then
+        Assertions.assertThat(preNotice).isNotEmpty();
+        Assertions.assertThat(preNotice.get().getId()).isEqualTo(findedNotices.get(standIndex - 1).getId());
+        Assertions.assertThat(postNotice).isEmpty();
     }
 }

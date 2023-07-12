@@ -14,8 +14,8 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Optional<Notice> findDetailById(Long id);
 
     @Query(value = "select n from Notice n where n.createdAt < :createdAt order by n.createdAt desc limit 1")
-    Optional<Notice> findTopByByCreatedAtLessThanEqualOOrderByCreatedAtDesc(@Param("createdAt") LocalDateTime createdAt);
+    Optional<Notice> findPreByCreatedAt(@Param("createdAt") LocalDateTime createdAt);
 
     @Query(value = "select n from Notice n where n.createdAt > :createdAt order by n.createdAt asc limit 1")
-    Optional<Notice> findTopByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(LocalDateTime createdAt);
+    Optional<Notice> findPostByCreatedAt(LocalDateTime createdAt);
 }
