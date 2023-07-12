@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -120,7 +121,6 @@ public class InitDatabase {
 
         private Club readyClub(int index) {
             ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO(index);
-
             return clubCreateRequestDTO.toEntity();
         }
 
@@ -141,8 +141,9 @@ public class InitDatabase {
         }
 
         private User readyUser(int index) {
+            String encPw = new BCryptPasswordEncoder().encode("password" + index);
             return new User("userId" + index,
-                    "password" + index,
+                    encPw,
                     Role.ROLE_USER,
                     "user_" + index,
                     "user contact_" + index);

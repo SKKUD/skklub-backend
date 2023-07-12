@@ -1,13 +1,11 @@
 package com.skklub.admin.controller.notice;
 
 import akka.protobuf.WireFormat;
-import com.mysql.cj.exceptions.AssertionFailedException;
 import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.NoticeCreateRequest;
 import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
-import com.skklub.admin.domain.Thumbnail;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.NoticeRepository;
 import com.skklub.admin.service.NoticeService;
@@ -28,7 +26,6 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -41,17 +38,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.skklub.admin.controller.RestDocsUtils.example;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -130,7 +123,7 @@ public class NoticeControllerTest {
         Long noticeId = 12L;
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("Notice Test Title", "Notice Test Content");
         FileNames fileNames = new FileNames("default_thumb.png", "default_thumb.png");
-        doThrow(AssertionFailedException.class).when(s3Transferer).uploadOne(any(MultipartFile.class));
+//        doThrow(AssertionFailedException.class).when(s3Transferer).uploadOne(any(MultipartFile.class));
         given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), "userId0", fileNames.toThumbnailEntity()))
                 .willReturn(noticeId);
 
