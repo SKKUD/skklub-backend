@@ -1,5 +1,6 @@
 package com.skklub.admin;
 
+import ch.qos.logback.core.pattern.color.BoldCyanCompositeConverter;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.skklub.admin.controller.S3Transferer;
@@ -62,6 +63,8 @@ public class InitDatabase {
         private String bucket;
         @Autowired
         private TestDataRepository testDataRepository;
+        @Autowired
+        private BCryptPasswordEncoder bCryptPasswordEncoder;
 
         @Transactional
         public void init() throws IOException {
@@ -121,6 +124,7 @@ public class InitDatabase {
 
         private Club readyClub(int index) {
             ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO(index);
+
             return clubCreateRequestDTO.toEntity();
         }
 
@@ -141,12 +145,13 @@ public class InitDatabase {
         }
 
         private User readyUser(int index) {
-            String encPw = new BCryptPasswordEncoder().encode("password" + index);
+            String password = bCryptPasswordEncoder.encode("password" + index);
             return new User("userId" + index,
-                    encPw,
+                    password,
                     Role.ROLE_USER,
                     "user_" + index,
                     "user contact_" + index);
+
         }
 
         @Transactional

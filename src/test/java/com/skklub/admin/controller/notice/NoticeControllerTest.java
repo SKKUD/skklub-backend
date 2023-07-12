@@ -6,10 +6,12 @@ import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.NoticeCreateRequest;
 import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
+import com.skklub.admin.domain.Thumbnail;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.NoticeRepository;
 import com.skklub.admin.service.NoticeService;
 import com.skklub.admin.service.dto.FileNames;
+import com.skklub.admin.service.dto.NoticeDeletionDto;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,13 +41,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.skklub.admin.controller.RestDocsUtils.example;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -123,7 +131,7 @@ public class NoticeControllerTest {
         Long noticeId = 12L;
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("Notice Test Title", "Notice Test Content");
         FileNames fileNames = new FileNames("default_thumb.png", "default_thumb.png");
-//        doThrow(AssertionFailedException.class).when(s3Transferer).uploadOne(any(MultipartFile.class));
+        doThrow(RuntimeException.class).when(s3Transferer).uploadOne(any(MultipartFile.class));
         given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), "userId0", fileNames.toThumbnailEntity()))
                 .willReturn(noticeId);
 
@@ -183,7 +191,7 @@ public class NoticeControllerTest {
                                 parameterWithName("noticeId").description("공지 ID").attributes(example("1"))
                         ),
                         requestParts(
-                                partWithName("files").description("첨부 파일(형식은...제한없는듯?)")
+                                partWithName("files").description("첨부 파일(형식 제한 없음)")
                         ),
                         responseFields(
                                 fieldWithPath("noticeId").type(WireFormat.FieldType.STRING).description("공지 ID").attributes(example("1")),
@@ -253,6 +261,304 @@ public class NoticeControllerTest {
         //then
         Assertions.assertThat(badNoticeIdResult.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
     }
+    
+    @Test
+    public void updateNotice_Default_Success() throws Exception{
+        //given
+        Long noticeId = 0L;
+        String updateTitle = "updateTitle";
+        String updateContent = "updateContent";
+        given(noticeService.updateNotice(eq(noticeId), any(Notice.class))).willReturn(Optional.of(updateTitle));
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                patch("/notice/{noticeId}", noticeId)
+                        .with(csrf())
+                        .queryParam("title", updateTitle)
+                        .queryParam("content", updateContent)
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(noticeId))
+                .andExpect(jsonPath("$.title").value(updateTitle))
+                .andDo(
+                        document("notice/update/notice",
+                                pathParameters(
+                                        parameterWithName("noticeId").description("수정 대상 공지 ID").attributes(example(noticeId.toString()))
+                                ),
+                                queryParameters(
+                                        parameterWithName("title").description("제목(변경 없을 시 기존꺼 보내주세요)").attributes(example(updateTitle)),
+                                        parameterWithName("content").description("글 내용(변경 없을 시 기존꺼 보내주세요)").attributes(example(updateContent))
+                                ),
+                                responseFields(
+                                        fieldWithPath("id").type(WireFormat.FieldType.INT64).description("수정 대상 공지 ID").attributes(example(noticeId.toString())),
+                                        fieldWithPath("title").type(WireFormat.FieldType.INT64).description("변경 반영 이후 공지 제목").attributes(example(updateTitle))
+                                )
+                        )
+                );
+
+    }
+
+    @Test
+    public void updateNotice_BadNoticeId_NoticeMisMatchException() throws Exception{
+        //given
+        Long noticeId = -1L;
+        String updateTitle = "updateTitle";
+        String updateContent = "updateContent";
+        given(noticeService.updateNotice(eq(noticeId), any(Notice.class))).willReturn(Optional.empty());
+
+        //when
+        MvcResult badIdResult = mockMvc.perform(
+                patch("/notice/{noticeId}", noticeId)
+                        .with(csrf())
+                        .queryParam("title", updateTitle)
+                        .queryParam("content", updateContent)
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
+
+    }
+
+    @Test
+    public void updateThumbnail_ChangeFromSomeThumb_CalledS3Deletion() throws Exception{
+        //given
+        Long noticeId = 0L;
+        MockMultipartFile mockMultipartFile = readyMockThumbnail();
+        FileNames fileNames = new FileNames("testThumb.png", "savedTestThumb.png");
+        FileNames oldFileNames = new FileNames("oldTestThumb.png", "oldSavedTestThumb.png");
+        Thumbnail thumbnail = fileNames.toThumbnailEntity();
+        given(noticeRepository.existsById(noticeId)).willReturn(true);
+        given(s3Transferer.uploadOne(mockMultipartFile)).willReturn(fileNames);
+        given(noticeService.updateThumbnail(noticeId, thumbnail)).willReturn(Optional.of(oldFileNames));
+        doNothing().when(s3Transferer).deleteOne(oldFileNames.getSavedName());
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                multipart("/notice/{noticeId}/thumbnail", noticeId)
+                        .file(mockMultipartFile)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.noticeId").value(noticeId))
+                .andExpect(jsonPath("$.deletedFileName").value(oldFileNames.getOriginalName()))
+                .andExpect(jsonPath("$.changedFileName").value(fileNames.getOriginalName()))
+                .andDo(
+                        document("notice/update/thumbnail",
+                                requestParts(
+                                        partWithName("thumbnailFile").description("변경될 썸네일 파일")
+                                ),
+                                pathParameters(
+                                        parameterWithName("noticeId").description("변경 대상 공지 ID").attributes(example(noticeId.toString()))
+                                ),
+                                responseFields(
+                                        fieldWithPath("noticeId").type(WireFormat.FieldType.INT64).description("변경된 공지 ID").attributes(example(noticeId.toString())),
+                                        fieldWithPath("deletedFileName").type(WireFormat.FieldType.STRING).description("삭제된 썸네일 파일명").attributes(example(oldFileNames.getOriginalName())),
+                                        fieldWithPath("changedFileName").type(WireFormat.FieldType.STRING).description("새로 등록된 썸네일 파일명").attributes(example(fileNames.getOriginalName()))
+                                )
+                        )
+                );
+    }
+
+    @Test
+    public void updateThumbnail_ChangeFromDefault_SkipS3Deletion() throws Exception{
+        //given
+        Long noticeId = 0L;
+        MockMultipartFile mockMultipartFile = readyMockThumbnail();
+        FileNames fileNames = new FileNames("testThumb.png", "savedTestThumb.png");
+        FileNames oldFileNames = new FileNames("default_thumb.png", "default_thumb.png");
+        Thumbnail thumbnail = fileNames.toThumbnailEntity();
+        given(noticeRepository.existsById(noticeId)).willReturn(true);
+        given(s3Transferer.uploadOne(mockMultipartFile)).willReturn(fileNames);
+        given(noticeService.updateThumbnail(noticeId, thumbnail)).willReturn(Optional.of(oldFileNames));
+        doThrow(RuntimeException.class).when(s3Transferer).deleteOne(anyString());
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                multipart("/notice/{noticeId}/thumbnail", noticeId)
+                        .file(mockMultipartFile)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
+        );
 
 
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.noticeId").value(noticeId))
+                .andExpect(jsonPath("$.deletedFileName").value(oldFileNames.getOriginalName()))
+                .andExpect(jsonPath("$.changedFileName").value(fileNames.getOriginalName()));
+    }
+
+    @Test
+    public void updateThumbnail_NoticeIsEmpty_NoticeIdMisMatchException() throws Exception{
+        //given
+        Long noticeId = -1L;
+        MockMultipartFile mockMultipartFile = readyMockThumbnail();
+        given(noticeRepository.existsById(noticeId)).willReturn(false);
+
+        //when
+        MvcResult noticeNotFound = mockMvc.perform(
+                multipart("/notice/{noticeId}/thumbnail", noticeId)
+                        .file(mockMultipartFile)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
+        ).andReturn();
+
+
+        //then
+        Assertions.assertThat(noticeNotFound.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
+    }
+    
+    @Test
+    public void deleteNotice_WithThumbnailAndFiles_Success() throws Exception{
+        //given
+        Long noticeId = 0L;
+        String noticeTitle = "test notice Title";
+        FileNames thumbnailFileName = new FileNames("testThumb.png", "savedTestThumb.png");
+        int fileCnt = 10;
+        List<FileNames> extraFileNames = readyFileNames(fileCnt);
+        NoticeDeletionDto noticeDeletionDto = NoticeDeletionDto.builder()
+                .noticeTitle(noticeTitle)
+                .thumbnailFileName(thumbnailFileName)
+                .extraFileNames(extraFileNames)
+                .build();
+        given(noticeService.deleteNotice(noticeId)).willReturn(Optional.of(noticeDeletionDto));
+        doNothing().when(s3Transferer).deleteOne(anyString());
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                delete("/notice/{noticeId}", noticeId)
+                        .with(csrf())
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(noticeId.toString()))
+                .andExpect(jsonPath("$.title").value(noticeTitle))
+                .andDo(
+                        document("notice/delete/notice/",
+                                pathParameters(
+                                        parameterWithName("noticeId").description("삭제할 공지 ID").attributes(example(noticeId.toString()))
+                                ),
+                                responseFields(
+                                        fieldWithPath("id").type(WireFormat.FieldType.INT64).description("삭제된 공지 ID").attributes(example(noticeId.toString())),
+                                        fieldWithPath("title").type(WireFormat.FieldType.STRING).description("삭제된 공지 제목").attributes(example(noticeTitle))
+                                )
+                        )
+                );
+
+    }
+
+    @Test
+    public void deleteNotice_WithDefaultThumbnail_SkipS3ThumbnailDeletion() throws Exception{
+        //given
+        Long noticeId = 0L;
+        String noticeTitle = "test notice Title";
+        String defaultThumbnailName = "default_thumb.png";
+        FileNames thumbnailFileName = new FileNames(defaultThumbnailName, defaultThumbnailName);
+        int fileCnt = 10;
+        List<FileNames> extraFileNames = readyFileNames(fileCnt);
+        NoticeDeletionDto noticeDeletionDto = NoticeDeletionDto.builder()
+                .noticeTitle(noticeTitle)
+                .thumbnailFileName(thumbnailFileName)
+                .extraFileNames(extraFileNames)
+                .build();
+        given(noticeService.deleteNotice(noticeId)).willReturn(Optional.of(noticeDeletionDto));
+        doNothing().when(s3Transferer).deleteOne(anyString());
+        doThrow(RuntimeException.class).when(s3Transferer).deleteOne(defaultThumbnailName);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                delete("/notice/{noticeId}", noticeId)
+                        .with(csrf())
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(noticeId.toString()))
+                .andExpect(jsonPath("$.title").value(noticeTitle));
+    }
+
+    @Test
+    public void deleteNotice_BadNoticeId_NoticeIdMisMatchException() throws Exception{
+        //given
+        Long noticeId = -1L;
+        given(noticeService.deleteNotice(noticeId)).willReturn(Optional.empty());
+
+        //when
+        MvcResult badIdResult = mockMvc.perform(
+                delete("/notice/{noticeId}", noticeId)
+                        .with(csrf())
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
+    }
+    
+    @Test
+    public void deleteFileByOriginalName_Default_Success() throws Exception{
+        //given
+        Long noticeId = 0L;
+        FileNames fileNames = readyFileNames(1).get(0);
+        given(noticeService.deleteExtraFile(noticeId, fileNames.getOriginalName())).willReturn(Optional.of(fileNames));
+        doNothing().when(s3Transferer).deleteOne(fileNames.getSavedName());
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                delete("/notice/{noticeId}/{fileName}", noticeId, fileNames.getOriginalName())
+                        .with(csrf())
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.noticeId").value(noticeId))
+                .andExpect(jsonPath("$.deletedFileName").value(fileNames.getOriginalName()))
+                .andDo(
+                        document(
+                                "notice/delete/file/",
+                                pathParameters(
+                                        parameterWithName("noticeId").description("파일이 포함된 공지 ID").attributes(example(noticeId.toString())),
+                                        parameterWithName("fileName").description("지우려는 파일 원본명").attributes(example(fileNames.getOriginalName()))
+                                ),
+                                responseFields(
+                                        fieldWithPath("noticeId").type(WireFormat.FieldType.INT64).description("파일이 삭제된 공지 ID").attributes(example(noticeId.toString())),
+                                        fieldWithPath("deletedFileName").type(WireFormat.FieldType.STRING).description("지워진 파일 원본명").attributes(example(fileNames.getOriginalName()))
+                                )
+                        )
+                );
+
+    }
+
+    @Test
+    public void deleteFileByOriginalName_BadNoticeId_NoticeIdMisMatchException() throws Exception{
+        //given
+        Long noticeId = -1L;
+        FileNames fileNames = readyFileNames(1).get(0);
+        given(noticeService.deleteExtraFile(noticeId, fileNames.getOriginalName())).willThrow(NoticeIdMisMatchException.class);
+
+        //when
+        MvcResult badIdResult = mockMvc.perform(
+                delete("/notice/{noticeId}/{fileName}", noticeId, fileNames.getOriginalName())
+                        .with(csrf())
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badIdResult.getResolvedException())
+                .isExactlyInstanceOf(NoticeIdMisMatchException.class);
+
+    }
+    
+    @Test
+    public void deleteFileByOriginalName_FileNotInNotice_ExtraFileNameMisMatchException() throws Exception{
+        //given
+        
+        //when
+        
+        //then
+        
+    }
 }

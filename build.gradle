@@ -76,6 +76,10 @@ clean {
 	delete file('src/main/resources/static/docs')
 }
 
+jar {
+	enabled = false
+}
+
 bootJar {
 	dependsOn asciidoctor
 	from ("${asciidoctor.outputDir}/html5") {

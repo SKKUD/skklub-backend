@@ -22,11 +22,25 @@ public class QNotice extends EntityPathBase<Notice> {
 
     public static final QNotice notice = new QNotice("notice");
 
+    public final QBaseEntity _super = new QBaseEntity(this);
+
     public final StringPath content = createString("content");
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
 
     public final ListPath<ExtraFile, QExtraFile> extraFiles = this.<ExtraFile, QExtraFile>createList("extraFiles", ExtraFile.class, QExtraFile.class, PathInits.DIRECT2);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> lastModifiedAt = _super.lastModifiedAt;
+
+    //inherited
+    public final StringPath lastModifiedBy = _super.lastModifiedBy;
 
     public final QThumbnail thumbnail;
 

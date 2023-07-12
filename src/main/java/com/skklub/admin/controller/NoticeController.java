@@ -1,10 +1,10 @@
 package com.skklub.admin.controller;
 
-import com.skklub.admin.controller.dto.NoticeCreateRequest;
-import com.skklub.admin.controller.dto.NoticeIdAndFileCountResponse;
-import com.skklub.admin.controller.dto.NoticeIdAndTitleResponse;
+import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.ExtraFile;
+import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
+import com.skklub.admin.error.exception.ExtraFileNameMisMatchException;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.NoticeRepository;
 import com.skklub.admin.security.jwt.TokenProvider;
@@ -12,7 +12,6 @@ import com.skklub.admin.service.NoticeService;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +30,8 @@ public class NoticeController {
     private final NoticeService noticeService;
     private final NoticeRepository noticeRepository;
 
+    private final static String DEFAULT_THUMBNAIL = "default_thumb.png";
+
 //=====CREATE=====//
 
     //등록
@@ -40,7 +41,7 @@ public class NoticeController {
                                                                  @AuthenticationPrincipal UserDetails userDetails){
         Thumbnail thumbnail = Optional.ofNullable(thumbnailFile)
                 .map(s3Transferer::uploadOne)
-                .orElse(new FileNames("default_thumb.png", "default_thumb.png"))
+                .orElse(new FileNames(DEFAULT_THUMBNAIL, DEFAULT_THUMBNAIL))
                 .toThumbnailEntity();
         String userName = TokenProvider.getAuthentication(userDetails).getName();
         Long noticeId = noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), userName, thumbnail);
@@ -80,13 +81,59 @@ public class NoticeController {
 //=====UPDATE=====//
 
     //내용 수정
+    @PatchMapping("/notice/{noticeId}")
+    public NoticeIdAndTitleResponse updateNotice(@PathVariable Long noticeId, @ModelAttribute NoticeCreateRequest noticeCreateRequest){
+        Notice updateInfo = noticeCreateRequest.toEntity();
+        return noticeService.updateNotice(noticeId, updateInfo)
+                .map(title -> new NoticeIdAndTitleResponse(noticeId, title))
+                .orElseThrow(NoticeIdMisMatchException::new);
+    }
 
     //썸네일(로고) 변경
+    @PostMapping("/notice/{noticeId}/thumbnail")
+    public NoticeIdAndFileNamesResponse updateThumbnail(@PathVariable Long noticeId, @RequestParam MultipartFile thumbnailFile) {
+        if (!noticeRepository.existsById(noticeId)) throw new NoticeIdMisMatchException();
+        FileNames thumbnailFileName = s3Transferer.uploadOne(thumbnailFile);
+        Thumbnail thumbnail = thumbnailFileName.toThumbnailEntity();
+        return noticeService.updateThumbnail(noticeId, thumbnail)
+                .map(
+                        oldThumbnailFileName -> {
+                            if (!oldThumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
+                                s3Transferer.deleteOne(oldThumbnailFileName.getSavedName());
+                            return new NoticeIdAndFileNamesResponse(noticeId, oldThumbnailFileName.getOriginalName(), thumbnailFileName.getOriginalName());
+                        }
+                ).orElseThrow(NoticeIdMisMatchException::new);
+    }
 
 //=====DELETE=====//
 
     //삭제
+    @DeleteMapping("/notice/{noticeId}")
+    public NoticeIdAndTitleResponse deleteNotice(@PathVariable Long noticeId) {
+        return noticeService.deleteNotice(noticeId)
+                .map(noticeDeletionDto -> {
+                            FileNames thumbnailFileName = noticeDeletionDto.getThumbnailFileName();
+                            List<FileNames> extraFileNames = noticeDeletionDto.getExtraFileNames();
+                            if (!thumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
+                                s3Transferer.deleteOne(thumbnailFileName.getSavedName());
+                            extraFileNames.stream()
+                                    .map(FileNames::getSavedName)
+                                    .forEach(s3Transferer::deleteOne);
+                            return new NoticeIdAndTitleResponse(noticeId, noticeDeletionDto.getNoticeTitle());
+                        }
+                )
+                .orElseThrow(NoticeIdMisMatchException::new);
+    }
 
     //특정 파일 삭제
-
+    @DeleteMapping("/notice/{noticeId}/{fileName}")
+    public NoticeIdAndDeletedNameResponse deleteFileByOriginalName(@PathVariable Long noticeId, @PathVariable String fileName) {
+        return noticeService.deleteExtraFile(noticeId, fileName)
+                .map(
+                        deletedExtraFileNames -> {
+                            s3Transferer.deleteOne(deletedExtraFileNames.getSavedName());
+                            return new NoticeIdAndDeletedNameResponse(noticeId, deletedExtraFileNames.getOriginalName());
+                        }
+                ).orElseThrow(ExtraFileNameMisMatchException::new);
+    }
 }

@@ -11,7 +11,7 @@ import org.aspectj.weaver.ast.Not;
 @Getter
 @EqualsAndHashCode(exclude = {"id", "notice"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ExtraFile {
+public class ExtraFile extends BaseTimeEntity{
     @Id @Column(name = "extra_file_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
