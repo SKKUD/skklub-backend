@@ -1,9 +1,11 @@
 package com.skklub.admin.controller;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
+import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.error.exception.ExtraFileNameMisMatchException;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.NoticeRepository;
@@ -12,6 +14,8 @@ import com.skklub.admin.service.NoticeService;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -67,16 +71,43 @@ public class NoticeController {
 //=====READ=====//
 
     //세부 조회
+    @GetMapping("/notice/{noticeId}")
+    public NoticeDetailResponse getDetailNotice(@PathVariable Long noticeId) {
+
+    }
 
     //파일 조회
+    @GetMapping("/notice/file")
+    public S3DownloadDto getFile(@RequestParam String fileSavedName) {
+        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(null, fileSavedName));
+        return s3DownloadDto;
+    }
 
     //목록 조회(with 썸네일)
+    @GetMapping("/notice/prev/thumbnail")
+    public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
+
+    }
 
     //목록 조회(전체, 시간순)
+    @GetMapping("/notice/prev")
+    public Page<NoticePrevResponse> getNoticePrev(@RequestParam(required = false, defaultValue = "전체") Campus campus, Pageable pageable) {
+
+    }
 
     //목록 조회(제목 검색, 시간순)
+    @GetMapping("/notice/prev/search/title")
+    public Page<NoticePrevResponse> getNoticePrevByTitle(@RequestParam String title, Pageable pageable) {
+
+    }
+
 
     //목록 조회(작성자 검색, 시간순)
+    @GetMapping("/notice/prev/search/writer")
+    public Page<NoticePrevResponse> getNoticePrevByWriter(@RequestParam String writer, Pageable pageable) {
+
+    }
+
 
 //=====UPDATE=====//
 
