@@ -413,7 +413,7 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void findPreAndPost_NoPre_CheckIdOrder() throws Exception{
+    public void findPreAndPost_NoPost_CheckIdOrder() throws Exception{
         //given
         int noticeCnt = 6;
         List<Notice> notices = new ArrayList<>();

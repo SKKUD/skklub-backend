@@ -1,11 +1,13 @@
 package com.skklub.admin.controller;
 
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
 import com.skklub.admin.domain.enums.Campus;
+import com.skklub.admin.domain.enums.Role;
+import com.skklub.admin.error.exception.CannotCategorizeByMasterException;
+import com.skklub.admin.error.exception.CannotCategorizeByUserException;
 import com.skklub.admin.error.exception.ExtraFileNameMisMatchException;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.NoticeRepository;
@@ -14,9 +16,13 @@ import com.skklub.admin.service.NoticeService;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -80,38 +86,56 @@ public class NoticeController {
         return new NoticeDetailResponse(notice, preNotice, postNotice);
     }
 
-//    //파일 조회
-//    @GetMapping("/notice/file")
-//    public Resource getFile(@RequestParam String fileSavedName) {
-//        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(null, fileSavedName));
-//        return s3DownloadDto;
-//    }
+    //파일 조회
+    @GetMapping("/notice/file")
+    public ResponseEntity<byte[]> getFile(@RequestParam String fileSavedName) {
+        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(null, fileSavedName));
+        String fileName = s3DownloadDto.getFileName();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        httpHeaders.setContentLength(s3DownloadDto.getBytes().length);
+        httpHeaders.setContentDispositionFormData("attachment", fileName);
 
-//    //목록 조회(with 썸네일)
-//    @GetMapping("/notice/prev/thumbnail")
-//    public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
-//
-//    }
-//
-//    //목록 조회(전체, 시간순)
-//    @GetMapping("/notice/prev")
-//    public Page<NoticePrevResponse> getNoticePrev(@RequestParam(required = false, defaultValue = "전체") Campus campus, Pageable pageable) {
-//
-//    }
-//
-//    //목록 조회(제목 검색, 시간순)
-//    @GetMapping("/notice/prev/search/title")
-//    public Page<NoticePrevResponse> getNoticePrevByTitle(@RequestParam String title, Pageable pageable) {
-//
-//    }
-//
-//
-//    //목록 조회(작성자 검색, 시간순)
-//    @GetMapping("/notice/prev/search/writer")
-//    public Page<NoticePrevResponse> getNoticePrevByWriter(@RequestParam String writer, Pageable pageable) {
-//
-//    }
+        return new ResponseEntity<>(s3DownloadDto.getBytes(), httpHeaders, HttpStatus.OK);
 
+    }
+
+    //목록 조회(with 썸네일)
+    @GetMapping("/notice/prev/thumbnail")
+    public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
+        return new PageImpl<>(noticeRepository.findWithWriterAndThumbnailOOrderByCreatedAt(pageable).stream()
+                .map(notice -> {
+                            Thumbnail thumbnail = notice.getThumbnail();
+                            S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(thumbnail));
+                            return new NoticePrevWithThumbnailResponse(notice, s3DownloadDto);
+                        }
+                ).collect(Collectors.toList())
+        );
+    }
+
+    //목록 조회(전체(작성자 선택), 시간순)
+    @GetMapping("/notice/prev")
+    public Page<NoticePrevResponse> getNoticePrev(@RequestParam(required = false) Optional<Role> role, Pageable pageable) {
+        Page<Notice> notices = role.map(r -> {
+                    if (r.equals(Role.ROLE_MASTER)) throw new CannotCategorizeByMasterException();
+                    if (r.equals(Role.ROLE_USER)) throw new CannotCategorizeByUserException();
+                    return noticeRepository.findAllByUserRole(r, pageable);
+                }
+        ).orElseGet(() -> noticeRepository.findAll(pageable));
+
+        return new PageImpl<>(notices.stream()
+                .map(NoticePrevResponse::new)
+                .collect(Collectors.toList()));
+    }
+
+    //목록 조회(제목 검색, 시간순)
+    @GetMapping("/notice/prev/search/title")
+    public Page<NoticePrevResponse> getNoticePrevByTitle(@RequestParam String title, Pageable pageable) {
+        return new PageImpl<>(noticeRepository.findWithWriterByTitleContainingOrderByCreatedAt(title, pageable).stream()
+                .map(NoticePrevResponse::new)
+                .collect(Collectors.toList())
+        );
+    }
 
 //=====UPDATE=====//
 
