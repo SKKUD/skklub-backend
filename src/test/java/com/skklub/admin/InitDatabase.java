@@ -2,7 +2,7 @@ package com.skklub.admin;
 
 import ch.qos.logback.core.pattern.color.BoldCyanCompositeConverter;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.*;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
 import com.skklub.admin.domain.*;
@@ -31,6 +31,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.amazonaws.auth.policy.actions.S3Actions.DeleteObject;
 
 @Slf4j
 @Component
@@ -156,23 +159,11 @@ public class InitDatabase {
 
         @Transactional
         public void cleanS3() {
-            s3Transferer.deleteOne("alt.jpg");
-            cleanLogoInS3();
-            cleanActivityImagesInS3();
-        }
-
-        private void cleanActivityImagesInS3() {
-            List<String> uploadedActivityImages = em.createQuery("select a.uploadedName from ActivityImage a", String.class)
-                    .getResultList();
-            uploadedActivityImages.stream()
-                    .forEach(s3Transferer::deleteOne);
-        }
-
-        private void cleanLogoInS3() {
-            List<String> uploadedLogo = em.createQuery("select l.uploadedName from Logo l", String.class)
-                    .getResultList();
-            uploadedLogo.stream()
-                    .forEach(s3Transferer::deleteOne);
+            ObjectListing objectListing = amazonS3.listObjects(bucket);
+            List<String> keys = objectListing.getObjectSummaries().stream()
+                    .map(S3ObjectSummary::getKey)
+                    .collect(Collectors.toList());
+            s3Transferer.deleteAll(keys);
         }
     }
 }

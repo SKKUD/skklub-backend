@@ -9,7 +9,7 @@ import org.aspectj.weaver.ast.Not;
 
 @Entity
 @Getter
-@EqualsAndHashCode(exclude = {"id", "notice"})
+@EqualsAndHashCode(exclude = {"id", "notice"}, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ExtraFile extends BaseTimeEntity{
     @Id @Column(name = "extra_file_id")

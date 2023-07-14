@@ -2,7 +2,6 @@ package com.skklub.admin.repository;
 
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.enums.Role;
-import io.lettuce.core.Value;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,9 +17,6 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @EntityGraph(attributePaths = {"writer"})
     Page<Notice> findAll(Pageable pageable);
 
-    @Query(value = "select n from Notice n inner join fetch n.writer w where w.role = :role")
-    Page<Notice> findAllByUserRole(@Param("role") Role role, Pageable pageable);
-
     @EntityGraph(attributePaths = {"writer", "extraFiles"})
     Optional<Notice> findDetailById(Long id);
 
@@ -31,9 +27,13 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Optional<Notice> findPostByCreatedAt(@Param("createdAt") LocalDateTime createdAt);
 
     @EntityGraph(attributePaths = {"writer", "thumbnail"})
-    Page<Notice> findWithWriterAndThumbnailOOrderByCreatedAt(Pageable pageable);
+    Page<Notice> findAllWithThumbnailBy(Pageable pageable);
 
     @EntityGraph(attributePaths = {"writer"})
-    Page<Notice> findWithWriterByTitleContainingOrderByCreatedAt(String title, Pageable pageable);
+    Page<Notice> findWithWriterAllByTitleContainingOrderByCreatedAt(String title, Pageable pageable);
+
+    @Query(value = "select n from Notice n inner join n.writer where n.writer.role = :role")
+    @EntityGraph(attributePaths = {"writer"})
+    Page<Notice> findAllByUserRole(@Param("role") Role role, Pageable pageable);
 
 }

@@ -1,6 +1,7 @@
 package com.skklub.admin.controller;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.skklub.admin.controller.dto.S3DownloadDto;
@@ -11,10 +12,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static com.amazonaws.services.s3.model.DeleteObjectsRequest.*;
 
 @RequiredArgsConstructor
 @Component
@@ -77,5 +81,12 @@ public class S3Transferer {
 
     public void deleteOne(String key) {
         amazonS3.deleteObject(bucket, key);
+    }
+
+    public void deleteAll(List<String> keys) {
+        DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucket)
+                .withKeys(keys.stream().map(KeyVersion::new).collect(Collectors.toList()))
+                .withQuiet(false);
+        amazonS3.deleteObjects(multiObjectDeleteRequest);
     }
 }

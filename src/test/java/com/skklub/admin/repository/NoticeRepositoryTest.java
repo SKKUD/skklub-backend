@@ -443,4 +443,6 @@ public class NoticeRepositoryTest {
         Assertions.assertThat(preNotice.get().getId()).isEqualTo(findedNotices.get(standIndex - 1).getId());
         Assertions.assertThat(postNotice).isEmpty();
     }
+
+
 }

@@ -4,7 +4,6 @@ import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
-import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.error.exception.CannotCategorizeByMasterException;
 import com.skklub.admin.error.exception.CannotCategorizeByUserException;
@@ -103,7 +102,7 @@ public class NoticeController {
     //목록 조회(with 썸네일)
     @GetMapping("/notice/prev/thumbnail")
     public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
-        return new PageImpl<>(noticeRepository.findWithWriterAndThumbnailOOrderByCreatedAt(pageable).stream()
+        return new PageImpl<>(noticeRepository.findAllWithThumbnailBy(pageable).stream()
                 .map(notice -> {
                             Thumbnail thumbnail = notice.getThumbnail();
                             S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(thumbnail));
@@ -131,7 +130,7 @@ public class NoticeController {
     //목록 조회(제목 검색, 시간순)
     @GetMapping("/notice/prev/search/title")
     public Page<NoticePrevResponse> getNoticePrevByTitle(@RequestParam String title, Pageable pageable) {
-        return new PageImpl<>(noticeRepository.findWithWriterByTitleContainingOrderByCreatedAt(title, pageable).stream()
+        return new PageImpl<>(noticeRepository.findWithWriterAllByTitleContainingOrderByCreatedAt(title, pageable).stream()
                 .map(NoticePrevResponse::new)
                 .collect(Collectors.toList())
         );
