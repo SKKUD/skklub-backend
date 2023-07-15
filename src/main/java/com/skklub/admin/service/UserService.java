@@ -128,7 +128,7 @@ public class UserService {
             //관리자에 의한 직권 수정 허용(MASTER, ADMIN)
             List<GrantedAuthority> authList = (List<GrantedAuthority>) nowEditingUser.getAuthorities();
             String authority = authList.get(0).getAuthority();
-            if(authority.equals(String.valueOf(Role.ROLE_ADMIN))||authority.equals(String.valueOf(Role.ROLE_MASTER))){
+            if(authority.equals(String.valueOf(Role.ROLE_ADMIN_SEOUL_CENTRAL))||authority.equals(String.valueOf(Role.ROLE_MASTER))){
                 log.info("now updating with authority of administrator({}): {}",authority, nowEditingUser.getUsername());
             }else{
                 throw new AuthException(ErrorCode.NO_AUTHORITY,"no authority");
