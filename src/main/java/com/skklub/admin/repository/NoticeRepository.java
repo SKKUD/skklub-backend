@@ -2,12 +2,12 @@ package com.skklub.admin.repository;
 
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.enums.Role;
-import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -21,10 +21,10 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Optional<Notice> findDetailById(Long id);
 
     @Query(value = "select n from Notice n where n.createdAt < :createdAt order by n.createdAt desc limit 1")
-    Optional<Notice> findPreByCreatedAt(@Param("createdAt") LocalDateTime createdAt);
+    Optional<Notice> findPreByCreatedAt(@Param(value = "createdAt") LocalDateTime createdAt);
 
     @Query(value = "select n from Notice n where n.createdAt > :createdAt order by n.createdAt asc limit 1")
-    Optional<Notice> findPostByCreatedAt(@Param("createdAt") LocalDateTime createdAt);
+    Optional<Notice> findPostByCreatedAt(@Param(value = "createdAt") LocalDateTime createdAt);
 
     @EntityGraph(attributePaths = {"writer", "thumbnail"})
     Page<Notice> findAllWithThumbnailBy(Pageable pageable);

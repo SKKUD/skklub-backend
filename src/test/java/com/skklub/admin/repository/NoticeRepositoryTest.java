@@ -5,14 +5,19 @@ import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
+import com.skklub.admin.service.dto.FileNames;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.hibernate.LazyInitializationException;
 import org.hibernate.proxy.HibernateProxy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -379,7 +384,6 @@ public class NoticeRepositoryTest {
         Assertions.assertThat(postNotice.get().getId()).isEqualTo(findedNotices.get(standIndex + 1).getId());
     }
 
-
     @Test
     public void findPreAndPost_NoPre_CheckIdOrder() throws Exception{
         //given
@@ -442,6 +446,124 @@ public class NoticeRepositoryTest {
         Assertions.assertThat(preNotice).isNotEmpty();
         Assertions.assertThat(preNotice.get().getId()).isEqualTo(findedNotices.get(standIndex - 1).getId());
         Assertions.assertThat(postNotice).isEmpty();
+    }
+
+    @Test
+    public void findAllByUserRole_GivenUser_CheckLazy() throws Exception{
+        //given
+        User userAdmin = new User("testId0", "password0", Role.ROLE_ADMIN, "testUser", "010-1234-1234");
+        User userUser = new User("testId0", "password0", Role.ROLE_USER, "testUser", "010-1234-1234");
+        userRepository.save(userAdmin);
+        userRepository.save(userUser);
+        int adminNoticeCnt = 10;
+        int noticeCnt = 20;
+        List<Notice> notices = new ArrayList<>();
+        for (int i = 0; i < adminNoticeCnt; i++)
+            notices.add(new Notice("test title" + i,
+                    "test content" + i,
+                    userAdmin,
+                    null)
+            );
+
+        for (int i = adminNoticeCnt; i < noticeCnt; i++)
+            notices.add(
+                    new Notice(
+                            "test title" + i,
+                            "test content" + i,
+                            userUser,
+                            null
+                    )
+            );
+        noticeRepository.saveAll(notices);
+        em.flush();
+        em.clear();
+
+        //when
+        PageRequest pageRequest = PageRequest.of(1, 5);
+        Page<Notice> findedNotices = noticeRepository.findAllByUserRole(Role.ROLE_ADMIN, pageRequest);
+
+        //then
+        Assertions.assertThat(findedNotices.getTotalElements()).isEqualTo(10);
+        Assertions.assertThat(findedNotices.getTotalPages()).isEqualTo(2);
+        Assertions.assertThat(findedNotices.getNumber()).isEqualTo(1);
+        Assertions.assertThat(findedNotices.getNumberOfElements()).isEqualTo(5);
+        for (Notice findedNotice : findedNotices) {
+            org.junit.jupiter.api.Assertions
+                    .assertDoesNotThrow(
+                            () -> findedNotice.getWriter().getContact()
+                    );
+            Assertions.assertThat(findedNotice.getWriter().getRole()).isEqualTo(Role.ROLE_ADMIN);
+        }
+    }
+
+    @Test
+    public void findAllWithThumbnailBy_WithThumbnailAndWriter_CheckLazy() throws Exception{
+        //given
+        String savedName = "saved_thumb.jpg";
+        FileNames thumbnail = new FileNames("test_thumb.jpg", savedName);
+        User userAdmin = new User("testId0", "password0", Role.ROLE_ADMIN, "testUser", "010-1234-1234");
+        userRepository.save(userAdmin);
+        int noticeCnt = 10;
+        List<Notice> notices = new ArrayList<>();
+        for (int i = 0; i < noticeCnt; i++)
+            notices.add(new Notice("test title" + i,
+                    "test content" + i,
+                    userAdmin,
+                    thumbnail.toThumbnailEntity())
+            );
+        noticeRepository.saveAll(notices);
+        em.flush();
+        em.clear();
+        PageRequest request = PageRequest.of(1, 5);
+
+        //when
+        Page<Notice> findedNotices = noticeRepository.findAllWithThumbnailBy(request);
+
+        //then
+        Assertions.assertThat(findedNotices.getTotalElements()).isEqualTo(noticeCnt);
+        Assertions.assertThat(findedNotices.getTotalPages()).isEqualTo(2);
+        Assertions.assertThat(findedNotices.getNumber()).isEqualTo(1);
+        Assertions.assertThat(findedNotices.getNumberOfElements()).isEqualTo(5);
+        for (Notice findedNotice : findedNotices) {
+            Assertions.assertThat(findedNotice.getThumbnail()).isNotEqualTo(HibernateProxy.class);
+            Assertions.assertThat(findedNotice.getThumbnail().getUploadedName()).isEqualTo(savedName);
+            Assertions.assertThat(findedNotice.getWriter()).isNotEqualTo((HibernateProxy.class));
+        }
+    }
+
+    @Test
+    public void findWithWriterAllByTitleContainingOrderByCreatedAt_MatchThreeType_CheckLazy() throws Exception{
+        //given
+        String keyword = "test";
+        PageRequest pageRequest = PageRequest.of(0, 2);
+        User user = new User("userId", "userPassword", Role.ROLE_ADMIN, "test User", "test Contact");
+        userRepository.save(user);
+        Notice firstMatch = new Notice("test title", "test content", user, null);
+        noticeRepository.save(firstMatch);
+        Notice middleMatch = new Notice("tittestle", "test content", user, null);
+        noticeRepository.save(middleMatch);
+        Notice lastMatch = new Notice("title test", "test content", user, null);
+        noticeRepository.save(lastMatch);
+        Notice noneMatch = new Notice("title", "test content", user, null);
+        noticeRepository.save(noneMatch);
+
+        //when
+        Page<Notice> notices = noticeRepository.findWithWriterAllByTitleContainingOrderByCreatedAt(keyword, pageRequest);
+
+        //then
+        Assertions.assertThat(notices.getTotalElements()).isEqualTo(3);
+        Assertions.assertThat(notices.getTotalPages()).isEqualTo(2);
+        Assertions.assertThat(notices.getNumber()).isEqualTo(0);
+        Assertions.assertThat(notices.getNumberOfElements()).isEqualTo(2);
+        for (Notice notice : notices) {
+            Assertions.assertThat(notice.getWriter()).isNotEqualTo((HibernateProxy.class));
+        }
+        Assertions.assertThat(notices.stream().map(Notice::getTitle)
+                .collect(Collectors.toList())).contains(
+                firstMatch.getTitle(),
+                middleMatch.getTitle()
+        );
+
     }
 
 

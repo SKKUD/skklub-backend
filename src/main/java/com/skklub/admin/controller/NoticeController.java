@@ -102,13 +102,14 @@ public class NoticeController {
     //목록 조회(with 썸네일)
     @GetMapping("/notice/prev/thumbnail")
     public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
-        return new PageImpl<>(noticeRepository.findAllWithThumbnailBy(pageable).stream()
-                .map(notice -> {
-                            Thumbnail thumbnail = notice.getThumbnail();
-                            S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(thumbnail));
-                            return new NoticePrevWithThumbnailResponse(notice, s3DownloadDto);
-                        }
-                ).collect(Collectors.toList())
+        return new PageImpl<>(
+                noticeRepository.findAllWithThumbnailBy(pageable).stream()
+                        .map(notice -> {
+                                    Thumbnail thumbnail = notice.getThumbnail();
+                                    S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(thumbnail));
+                                    return new NoticePrevWithThumbnailResponse(notice, s3DownloadDto);
+                                }
+                        ).collect(Collectors.toList())
         );
     }
 

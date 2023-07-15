@@ -22,6 +22,7 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -807,5 +808,25 @@ public class NoticeControllerTest {
         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
     }
 
+    @Test
+    public void getNoticePrevWithThumbnail_d() throws Exception{
+        //given
+        PageRequest request = PageRequest.of(1, 5);
+        int noticeCnt = 20;
+        List<Notice> notices = new ArrayList<>();
+        Path path = Paths.get("src/test/resources/img/1.jpg");
+        byte[] bytes = Files.readAllBytes(path);
+        MultipartFile multipartFile = new MockMultipartFile("1.jpg", "1.jpg","image", bytes);
+        for(int i = 0; i < noticeCnt; i++){
+            User user = new User("username " + i, "password " + i, Role.ROLE_ADMIN, "test name " + i, null);
+            notices.add(
+                    new Notice("test title" + i, "test content " + i, user, null)
+            );
+        }
 
+        //when
+
+        //then
+
+    }
 }
