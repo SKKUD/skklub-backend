@@ -57,5 +57,6 @@ jobs:
       - name: Docker build & push
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -f Dockerfile -t ${{ secrets.DOCKER_TEST_REPO }} .
+          docker buildx create --name multi-arch-builder —-driver docker-container —-use 
+          docker buildx build --platform=linux/arm64/v8,linux/amd64/v3 -f Dockerfile -t ${{ secrets.DOCKER_TEST_REPO }} .
           docker push ${{ secrets.DOCKER_TEST_REPO }}
