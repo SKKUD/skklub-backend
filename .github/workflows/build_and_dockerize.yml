@@ -48,12 +48,12 @@ jobs:
         shell: bash
 
       - name: Create application.yml
+        shell: bash
         run: |
           mkdir -p ./src/main/resources
           cd ./src/main/resources
           touch ./application.yml
           echo "${{ secrets.PROPERTIES }}" > ./application.yml
-        shell: bash
 
       - name: Build with Gradle
         run: ./gradlew build -x test
@@ -73,3 +73,7 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker buildx create --name multi-arch-builder --driver docker-container --use 
           docker buildx build --platform=linux/arm64/v8,linux/amd64/v3 -f Dockerfile -t ${{ secrets.DOCKER_TEST_REPO }}:${{ steps.extract_branch.outputs.BRANCH_NAME }}-latest --push .
+      
+      - name: Jenkins post
+        run: |
+          curl -X POST https://${{ secrets.JENKINS_USERNAME }}:${{ secrets.JENKINS_TOKEN }}@deploy.skku.dev/job/%28DEV%29skklub-backend/build
