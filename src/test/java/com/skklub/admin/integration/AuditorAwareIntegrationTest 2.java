@@ -39,8 +39,9 @@ public class AuditorAwareIntegrationTest {
     @Test
     @DisplayName("userAuditorAware_create")
     @Transactional
-    @WithMockCustomUser(username = "testerID",password = "testerPW",role = Role.ROLE_MASTER, name = "tester")
+    @WithMockCustomUser(username = "tester",password = "tester_pw",role = Role.ROLE_MASTER)
     public void userAuditorAware_WithMockSecurityContext() throws Exception{
+
         //given
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
         Path path = Paths.get("src/test/resources/img/1.jpg");
@@ -53,8 +54,9 @@ public class AuditorAwareIntegrationTest {
         Optional<Club> club = clubRepository.findById(clubNameAndIdDTO.getId());
 
         //then
-        Assertions.assertThat(club.get().getCreatedBy()).isEqualTo("testerID");
-        Assertions.assertThat(club.get().getLastModifiedBy()).isEqualTo("testerID");
+        Assertions.assertThat(club.get().getCreatedBy()).isEqualTo("tester");
+        Assertions.assertThat(club.get().getLastModifiedBy()).isEqualTo("tester");
+
     }
 
 }
