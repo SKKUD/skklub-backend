@@ -106,4 +106,12 @@ public class ClubService {
                 });
     }
 
+    public Optional<String> updateClubType(Long clubId, Club clubUpdateInfo) {
+        return clubRepository.findById(clubId)
+                .map(baseClub -> {
+                    baseClub.update(clubUpdateInfo);
+                    return baseClub.getName();
+                });
+    }
+
 }

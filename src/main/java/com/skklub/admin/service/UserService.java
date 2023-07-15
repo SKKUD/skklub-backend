@@ -1,19 +1,23 @@
 package com.skklub.admin.service;
 
-import com.skklub.admin.security.redis.RedisUtil;
-import com.skklub.admin.service.dto.*;
 import com.skklub.admin.domain.User;
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.exception.AuthException;
 import com.skklub.admin.exception.ErrorCode;
 import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
+import com.skklub.admin.security.redis.RedisUtil;
+import com.skklub.admin.service.dto.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -79,18 +83,11 @@ public class UserService {
 
     //User Update
     public UserProcResultDTO userUpdate(UserUpdateDTO userUpdateDTO){
-        //업데이트할 유저 존재하는지 확인
-        Optional<User> existingUser = Optional.of(userRepository.findById(userUpdateDTO.getId()))
-                .orElseThrow(()->
-                        new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
-        //update 진행
-        String username = existingUser.get().getUsername();
-        String encPwd = bCryptPasswordEncoder.encode(userUpdateDTO.getPassword());
 
-        //업데이트 대상 계정과 로그인된 계정 일치 여부 확인
-        if(!userUpdateDTO.getUserDetails().getUsername().equals(username)){
-            throw new AuthException(ErrorCode.NO_AUTHORITY,"No authority");
-        }
+        validateEditingUserAuthority(userUpdateDTO.getUserDetails(),userUpdateDTO.getId());
+        //update 진행
+        String username = userRepository.findById(userUpdateDTO.getId()).get().getUsername();
+        String encPwd = bCryptPasswordEncoder.encode(userUpdateDTO.getPassword());
 
         User updatedUser =
                 new User(userUpdateDTO.getId(),
@@ -119,6 +116,24 @@ public class UserService {
         redisUtil.setBlackList(bannedToken, "AT:" + username, TokenProvider.getExpiration(bannedToken)+(60 * 10 * 1000), TimeUnit.MILLISECONDS);
 
         return username;
+    }
+
+    public void validateEditingUserAuthority(UserDetails nowEditingUser, Long id){
+        //수정 권한자로 등록된 유저 확인
+        User registeredUser = Optional.of(userRepository.findById(id).get())
+                .orElseThrow(()->
+                        new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
+        //업데이트 대상 계정과 로그인된 계정 일치 여부 확인
+        if(!nowEditingUser.getUsername().equals(registeredUser.getUsername())){
+            //관리자에 의한 직권 수정 허용(MASTER, ADMIN)
+            List<GrantedAuthority> authList = (List<GrantedAuthority>) nowEditingUser.getAuthorities();
+            String authority = authList.get(0).getAuthority();
+            if(authority.equals(String.valueOf(Role.ROLE_ADMIN_SEOUL_CENTRAL))||authority.equals(String.valueOf(Role.ROLE_MASTER))){
+                log.info("now updating with authority of administrator({}): {}",authority, nowEditingUser.getUsername());
+            }else{
+                throw new AuthException(ErrorCode.NO_AUTHORITY,"no authority");
+            }
+        }
     }
 
 }

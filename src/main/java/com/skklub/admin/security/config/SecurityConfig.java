@@ -68,8 +68,8 @@ public class SecurityConfig  {
                     try {
                         authorize
                                 .requestMatchers(publicEndpoints()).permitAll()
-                                .requestMatchers(userEndpoints()).access(new WebExpressionAuthorizationManager("hasRole('ROLE_MASTER') or hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')"))
-                                .requestMatchers(adminEndpoints()).access(new WebExpressionAuthorizationManager("hasRole('ROLE_MASTER') or hasRole('ROLE_ADMIN')"))
+                                .requestMatchers(userEndpoints()).access(new WebExpressionAuthorizationManager("hasRole('ROLE_MASTER') or hasRole('ROLE_ADMIN_SEOUL_CENTRAL') or hasRole('ROLE_ADMIN_SUWON_CENTRAL') or hasRole('ROLE_USER')"))
+                                .requestMatchers(adminEndpoints()).access(new WebExpressionAuthorizationManager("hasRole('ROLE_MASTER') or hasRole('ROLE_ADMIN_SEOUL_CENTRAL') or hasRole('ROLE_ADMIN_SUWON_CENTRAL')"))
                                 .requestMatchers(masterEndpoints()).access(new WebExpressionAuthorizationManager("hasRole('ROLE_MASTER')"))
                                 .anyRequest().authenticated();
 
