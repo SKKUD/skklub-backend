@@ -2,13 +2,15 @@ package com.skklub.admin.controller.notice;
 
 import akka.protobuf.WireFormat;
 import com.skklub.admin.controller.NoticeController;
+import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.NoticeCreateRequest;
-import com.skklub.admin.domain.ExtraFile;
-import com.skklub.admin.domain.Notice;
-import com.skklub.admin.domain.Thumbnail;
-import com.skklub.admin.domain.User;
+import com.skklub.admin.controller.dto.NoticePrevWithThumbnailResponse;
+import com.skklub.admin.controller.dto.S3DownloadDto;
+import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Role;
+import com.skklub.admin.error.exception.CannotCategorizeByMasterException;
+import com.skklub.admin.error.exception.CannotCategorizeByUserException;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.NoticeRepository;
 import com.skklub.admin.service.NoticeService;
@@ -22,10 +24,14 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
@@ -42,11 +48,12 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.skklub.admin.controller.RestDocsUtils.example;
+import static com.skklub.admin.controller.RestDocsUtils.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -809,24 +816,265 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void getNoticePrevWithThumbnail_d() throws Exception{
+    public void getNoticePrevWithThumbnail_Default_Success() throws Exception{
+        //given
+        PageRequest request = PageRequest.of(1, 5, Sort.by("createdAt").ascending());
+        int noticeCnt = 20;
+        List<Notice> notices = readyNoticeWithUserAndThumbnail(noticeCnt);
+        setNoticeIds(notices);
+        setNoticeCreatedAt(notices);
+        PageImpl<Notice> noticePages = new PageImpl<>(notices, request, noticeCnt);
+        given(noticeRepository.findAllWithThumbnailBy(request)).willReturn(noticePages);
+        byte[] bytes = "test Bytes".getBytes();
+        for (Notice notice : notices) {
+            given(s3Transferer.downloadOne(new FileNames(notice.getThumbnail())))
+                    .willReturn(new S3DownloadDto(null, notice.getThumbnail().getOriginalName(), bytes));
+        }
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/notice/prev/thumbnail")
+                        .with(csrf())
+                        .queryParam("size", String.valueOf(request.getPageSize()))
+                        .queryParam("page", String.valueOf(request.getPageNumber()))
+                        .queryParam("sort", "createdAt,ASC")
+        );
+
+        //then
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalPages").value(4))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        for(int i = 0; i < 5; i++) {
+            actions.andExpect(jsonPath("$.content[" + i + "].noticeId").value(i))
+                    .andExpect(jsonPath("$.content[" + i + "].title").value(notices.get(i).getTitle()))
+                    .andExpect(jsonPath("$.content[" + i + "].content").value(notices.get(i).getContent()))
+                    .andExpect(jsonPath("$.content[" + i + "].createdAt").value(notices.get(i).getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()))
+                    .andExpect(jsonPath("$.content[" + i + "].thumbnail.fileName").value(notices.get(i).getThumbnail().getOriginalName()))
+                    .andExpect(jsonPath("$.content[" + i + "].thumbnail.bytes").value(new String(Base64.getEncoder().encode(bytes))));
+        }
+
+        List<FieldDescriptor> pageableResponseFields = new ArrayList<>();
+        pageableResponseFields.add(fieldWithPath("content[].noticeId").type(WireFormat.FieldType.INT64).description("공지 아이디").attributes(example(notices.get(0).getId().toString())));
+        pageableResponseFields.add(fieldWithPath("content[].title").type(WireFormat.FieldType.STRING).description("공지 제목").attributes(example(notices.get(0).getTitle())));
+        pageableResponseFields.add(fieldWithPath("content[].content").type(WireFormat.FieldType.STRING).description("공지 내용").attributes(example(notices.get(0).getContent())));
+        pageableResponseFields.add(fieldWithPath("content[].createdAt").type(WireFormat.FieldType.STRING).description("작성일자").attributes(example("yyyy-MM-dd'T'HH:mm")));
+        pageableResponseFields.add(fieldWithPath("content[].thumbnail.id").type(WireFormat.FieldType.INT64).description("썸네일 아이디").attributes(example("1")));
+        pageableResponseFields.add(fieldWithPath("content[].thumbnail.fileName").type(WireFormat.FieldType.STRING).description("썸네일 원본 파일명").attributes(example(notices.get(0).getThumbnail().getOriginalName())));
+        pageableResponseFields.add(fieldWithPath("content[].thumbnail.bytes").type(WireFormat.FieldType.BYTES).description("썸네일 바이트").attributes(example("바이트 배열")));
+        addPageableResponseFields(pageableResponseFields);
+
+        actions.andDo(
+                document("notice/get/prevs/thumbnail",
+                        queryParameters(
+                                parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
+                                parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT))
+                        ),
+                        responseFields(
+                                pageableResponseFields
+                        )
+                )
+        );
+
+    }
+
+    @Test
+    public void getNoticePrev_NoRole_전체조회() throws Exception{
         //given
         PageRequest request = PageRequest.of(1, 5);
         int noticeCnt = 20;
-        List<Notice> notices = new ArrayList<>();
-        Path path = Paths.get("src/test/resources/img/1.jpg");
-        byte[] bytes = Files.readAllBytes(path);
-        MultipartFile multipartFile = new MockMultipartFile("1.jpg", "1.jpg","image", bytes);
-        for(int i = 0; i < noticeCnt; i++){
-            User user = new User("username " + i, "password " + i, Role.ROLE_ADMIN, "test name " + i, null);
-            notices.add(
-                    new Notice("test title" + i, "test content " + i, user, null)
-            );
+        List<Notice> notices = readyNoticeWithUserAndThumbnail(noticeCnt);
+        setNoticeIds(notices);
+        setNoticeCreatedAt(notices);
+        PageImpl<Notice> noticePages = new PageImpl<>(notices, request, noticeCnt);
+        given(noticeRepository.findAll(request)).willReturn(noticePages);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/notice/prev")
+                        .with(csrf())
+                        .queryParam("size", String.valueOf(request.getPageSize()))
+                        .queryParam("page", String.valueOf(request.getPageNumber()))
+        );
+
+        //then
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalPages").value(4))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("false"));
+        for(int i = 0; i < 5; i++) {
+            actions.andExpect(jsonPath("$.content[" + i + "].noticeId").value(i))
+                    .andExpect(jsonPath("$.content[" + i + "].title").value(notices.get(i).getTitle()))
+                    .andExpect(jsonPath("$.content[" + i + "].writerName").value(notices.get(i).getWriter().getName()))
+                    .andExpect(jsonPath("$.content[" + i + "].createdAt").value(notices.get(i).getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()));
         }
 
+
+        List<FieldDescriptor> pageableResponseFields = new ArrayList<>();
+        pageableResponseFields.add(fieldWithPath("content[].noticeId").type(WireFormat.FieldType.INT64).description("공지 아이디").attributes(example(notices.get(0).getId().toString())));
+        pageableResponseFields.add(fieldWithPath("content[].title").type(WireFormat.FieldType.STRING).description("공지 제목").attributes(example(notices.get(0).getTitle())));
+        pageableResponseFields.add(fieldWithPath("content[].writerName").type(WireFormat.FieldType.STRING).description("작성자").attributes(example(notices.get(0).getWriter().getName())));
+        pageableResponseFields.add(fieldWithPath("content[].createdAt").type(WireFormat.FieldType.STRING).description("작성일자").attributes(example("yyyy-MM-dd'T'HH:mm")));
+        addPageableResponseFields(pageableResponseFields);
+
+        actions.andDo(
+                document("notice/get/prevs/role",
+                        queryParameters(
+                                parameterWithName("role").optional().description("검색할 유저 - 권한").attributes(example(RestDocsUtils.LINK_ADMIN)),
+                                parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
+                                parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT))
+                        ),
+                        responseFields(
+                                pageableResponseFields
+                        )
+                )
+        );
+
+    }
+
+    @Test
+    public void getNoticePrev_RoleAdmin_관리자권한수정됨에따라변경될테스트() throws Exception{
+        //given
+        PageRequest request = PageRequest.of(1, 5);
+        Role role = Role.ROLE_ADMIN;
+        //**수정필요
         //when
 
         //then
 
+    }
+
+    @Test
+    public void getNoticePrev_RoleUser_CannotCategorizeByUserException() throws Exception{
+        //given
+        PageRequest request = PageRequest.of(1, 5);
+        Role role = Role.ROLE_USER;
+
+        //when
+        MvcResult badRoleResult = mockMvc.perform(
+                get("/notice/prev")
+                        .with(csrf())
+                        .queryParam("role", role.toString())
+                        .queryParam("size", String.valueOf(request.getPageSize()))
+                        .queryParam("page", String.valueOf(request.getPageNumber()))
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badRoleResult.getResolvedException())
+                .isExactlyInstanceOf(CannotCategorizeByUserException.class);
+    }
+
+
+    @Test
+    public void getNoticePrev_RoleMaster_CannotCategorizeByMasterException() throws Exception{
+        //given
+        PageRequest request = PageRequest.of(1, 5);
+        Role role = Role.ROLE_MASTER;
+
+        //when
+        MvcResult badRoleResult = mockMvc.perform(
+                get("/notice/prev")
+                        .with(csrf())
+                        .queryParam("role", role.toString())
+                        .queryParam("size", String.valueOf(request.getPageSize()))
+                        .queryParam("page", String.valueOf(request.getPageNumber()))
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badRoleResult.getResolvedException())
+                .isExactlyInstanceOf(CannotCategorizeByMasterException.class);
+
+    }
+    
+    @Test
+    public void getNoticePrevByTitle_Default_Success() throws Exception{
+        //given
+        String keyword = "test";
+        PageRequest request = PageRequest.of(0, 2);
+        User user = new User("userId", "userPassword", Role.ROLE_ADMIN, "test User", "test Contact");
+        List<Notice> notices = new ArrayList<>();
+        notices.add(new Notice("test title", "test content", user, null));
+        notices.add(new Notice("tittestle", "test content", user, null));
+        notices.add(new Notice("title test", "test content", user, null));
+        setNoticeIds(notices);
+        setNoticeCreatedAt(notices);
+        PageImpl<Notice> noticePages = new PageImpl<>(notices, request, 3);
+        given(noticeRepository.findWithWriterAllByTitleContainingOrderByCreatedAt(keyword, request))
+                .willReturn(noticePages);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/notice/prev/search/title")
+                        .queryParam("title", keyword)
+                        .queryParam("size", String.valueOf(request.getPageSize()))
+                        .queryParam("page", String.valueOf(request.getPageNumber()))
+        );
+
+        //then
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("false"));
+        for(int i = 0; i < 2; i++) {
+            actions.andExpect(jsonPath("$.content[" + i + "].noticeId").value(i))
+                    .andExpect(jsonPath("$.content[" + i + "].title").value(notices.get(i).getTitle()))
+                    .andExpect(jsonPath("$.content[" + i + "].writerName").value(notices.get(i).getWriter().getName()))
+                    .andExpect(jsonPath("$.content[" + i + "].createdAt").value(notices.get(i).getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()));
+        }
+
+
+        List<FieldDescriptor> pageableResponseFields = new ArrayList<>();
+        pageableResponseFields.add(fieldWithPath("content[].noticeId").type(WireFormat.FieldType.INT64).description("공지 아이디").attributes(example(notices.get(0).getId().toString())));
+        pageableResponseFields.add(fieldWithPath("content[].title").type(WireFormat.FieldType.STRING).description("공지 제목").attributes(example(notices.get(0).getTitle())));
+        pageableResponseFields.add(fieldWithPath("content[].writerName").type(WireFormat.FieldType.STRING).description("작성자").attributes(example(notices.get(0).getWriter().getName())));
+        pageableResponseFields.add(fieldWithPath("content[].createdAt").type(WireFormat.FieldType.STRING).description("작성일자").attributes(example("yyyy-MM-dd'T'HH:mm")));
+        addPageableResponseFields(pageableResponseFields);
+
+        actions.andDo(
+                document("notice/get/prevs/title",
+                        queryParameters(
+                                parameterWithName("title").optional().description("제목 검색 키워드").attributes(example("'test' : 'testabcdef' or 'abctestdef' or 'abcdeftest'")),
+                                parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
+                                parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT))
+                        ),
+                        responseFields(
+                                pageableResponseFields
+                        )
+                )
+        );
+
+    }
+
+
+    private List<Notice> readyNoticeWithUserAndThumbnail(int noticeCnt) {
+        List<Notice> notices = new ArrayList<>();
+        for(int i = 0; i < noticeCnt; i++){
+            Thumbnail thumbnail = new Thumbnail("test_Thumb" + i + ".jpg", "saved_Thumb" + i + ".jpg");
+            User user = new User("username " + i, "password " + i, Role.ROLE_ADMIN, "test name " + i, null);
+            notices.add(
+                    new Notice("test title" + i, "test content " + i, user, thumbnail)
+            );
+        }
+        return notices;
+    }
+
+
+    private void setNoticeIds(List<Notice> notices) throws NoSuchFieldException, IllegalAccessException {
+        Field id = notices.get(0).getClass().getDeclaredField("id");
+        id.setAccessible(true);
+        for(int i = 0; i < notices.size(); i++){
+            id.set(notices.get(i), (long)i);
+        }
+    }
+
+    private void setNoticeCreatedAt(List<Notice> notices) throws NoSuchFieldException, IllegalAccessException {
+        Field createdAt = notices.get(0).getClass().getSuperclass().getSuperclass().getDeclaredField("createdAt");
+        createdAt.setAccessible(true);
+        for(int i = 0; i < notices.size(); i++){
+            createdAt.set(notices.get(i), LocalDateTime.now());
+        }
     }
 }

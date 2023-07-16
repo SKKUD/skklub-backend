@@ -153,6 +153,27 @@ public class ClubExceptionHandler {
                 .reasonMessage("대상 공지글의 파일 중 입력된 파일명과 일치하는 파일이 존재하지 않습니다")
                 .build();
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
-
     }
+
+
+    @ExceptionHandler(CannotCategorizeByMasterException.class)
+    public ResponseEntity<ErrorResponse> cannotCategorizeByMasterException(CannotCategorizeByMasterException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("role")
+                .given(request.getParameter("role"))
+                .reasonMessage("공지글은 관리자로는 분류할 수 없습니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
+    @ExceptionHandler(CannotCategorizeByUserException.class)
+    public ResponseEntity<ErrorResponse> ㅊannotCategorizeByUserException(CannotCategorizeByUserException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("role")
+                .given(request.getParameter("role"))
+                .reasonMessage("공지글은 일반 유저로는 분류할 수 없습니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
 }

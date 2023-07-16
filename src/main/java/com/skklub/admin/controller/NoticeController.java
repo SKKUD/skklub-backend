@@ -102,15 +102,13 @@ public class NoticeController {
     //목록 조회(with 썸네일)
     @GetMapping("/notice/prev/thumbnail")
     public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
-        return new PageImpl<>(
-                noticeRepository.findAllWithThumbnailBy(pageable).stream()
-                        .map(notice -> {
-                                    Thumbnail thumbnail = notice.getThumbnail();
-                                    S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(thumbnail));
-                                    return new NoticePrevWithThumbnailResponse(notice, s3DownloadDto);
-                                }
-                        ).collect(Collectors.toList())
-        );
+        return noticeRepository.findAllWithThumbnailBy(pageable)
+                .map(notice -> {
+                            Thumbnail thumbnail = notice.getThumbnail();
+                            S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(thumbnail));
+                            return new NoticePrevWithThumbnailResponse(notice, s3DownloadDto);
+                        }
+                );
     }
 
     //목록 조회(전체(작성자 선택), 시간순)
@@ -122,19 +120,15 @@ public class NoticeController {
                     return noticeRepository.findAllByUserRole(r, pageable);
                 }
         ).orElseGet(() -> noticeRepository.findAll(pageable));
-
-        return new PageImpl<>(notices.stream()
-                .map(NoticePrevResponse::new)
-                .collect(Collectors.toList()));
+        return notices.map(NoticePrevResponse::new);
     }
 
     //목록 조회(제목 검색, 시간순)
     @GetMapping("/notice/prev/search/title")
     public Page<NoticePrevResponse> getNoticePrevByTitle(@RequestParam String title, Pageable pageable) {
-        return new PageImpl<>(noticeRepository.findWithWriterAllByTitleContainingOrderByCreatedAt(title, pageable).stream()
-                .map(NoticePrevResponse::new)
-                .collect(Collectors.toList())
-        );
+        return noticeRepository
+                .findWithWriterAllByTitleContainingOrderByCreatedAt(title, pageable)
+                .map(NoticePrevResponse::new);
     }
 
 //=====UPDATE=====//
