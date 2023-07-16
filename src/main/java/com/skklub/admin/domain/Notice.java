@@ -18,6 +18,7 @@ public class Notice extends BaseEntity{
     private Long id;
 
     private String title;
+    @Lob
     private String content;
 
     @OneToOne(fetch = FetchType.LAZY)

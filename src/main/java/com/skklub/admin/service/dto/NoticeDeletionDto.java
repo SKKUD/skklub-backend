@@ -15,5 +15,6 @@ import java.util.List;
 public class NoticeDeletionDto {
     private String noticeTitle;
     private FileNames thumbnailFileName;
+    @Builder.Default
     private List<FileNames> extraFileNames = new ArrayList<>();
 }

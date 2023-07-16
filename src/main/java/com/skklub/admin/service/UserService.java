@@ -89,17 +89,18 @@ public class UserService {
         String username = userRepository.findById(userUpdateDTO.getId()).get().getUsername();
         String encPwd = bCryptPasswordEncoder.encode(userUpdateDTO.getPassword());
 
-        User updatedUser =
-                new User(userUpdateDTO.getId(),
-                        username,
-                        encPwd,
-                        userUpdateDTO.getRole(),
-                        userUpdateDTO.getName(),
-                        userUpdateDTO.getContact());
-        userRepository.save(updatedUser);
-        UserProcResultDTO result = new UserProcResultDTO(updatedUser.getId(),updatedUser.getUsername(),updatedUser.getName(),updatedUser.getContact());
-        log.info("user updated -> userId : {}, username : {}", userUpdateDTO.getId(), username);
-        return result;
+//        User updatedUser =
+//                new User(userUpdateDTO.getId(),
+//                        username,
+//                        encPwd,
+//                        userUpdateDTO.getRole(),
+//                        userUpdateDTO.getName(),
+//                        userUpdateDTO.getContact());
+//        userRepository.save(updatedUser);
+//        UserProcResultDTO result = new UserProcResultDTO(updatedUser.getId(),updatedUser.getUsername(),updatedUser.getName(),updatedUser.getContact());
+//        log.info("user updated -> userId : {}, username : {}", userUpdateDTO.getId(), username);
+//        return result;
+        return null;
 
     }
 

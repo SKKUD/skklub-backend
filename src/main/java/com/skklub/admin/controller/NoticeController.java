@@ -4,6 +4,9 @@ import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
+import com.skklub.admin.domain.enums.Role;
+import com.skklub.admin.error.exception.CannotCategorizeByMasterException;
+import com.skklub.admin.error.exception.CannotCategorizeByUserException;
 import com.skklub.admin.error.exception.ExtraFileNameMisMatchException;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.NoticeRepository;
@@ -12,6 +15,13 @@ import com.skklub.admin.service.NoticeService;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -67,16 +77,58 @@ public class NoticeController {
 //=====READ=====//
 
     //세부 조회
+    @GetMapping("/notice/{noticeId}")
+    public NoticeDetailResponse getDetailNotice(@PathVariable Long noticeId) {
+        Notice notice = noticeRepository.findDetailById(noticeId).orElseThrow(NoticeIdMisMatchException::new);
+        Optional<Notice> preNotice = noticeService.findPreNotice(notice);
+        Optional<Notice> postNotice = noticeService.findPostNotice(notice);
+        return new NoticeDetailResponse(notice, preNotice, postNotice);
+    }
 
     //파일 조회
+    @GetMapping("/notice/file")
+    public ResponseEntity<byte[]> getFile(@RequestParam String fileSavedName) {
+        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(null, fileSavedName));
+        String fileName = s3DownloadDto.getFileName();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        httpHeaders.setContentLength(s3DownloadDto.getBytes().length);
+        httpHeaders.setContentDispositionFormData("attachment", fileName);
+
+        return new ResponseEntity<>(s3DownloadDto.getBytes(), httpHeaders, HttpStatus.OK);
+    }
 
     //목록 조회(with 썸네일)
+    @GetMapping("/notice/prev/thumbnail")
+    public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
+        return noticeRepository.findAllWithThumbnailBy(pageable)
+                .map(notice -> {
+                            Thumbnail thumbnail = notice.getThumbnail();
+                            S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(thumbnail));
+                            return new NoticePrevWithThumbnailResponse(notice, s3DownloadDto);
+                        }
+                );
+    }
 
-    //목록 조회(전체, 시간순)
+    //목록 조회(전체(작성자 선택), 시간순)
+    @GetMapping("/notice/prev")
+    public Page<NoticePrevResponse> getNoticePrev(@RequestParam(required = false) Optional<Role> role, Pageable pageable) {
+        Page<Notice> notices = role.map(r -> {
+                    if (r.equals(Role.ROLE_MASTER)) throw new CannotCategorizeByMasterException();
+                    if (r.equals(Role.ROLE_USER)) throw new CannotCategorizeByUserException();
+                    return noticeRepository.findAllByUserRole(r, pageable);
+                }
+        ).orElseGet(() -> noticeRepository.findAll(pageable));
+        return notices.map(NoticePrevResponse::new);
+    }
 
     //목록 조회(제목 검색, 시간순)
-
-    //목록 조회(작성자 검색, 시간순)
+    @GetMapping("/notice/prev/search/title")
+    public Page<NoticePrevResponse> getNoticePrevByTitle(@RequestParam String title, Pageable pageable) {
+        return noticeRepository
+                .findWithWriterAllByTitleContainingOrderByCreatedAt(title, pageable)
+                .map(NoticePrevResponse::new);
+    }
 
 //=====UPDATE=====//
 

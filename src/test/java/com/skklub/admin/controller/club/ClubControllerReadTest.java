@@ -573,47 +573,47 @@ class ClubControllerReadTest {
 
      }
 
-     @Test
-     public void getRandomClubNameAndIdByCategories_Default_Success() throws Exception{
-         //given
-         Campus campus = Campus.명륜;
-         ClubType clubType = ClubType.중앙동아리;
-         String belongs = "취미교양";
-         List<Club> clubs = testDataRepository.getClubs().subList(0, 3);
-         setClubIds(clubs);
-         given(clubService.getRandomClubsByCategories(campus, clubType, belongs)).willReturn(clubs);
+    @Test
+    public void getRandomClubNameAndIdByCategories_Default_Success() throws Exception {
+        //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.중앙동아리;
+        String belongs = "취미교양";
+        List<Club> clubs = testDataRepository.getClubs().subList(0, 3);
+        setClubIds(clubs);
+        given(clubService.getRandomClubsByCategories(campus, clubType, belongs)).willReturn(clubs);
 
-         //when
-         ResultActions actions = mockMvc.perform(
-                 get("/club/random")
-                         .with(csrf())
-                         .queryParam("campus", campus.toString())
-                         .queryParam("clubType", clubType.toString())
-                         .queryParam("belongs", belongs)
-         );
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/club/random")
+                        .with(csrf())
+                        .queryParam("campus", campus.toString())
+                        .queryParam("clubType", clubType.toString())
+                        .queryParam("belongs", belongs)
+        );
 
-         //then
-         actions.andExpect(status().isOk());
-         for(int i = 0; i < clubs.size(); i++) {
-             actions.andExpect(jsonPath("$[" + i + "].id").value(clubs.get(i).getId()))
-                     .andExpect(jsonPath("$[" + i + "].name").value(clubs.get(i).getName()))
-                     .andExpect(jsonPath("$[" + i + "].campus").value(clubs.get(i).getCampus().toString()));
-         }
-         actions.andDo(
-                 document("club/get/random",
-                         queryParameters(
-                                 parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
-                                 parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(LINK_CLUB_TYPE_NULL)).optional(),
-                                 parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(LINK_BELONGS_TYPE_NULL)).optional()
-                         ),
-                         responseFields(
-                                 fieldWithPath("[]id").type(WireFormat.FieldType.INT64).description("동아리 Id").attributes(example(clubs.get(0).getId().toString())),
-                                 fieldWithPath("[]name").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(clubs.get(0).getName())),
-                                 fieldWithPath("[]campus").type(WireFormat.FieldType.STRING).description("캠퍼스 종류").attributes(example(LINK_CAMPUS_TYPE))
-                         )
-                 )
-         );
-      }
+        //then
+        actions.andExpect(status().isOk());
+        for (int i = 0; i < clubs.size(); i++) {
+            actions.andExpect(jsonPath("$[" + i + "].id").value(clubs.get(i).getId()))
+                    .andExpect(jsonPath("$[" + i + "].name").value(clubs.get(i).getName()))
+                    .andExpect(jsonPath("$[" + i + "].campus").value(clubs.get(i).getCampus().toString()));
+        }
+        actions.andDo(
+                document("club/get/random",
+                        queryParameters(
+                                parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
+                                parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(LINK_CLUB_TYPE_NULL)).optional(),
+                                parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(LINK_BELONGS_TYPE_NULL)).optional()
+                        ),
+                        responseFields(
+                                fieldWithPath("[]id").type(WireFormat.FieldType.INT64).description("동아리 Id").attributes(example(clubs.get(0).getId().toString())),
+                                fieldWithPath("[]name").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(clubs.get(0).getName())),
+                                fieldWithPath("[]campus").type(WireFormat.FieldType.STRING).description("캠퍼스 종류").attributes(example(LINK_CAMPUS_TYPE))
+                        )
+                )
+        );
+    }
 
     @Test
     public void getRandomClubNameAndIdByCategories_IllegalBelongsType_InvalidBelongsException() throws Exception{

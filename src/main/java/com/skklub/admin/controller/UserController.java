@@ -54,7 +54,9 @@ public class UserController {
     public ResponseEntity<UserProcResultDTO> update(@PathVariable Long userId, @ModelAttribute UserUpdateRequestDTO userUpdateRequestDTO, @AuthenticationPrincipal UserDetails userDetails){
         UserProcResultDTO updated = userService.userUpdate(
                 new UserUpdateDTO(
-                        userId, userUpdateRequestDTO.getPassword(), role, userUpdateRequestDTO.getName(),userUpdateRequestDTO.getContact(),userDetails));
+                        userId, userUpdateRequestDTO.getPassword(),
+                        role, userUpdateRequestDTO.getName(),
+                        userUpdateRequestDTO.getContact(),userDetails));
         return ResponseEntity.ok().body(updated);
     }
 
