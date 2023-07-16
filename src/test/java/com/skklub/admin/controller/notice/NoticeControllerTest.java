@@ -65,8 +65,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @Slf4j
@@ -865,7 +864,7 @@ public class NoticeControllerTest {
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(
-                document("notice/get/prevs/thumbnail",
+                document("notice/read/prevs/thumbnail",
                         queryParameters(
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
@@ -919,7 +918,7 @@ public class NoticeControllerTest {
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(
-                document("notice/get/prevs/role",
+                document("notice/read/prevs/role",
                         queryParameters(
                                 parameterWithName("role").optional().description("검색할 유저 - 권한").attributes(example(RestDocsUtils.LINK_ADMIN)),
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
@@ -1033,7 +1032,7 @@ public class NoticeControllerTest {
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(
-                document("notice/get/prevs/title",
+                document("notice/read/prevs/title",
                         queryParameters(
                                 parameterWithName("title").optional().description("제목 검색 키워드").attributes(example("'test' : 'testabcdef' or 'abctestdef' or 'abcdeftest'")),
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
@@ -1048,6 +1047,32 @@ public class NoticeControllerTest {
 
     }
 
+    @Test
+    public void getFile_Default_Success() throws Exception {
+        //given
+        String fileSavedName = "save_File.pdf";
+        byte[] bytes = "test Bytes".getBytes();
+        S3DownloadDto s3DownloadDto = new S3DownloadDto(2L, "original_file.pdf", bytes);
+        given(s3Transferer.downloadOne(new FileNames(null, fileSavedName))).willReturn(s3DownloadDto);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/notice/file")
+                        .with(csrf())
+                        .queryParam("fileSavedName", fileSavedName)
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andDo(
+                        document("notice/read/file",
+                                queryParameters(
+                                        parameterWithName("fileSavedName").description("파일이 S3에 저장된 이름").attributes(example("002e73a5-511a-4315-a85d-6c40fb60.pdf"))
+                                )
+                        )
+                );
+
+    }
 
     private List<Notice> readyNoticeWithUserAndThumbnail(int noticeCnt) {
         List<Notice> notices = new ArrayList<>();

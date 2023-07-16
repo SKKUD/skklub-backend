@@ -96,7 +96,6 @@ public class NoticeController {
         httpHeaders.setContentDispositionFormData("attachment", fileName);
 
         return new ResponseEntity<>(s3DownloadDto.getBytes(), httpHeaders, HttpStatus.OK);
-
     }
 
     //목록 조회(with 썸네일)
