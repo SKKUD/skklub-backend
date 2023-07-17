@@ -1,0 +1,2 @@
+===== Delete - /notice/{noticeId}/{fileName}
+operation::notice/delete/file[snippets='path-parameters,response-fields']

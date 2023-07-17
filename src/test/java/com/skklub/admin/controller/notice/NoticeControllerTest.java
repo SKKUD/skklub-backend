@@ -1,6 +1,7 @@
 package com.skklub.admin.controller.notice;
 
 import akka.protobuf.WireFormat;
+import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
@@ -88,14 +89,14 @@ public class NoticeControllerTest {
 
 
     @Test
-    @WithUserDetails(value = "userId0")
+    @WithMockUser
     public void createNotice_WithThumbnail_Success() throws Exception{
         //given
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("Notice Test Title", "Notice Test Content");
         MockMultipartFile mockThumbnail = readyMockThumbnail();
         FileNames fileNames = new FileNames("testThumb.png", "savedTestThumb.png");
         given(s3Transferer.uploadOne(mockThumbnail)).willReturn(fileNames);
-        given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), "userId0", fileNames.toThumbnailEntity()))
+        given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), "testerID", fileNames.toThumbnailEntity()))
                 .willReturn(0L);
 
         //when
@@ -105,6 +106,7 @@ public class NoticeControllerTest {
                         .queryParam("title", noticeCreateRequest.getTitle())
                         .queryParam("content", noticeCreateRequest.getContent())
                         .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
         );
 
         //then
@@ -112,7 +114,7 @@ public class NoticeControllerTest {
                 .andExpect(jsonPath("$.id").value(0L))
                 .andExpect(jsonPath("$.title").value(noticeCreateRequest.getTitle()))
                 .andDo(document(
-                                "notice/create/",
+                                "notice/create/notice",
                                 queryParameters(
                                         parameterWithName("title").description("공지 제목").attributes(example("[밴드] 제 22회 못갖춘마디 정기공연 초청")),
                                         parameterWithName("content").description("공지 본문").attributes(example("어쩌구저쩌구 초청합니다 어쩌구저쩌구 초청합니다.어쩌구저쩌구 초청합니다.\n어쩌구저쩌구 초청합니다.\n"))
@@ -136,14 +138,14 @@ public class NoticeControllerTest {
     }
 
     @Test
-    @WithMockUser(value = "userId0")
+    @WithMockUser
     public void createNotice_NoThumbnail_SaveAsDefaultThumbnail() throws Exception{
         //given
         Long noticeId = 12L;
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("Notice Test Title", "Notice Test Content");
         FileNames fileNames = new FileNames("default_thumb.png", "default_thumb.png");
         doThrow(RuntimeException.class).when(s3Transferer).uploadOne(any(MultipartFile.class));
-        given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), "userId0", fileNames.toThumbnailEntity()))
+        given(noticeService.createNotice(eq(noticeCreateRequest.getTitle()), eq(noticeCreateRequest.getContent()), anyString(), eq(fileNames.toThumbnailEntity())))
                 .willReturn(noticeId);
 
         //when
@@ -152,6 +154,7 @@ public class NoticeControllerTest {
                         .queryParam("title", noticeCreateRequest.getTitle())
                         .queryParam("content", noticeCreateRequest.getContent())
                         .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
         );
 
         //then
@@ -577,7 +580,7 @@ public class NoticeControllerTest {
     public void getDetailNotice_HasPrePost_Success() throws Exception{
         //given
         Long noticeId = 0L;
-        User user = new User(null, null, Role.ROLE_ADMIN, "홍길동", null);
+        User user = new User(null, null, Role.ROLE_ADMIN_SEOUL_CENTRAL, "홍길동", null);
         Notice notice = new Notice("Test Title", "Test Content", user, null);
         settingCreatedAt(notice);
         int fileCnt = 10;
@@ -657,7 +660,7 @@ public class NoticeControllerTest {
     public void getDetailNotice_NoPre_Success() throws Exception{
         //given
         Long noticeId = 0L;
-        User user = new User(null, null, Role.ROLE_ADMIN, "홍길동", null);
+        User user = new User(null, null, Role.ROLE_ADMIN_SEOUL_CENTRAL, "홍길동", null);
         Notice notice = new Notice("Test Title", "Test Content", user, null);
         settingCreatedAt(notice);
         int fileCnt = 10;
@@ -707,7 +710,7 @@ public class NoticeControllerTest {
     public void getDetailNotice_NoPost_Success() throws Exception{
         //given
         Long noticeId = 0L;
-        User user = new User(null, null, Role.ROLE_ADMIN, "홍길동", null);
+        User user = new User(null, null, Role.ROLE_ADMIN_SEOUL_CENTRAL, "홍길동", null);
         Notice notice = new Notice("Test Title", "Test Content", user, null);
         settingCreatedAt(notice);
         int fileCnt = 10;
@@ -756,7 +759,7 @@ public class NoticeControllerTest {
     public void getDetailNotice_NoPreAndPost_Success() throws Exception{
         //given
         Long noticeId = 0L;
-        User user = new User(null, null, Role.ROLE_ADMIN, "홍길동", null);
+        User user = new User(null, null, Role.ROLE_ADMIN_SEOUL_CENTRAL, "홍길동", null);
         Notice notice = new Notice("Test Title", "Test Content", user, null);
         settingCreatedAt(notice);
         int fileCnt = 10;
@@ -937,7 +940,7 @@ public class NoticeControllerTest {
     public void getNoticePrev_RoleAdmin_관리자권한수정됨에따라변경될테스트() throws Exception{
         //given
         PageRequest request = PageRequest.of(1, 5);
-        Role role = Role.ROLE_ADMIN;
+        Role role = Role.ROLE_ADMIN_SEOUL_CENTRAL;
         //**수정필요
         //when
 
@@ -992,7 +995,7 @@ public class NoticeControllerTest {
         //given
         String keyword = "test";
         PageRequest request = PageRequest.of(0, 2);
-        User user = new User("userId", "userPassword", Role.ROLE_ADMIN, "test User", "test Contact");
+        User user = new User("userId", "userPassword", Role.ROLE_ADMIN_SEOUL_CENTRAL, "test User", "test Contact");
         List<Notice> notices = new ArrayList<>();
         notices.add(new Notice("test title", "test content", user, null));
         notices.add(new Notice("tittestle", "test content", user, null));
@@ -1078,7 +1081,7 @@ public class NoticeControllerTest {
         List<Notice> notices = new ArrayList<>();
         for(int i = 0; i < noticeCnt; i++){
             Thumbnail thumbnail = new Thumbnail("test_Thumb" + i + ".jpg", "saved_Thumb" + i + ".jpg");
-            User user = new User("username " + i, "password " + i, Role.ROLE_ADMIN, "test name " + i, null);
+            User user = new User("username " + i, "password " + i, Role.ROLE_ADMIN_SEOUL_CENTRAL, "test name " + i, null);
             notices.add(
                     new Notice("test title" + i, "test content " + i, user, thumbnail)
             );

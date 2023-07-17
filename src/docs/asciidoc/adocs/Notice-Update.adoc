@@ -1,0 +1,2 @@
+===== Patch - /notice/{noticeId}
+operation::club/update/club[snippets='path-parameters,query-parameters,response-fields']

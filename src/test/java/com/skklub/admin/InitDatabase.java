@@ -43,7 +43,7 @@ public class InitDatabase {
     private InitTestData initTestData;
 
     @PostConstruct
-    public void init() throws IOException {
+    public void init() throws IOException, InterruptedException {
         initTestData.init();
     }
 
@@ -58,6 +58,7 @@ public class InitDatabase {
         @PersistenceContext
         private EntityManager em;
         private final int clubCnt = 36;
+        private final int noticeCnt = 20;
         @Autowired
         private S3Transferer s3Transferer;
         @Autowired
@@ -70,8 +71,72 @@ public class InitDatabase {
         private BCryptPasswordEncoder bCryptPasswordEncoder;
 
         @Transactional
-        public void init() throws IOException {
+        public void init() throws IOException, InterruptedException {
             readyDefaultLogoInS3();
+            readyClubDomains();
+            readyNoticeDomains();
+        }
+
+        private void readyNoticeDomains() throws IOException, InterruptedException {
+            for (int i = 0; i < noticeCnt; i++) {
+                User user = readyAdmin(i);
+                em.persist(user);
+                Thumbnail thumbnail = readyThumbnail(i);
+                Notice notice = readyNotice(i, user, thumbnail);
+                Thread.sleep(1000);
+                em.persist(notice);
+                List<ExtraFile> extraFiles = readyExtraFiles(notice, i);
+                extraFiles.stream().forEach(em::persist);
+            }
+        }
+
+        private List<ExtraFile> readyExtraFiles(Notice notice, int index) throws IOException {
+            List<ExtraFile> extraFiles = new ArrayList<>();
+            for (int i = 0; i < index % 5; i++) {
+                String originalFileName = i + ".pdf";
+                Path path = Paths.get("src/test/resources/file/" + originalFileName);
+                byte[] bytes = Files.readAllBytes(path);
+                MultipartFile multipartFile = new MockMultipartFile(originalFileName, originalFileName, "application/pdf", bytes);
+                extraFiles.add(
+                        s3Transferer.uploadOne(multipartFile).toExtraFileEntity()
+                );
+            }
+            notice.appendExtraFiles(extraFiles);
+            return extraFiles;
+        }
+
+        private Notice readyNotice(int i, User user, Thumbnail thumbnail) {
+            return new Notice(
+                    "test title " + i,
+                    "test content " + i,
+                    user,
+                    thumbnail
+            );
+        }
+
+        private Thumbnail readyThumbnail(int i) throws IOException {
+            if(i % 4 == 0) return new Thumbnail(
+                    "default_thumb.png",
+                    "default_thumb.png"
+            );
+            Path path = Paths.get("src/test/resources/img/5.jpg");
+            byte[] bytes = Files.readAllBytes(path);
+            MultipartFile multipartFile = new MockMultipartFile("5.jpg", "5.jpg", "image", bytes);
+            return s3Transferer.uploadOne(multipartFile).toThumbnailEntity();
+        }
+
+        private User readyAdmin(int i) {
+            String password = bCryptPasswordEncoder.encode("testAdminPw" + i);
+            return new User(
+                    "testAdminID" + i,
+                    password,
+                    i % 2 == 0 ? Role.ROLE_ADMIN_SEOUL_CENTRAL : Role.ROLE_ADMIN_SUWON_CENTRAL,
+                    "testAdminName" + i,
+                    "010-0000-0000"
+            );
+        }
+
+        private void readyClubDomains() throws IOException {
             for (int i = 0; i < clubCnt; i++) {
                 Logo logo = readyLogo(i);
                 Optional<Recruit> recruit = readyRecruit(i);
@@ -90,7 +155,6 @@ public class InitDatabase {
                 em.persist(club);
                 activityImages.stream().forEach(em::persist);
             }
-
         }
 
         private void readyDefaultLogoInS3() throws IOException {

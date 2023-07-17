@@ -1,0 +1,11 @@
+===== Get - /notice/file
+operation::notice/read/file[snippets='query-parameters']
+
+
+===== Response (As Byte Array)
+[source,http,options="nowrap"]
+----
+Content-Type: application/octet-stream
+Content-Length: 파일 용량
+attachment : 원본 파일명
+----

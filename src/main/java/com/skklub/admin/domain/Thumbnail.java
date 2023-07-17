@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Thumbnail extends BaseEntity{
     @Id

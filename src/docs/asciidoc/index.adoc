@@ -1,0 +1,135 @@
+= SKklub API
+// backtony.github.io(부제)
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+:docinfo: shared-head
+
+= Authentication API
+
+=== 유저 회원가입
+include::{snippets}/User-Join/http-request.adoc[]
+include::{snippets}/User-Join/http-response.adoc[]
+include::{snippets}/User-Join/query-parameters.adoc[]
+
+=== 유저 로그인
+include::{snippets}/User-Login/http-request.adoc[]
+include::{snippets}/User-Login/http-response.adoc[]
+include::{snippets}/User-Login/query-parameters.adoc[]
+
+=== 유저 정보 수정
+include::{snippets}/User-Update/http-request.adoc[]
+include::{snippets}/User-Update/http-response.adoc[]
+include::{snippets}/User-Update/query-parameters.adoc[]
+
+=== 유저 로그아웃
+include::{snippets}/User-Logout/http-request.adoc[]
+include::{snippets}/User-Logout/http-response.adoc[]
+
+=== Token Refresh
+include::{snippets}/RefreshToken-Refresh/http-request.adoc[]
+include::{snippets}/RefreshToken-Refresh/http-response.adoc[]
+
+= Club API
+
+== Create
+
+=== 동아리 생성
+include::adocs/Club-Create.adoc[]
+
+=== 활동 사진 추가
+include::adocs/Activity-Append.adoc[]
+
+== Read
+
+=== 동아리 세부 조회
+include::adocs/Club-Read-Detail.adoc[]
+
+=== 동아리 프리뷰 조회 - 카테고리 선택
+include::adocs/Club-Read-Prev.adoc[]
+
+=== 이름 검색(완전 일치)
+include::adocs/Search-Exactly.adoc[]
+
+=== 이름 검색(부분 일치)
+include::adocs/Search-Part.adoc[]
+
+=== 오늘의 추천 동아리
+include::adocs/Today-Club.adoc[]
+
+== Update
+
+=== 동아리 정보 수정
+include::adocs/Club-Update.adoc[]
+
+=== 동아리 로고 수정
+include::adocs/Logo-Update.adoc[]
+
+== Delete
+
+=== 동아리 삭제
+include::adocs/Club-Delete.adoc[]
+
+=== 동아리 삭제 취소(복구)
+include::adocs/Club-Revive.adoc[]
+
+=== 특정 활동 사진 삭제
+include::adocs/Activity-Delete.adoc[]
+
+= Recruit API
+
+=== 모집 정보 등록
+include::adocs/Recruit-Create.adoc[]
+
+=== 모집 정보 수정
+include::adocs/Recruit-Update.adoc[]
+
+=== 모집 정보 삭제
+include::adocs/Recruit-Delete.adoc[]
+
+= Notice API
+
+== Create
+
+=== 공지 등록
+include::adocs/Notice-Create.adoc[]
+
+=== 공지 파일 추가(초기 등록 포함)
+include::adocs/ExtraFile-append.adoc[]
+
+== Read
+
+=== 공지 세부 조회
+include::adocs/Notice-Read-Detail.adoc[]
+
+=== 공지 썸네일 카드 조회
+include::adocs/Notice-Read-Thumbnail.adoc[]
+
+=== 공지 목록 조회 (작성자 검색)
+include::adocs/Notice-Read-List.adoc[]
+
+=== 공지 제목으로 검색
+include::adocs/Notice-Read-Title.adoc[]
+
+=== 첨부 파일 다운로드
+include::adocs/ExtraFile-Read.adoc[]
+
+
+== Update
+
+=== 공지 수정
+include::adocs/Notice-Update.adoc[]
+
+=== 썸네일 변경
+include::adocs/Thumbnail-Update.adoc[]
+
+== Delete
+
+=== 공지 삭제
+include::adocs/Notice-Delete.adoc[]
+
+=== 특정 첨부 파일 삭제
+include::adocs/ExtraFile-Delete.adoc[]
