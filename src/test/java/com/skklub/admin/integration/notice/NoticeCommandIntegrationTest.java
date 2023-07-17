@@ -1,4 +1,4 @@
-package com.skklub.admin.integration;
+package com.skklub.admin.integration.notice;
 
 import com.skklub.admin.controller.NoticeController;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
 @SpringBootTest
-public class NoticeQueryIntegrationTest {
+public class NoticeCommandIntegrationTest {
     @Autowired
     private NoticeController noticeController;
 

@@ -166,12 +166,12 @@ public class NoticeController {
         return noticeService.deleteNotice(noticeId)
                 .map(noticeDeletionDto -> {
                             FileNames thumbnailFileName = noticeDeletionDto.getThumbnailFileName();
-                    if (!thumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
+                            if (!thumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
                                 s3Transferer.deleteOne(thumbnailFileName.getSavedName());
-                    List<String> extraFileKeys = noticeDeletionDto.getExtraFileNames().stream()
-                            .map(FileNames::getSavedName)
-                            .collect(Collectors.toList());
-                    s3Transferer.deleteAll(extraFileKeys);
+                            List<String> extraFileKeys = noticeDeletionDto.getExtraFileNames().stream()
+                                    .map(FileNames::getSavedName)
+                                    .collect(Collectors.toList());
+                            s3Transferer.deleteAll(extraFileKeys);
                             return new NoticeIdAndTitleResponse(noticeId, noticeDeletionDto.getNoticeTitle());
                         }
                 )

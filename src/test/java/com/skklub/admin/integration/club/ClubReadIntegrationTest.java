@@ -1,4 +1,4 @@
-package com.skklub.admin.integration;
+package com.skklub.admin.integration.club;
 
 import com.skklub.admin.InitDatabase;
 import com.skklub.admin.TestDataRepository;

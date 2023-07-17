@@ -442,6 +442,7 @@ public class NoticeControllerTest {
                 .build();
         given(noticeService.deleteNotice(noticeId)).willReturn(Optional.of(noticeDeletionDto));
         doNothing().when(s3Transferer).deleteOne(anyString());
+        doNothing().when(s3Transferer).deleteAll(anyList());
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -484,6 +485,7 @@ public class NoticeControllerTest {
         given(noticeService.deleteNotice(noticeId)).willReturn(Optional.of(noticeDeletionDto));
         doNothing().when(s3Transferer).deleteOne(anyString());
         doThrow(RuntimeException.class).when(s3Transferer).deleteOne(defaultThumbnailName);
+        doNothing().when(s3Transferer).deleteAll(anyList());
 
         //when
         ResultActions actions = mockMvc.perform(

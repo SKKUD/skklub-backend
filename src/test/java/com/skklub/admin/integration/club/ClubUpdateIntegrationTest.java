@@ -1,4 +1,4 @@
-package com.skklub.admin.integration;
+package com.skklub.admin.integration.club;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.skklub.admin.TestDataRepository;
