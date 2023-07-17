@@ -13,6 +13,7 @@ import com.skklub.admin.repository.NoticeRepository;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.service.NoticeService;
 import com.skklub.admin.service.dto.FileNames;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -46,7 +47,7 @@ public class NoticeController {
 
     //등록
     @PostMapping("/notice")
-    public NoticeIdAndTitleResponse createNotice(@ModelAttribute NoticeCreateRequest noticeCreateRequest,
+    public NoticeIdAndTitleResponse createNotice(@ModelAttribute @Valid NoticeCreateRequest noticeCreateRequest,
                                                                  @RequestParam(required = false) MultipartFile thumbnailFile,
                                                                  @AuthenticationPrincipal UserDetails userDetails){
         Thumbnail thumbnail = Optional.ofNullable(thumbnailFile)
@@ -134,7 +135,7 @@ public class NoticeController {
 
     //내용 수정
     @PatchMapping("/notice/{noticeId}")
-    public NoticeIdAndTitleResponse updateNotice(@PathVariable Long noticeId, @ModelAttribute NoticeCreateRequest noticeCreateRequest){
+    public NoticeIdAndTitleResponse updateNotice(@PathVariable Long noticeId, @ModelAttribute @Valid NoticeCreateRequest noticeCreateRequest){
         Notice updateInfo = noticeCreateRequest.toEntity();
         return noticeService.updateNotice(noticeId, updateInfo)
                 .map(title -> new NoticeIdAndTitleResponse(noticeId, title))
@@ -165,12 +166,12 @@ public class NoticeController {
         return noticeService.deleteNotice(noticeId)
                 .map(noticeDeletionDto -> {
                             FileNames thumbnailFileName = noticeDeletionDto.getThumbnailFileName();
-                            List<FileNames> extraFileNames = noticeDeletionDto.getExtraFileNames();
-                            if (!thumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
+                    if (!thumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
                                 s3Transferer.deleteOne(thumbnailFileName.getSavedName());
-                            extraFileNames.stream()
-                                    .map(FileNames::getSavedName)
-                                    .forEach(s3Transferer::deleteOne);
+                    List<String> extraFileKeys = noticeDeletionDto.getExtraFileNames().stream()
+                            .map(FileNames::getSavedName)
+                            .collect(Collectors.toList());
+                    s3Transferer.deleteAll(extraFileKeys);
                             return new NoticeIdAndTitleResponse(noticeId, noticeDeletionDto.getNoticeTitle());
                         }
                 )

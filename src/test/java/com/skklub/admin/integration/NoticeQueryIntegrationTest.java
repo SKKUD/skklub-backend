@@ -61,5 +61,137 @@ public class NoticeQueryIntegrationTest {
         //then
 
     }
+    
+    
+    @Test
+    public void updateNotice_Default_CheckChangedInfo() throws Exception{
+        //given
+        
+        //when
+        
+        //then
+        
+    }
+
+    @Test
+    public void updateNotice_BadNoticeId_NoticeIdMistMatchException() throws Exception {
+        //given
+
+        //when
+
+        //then
+
+    }
+    
+    @Test
+    public void updateThumbnail_FromDefaultThumbnail_NoS3Deletion() throws Exception{
+        //given
+        
+        //when
+        
+        //then
+        
+    }
+
+    @Test
+    public void updateThumbnail_FromSomeThumbnail_WithS3Deletion() throws Exception{
+        //given
+
+        //when
+
+        //then
+
+    }
+
+    @Test
+    public void updateThumbnail_BadNoticeId_NoticeIdMisMatchException() throws Exception{
+        //given
+
+        //when
+
+        //then
+
+    }
+
+
+    @Test
+    public void deleteNotice_DefaultThumbnail_NoS3Deletion() throws Exception{
+        //given
+
+        //when
+
+        //then
+
+    }
+
+    @Test
+    public void deleteNotice_WithThumbnail_S3Deletion() throws Exception{
+        //given
+
+        //when
+
+        //then
+
+    }
+
+    @Test
+    public void deleteNotice_NoExtraFile_SkipS3Deletion() throws Exception{
+        //given
+
+        //when
+
+        //then
+
+    }
+
+    @Test
+    public void deleteNotice_WithExtraFiles_S3BulkDeletion() throws Exception{
+        //given
+
+        //when
+
+        //then
+
+    }
+
+    @Test
+    public void deleteNotice_BadNoticeId_NoticeIdMistMatchException() throws Exception{
+        //given
+
+        //when
+
+        //then
+
+    }
+
+    @Test
+    public void deleteFileByOriginalName_Default_CannotFindFromNotice() throws Exception{
+        //given
+        
+        //when
+        
+        //then
+        
+    }
+
+    @Test
+    public void deleteFileByOriginalName_CannotFindFileInNotice_ExtraFileNameMisMatchException() throws Exception{
+        //given
+
+        //when
+
+        //then
+
+    }
+
+    @Test
+    public void deleteFileByOriginalName_BadNoticeID_NoticeIdMisMatchException() throws Exception{
+        //given
+
+        //when
+
+        //then
+
+    }
 
 }
