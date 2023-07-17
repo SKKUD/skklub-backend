@@ -74,6 +74,7 @@ public class InitDatabase {
         public void init() throws IOException, InterruptedException {
             readyDefaultLogoInS3();
             readyClubDomains();
+            readyDefaultThumbnailInS3();
             readyNoticeDomains();
         }
 
@@ -165,6 +166,16 @@ public class InitDatabase {
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(multipartFile.getInputStream().available());
             amazonS3.putObject(bucket, "alt.jpg", byteArrayInputStream, metadata);
+        }
+
+        private void readyDefaultThumbnailInS3() throws IOException {
+            Path path = Paths.get("src/test/resources/img/default_thumb.png");
+            byte[] bytes = Files.readAllBytes(path);
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+            MultipartFile multipartFile = new MockMultipartFile("default_thumb.png", "default_thumb.png","image", bytes);
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(multipartFile.getInputStream().available());
+            amazonS3.putObject(bucket, "default_thumb.png", byteArrayInputStream, metadata);
         }
 
         private List<ActivityImage> readyActivityImages(int index) throws IOException {

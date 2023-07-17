@@ -17,7 +17,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -37,23 +36,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NoticeController {
 
+    private final static String DEFAULT_THUMBNAIL = "default_thumb.png";
     private final S3Transferer s3Transferer;
     private final NoticeService noticeService;
     private final NoticeRepository noticeRepository;
-
-    private final static String DEFAULT_THUMBNAIL = "default_thumb.png";
 
 //=====CREATE=====//
 
     //등록
     @PostMapping("/notice")
-    public NoticeIdAndTitleResponse createNotice(@ModelAttribute @Valid NoticeCreateRequest noticeCreateRequest,
-                                                                 @RequestParam(required = false) MultipartFile thumbnailFile,
-                                                                 @AuthenticationPrincipal UserDetails userDetails){
-        Thumbnail thumbnail = Optional.ofNullable(thumbnailFile)
-                .map(s3Transferer::uploadOne)
-                .orElse(new FileNames(DEFAULT_THUMBNAIL, DEFAULT_THUMBNAIL))
-                .toThumbnailEntity();
+    public NoticeIdAndTitleResponse createNotice(@ModelAttribute @Valid NoticeCreateRequest noticeCreateRequest
+            , @RequestParam(required = false) MultipartFile thumbnailFile
+            , @AuthenticationPrincipal UserDetails userDetails) {
+        Thumbnail thumbnail = Optional.ofNullable(thumbnailFile).map(s3Transferer::uploadOne).orElse(new FileNames(DEFAULT_THUMBNAIL, DEFAULT_THUMBNAIL)).toThumbnailEntity();
         String userName = TokenProvider.getAuthentication(userDetails).getName();
         Long noticeId = noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), userName, thumbnail);
         return new NoticeIdAndTitleResponse(noticeId, noticeCreateRequest.getTitle());
@@ -62,17 +57,11 @@ public class NoticeController {
     //파일 등록
     @PostMapping("/notice/{noticeId}/file")
     public NoticeIdAndFileCountResponse appendFile(@PathVariable Long noticeId, @RequestParam List<MultipartFile> files) {
-        return noticeRepository.findById(noticeId)
-                .map(
-                        notice -> {
-                            List<ExtraFile> extraFiles = s3Transferer.uploadAll(files).stream()
-                                    .map(FileNames::toExtraFileEntity)
-                                    .collect(Collectors.toList());
-                            int fileCnt = noticeService.appendExtraFiles(notice, extraFiles);
-                            return new NoticeIdAndFileCountResponse(noticeId, fileCnt);
-                        }
-                )
-                .orElseThrow(NoticeIdMisMatchException::new);
+        return noticeRepository.findById(noticeId).map(notice -> {
+            List<ExtraFile> extraFiles = s3Transferer.uploadAll(files).stream().map(FileNames::toExtraFileEntity).collect(Collectors.toList());
+            int fileCnt = noticeService.appendExtraFiles(notice, extraFiles);
+            return new NoticeIdAndFileCountResponse(noticeId, fileCnt);
+        }).orElseThrow(NoticeIdMisMatchException::new);
     }
 
 //=====READ=====//
@@ -102,44 +91,37 @@ public class NoticeController {
     //목록 조회(with 썸네일)
     @GetMapping("/notice/prev/thumbnail")
     public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
-        return noticeRepository.findAllWithThumbnailBy(pageable)
-                .map(notice -> {
-                            Thumbnail thumbnail = notice.getThumbnail();
-                            S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(thumbnail));
-                            return new NoticePrevWithThumbnailResponse(notice, s3DownloadDto);
-                        }
-                );
+        return noticeRepository.findAllWithThumbnailBy(pageable).map(notice -> {
+            Thumbnail thumbnail = notice.getThumbnail();
+            S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(thumbnail));
+            return new NoticePrevWithThumbnailResponse(notice, s3DownloadDto);
+        });
     }
 
     //목록 조회(전체(작성자 선택), 시간순)
     @GetMapping("/notice/prev")
     public Page<NoticePrevResponse> getNoticePrev(@RequestParam(required = false) Optional<Role> role, Pageable pageable) {
         Page<Notice> notices = role.map(r -> {
-                    if (r.equals(Role.ROLE_MASTER)) throw new CannotCategorizeByMasterException();
-                    if (r.equals(Role.ROLE_USER)) throw new CannotCategorizeByUserException();
-                    return noticeRepository.findAllByUserRole(r, pageable);
-                }
-        ).orElseGet(() -> noticeRepository.findAll(pageable));
+            if (r.equals(Role.ROLE_MASTER)) throw new CannotCategorizeByMasterException();
+            if (r.equals(Role.ROLE_USER)) throw new CannotCategorizeByUserException();
+            return noticeRepository.findAllByUserRole(r, pageable);
+        }).orElseGet(() -> noticeRepository.findAll(pageable));
         return notices.map(NoticePrevResponse::new);
     }
 
     //목록 조회(제목 검색, 시간순)
     @GetMapping("/notice/prev/search/title")
     public Page<NoticePrevResponse> getNoticePrevByTitle(@RequestParam String title, Pageable pageable) {
-        return noticeRepository
-                .findWithWriterAllByTitleContainingOrderByCreatedAt(title, pageable)
-                .map(NoticePrevResponse::new);
+        return noticeRepository.findWithWriterAllByTitleContainingOrderByCreatedAt(title, pageable).map(NoticePrevResponse::new);
     }
 
 //=====UPDATE=====//
 
     //내용 수정
     @PatchMapping("/notice/{noticeId}")
-    public NoticeIdAndTitleResponse updateNotice(@PathVariable Long noticeId, @ModelAttribute @Valid NoticeCreateRequest noticeCreateRequest){
+    public NoticeIdAndTitleResponse updateNotice(@PathVariable Long noticeId, @ModelAttribute @Valid NoticeCreateRequest noticeCreateRequest) {
         Notice updateInfo = noticeCreateRequest.toEntity();
-        return noticeService.updateNotice(noticeId, updateInfo)
-                .map(title -> new NoticeIdAndTitleResponse(noticeId, title))
-                .orElseThrow(NoticeIdMisMatchException::new);
+        return noticeService.updateNotice(noticeId, updateInfo).map(title -> new NoticeIdAndTitleResponse(noticeId, title)).orElseThrow(NoticeIdMisMatchException::new);
     }
 
     //썸네일(로고) 변경
@@ -148,14 +130,11 @@ public class NoticeController {
         if (!noticeRepository.existsById(noticeId)) throw new NoticeIdMisMatchException();
         FileNames thumbnailFileName = s3Transferer.uploadOne(thumbnailFile);
         Thumbnail thumbnail = thumbnailFileName.toThumbnailEntity();
-        return noticeService.updateThumbnail(noticeId, thumbnail)
-                .map(
-                        oldThumbnailFileName -> {
-                            if (!oldThumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
-                                s3Transferer.deleteOne(oldThumbnailFileName.getSavedName());
-                            return new NoticeIdAndFileNamesResponse(noticeId, oldThumbnailFileName.getOriginalName(), thumbnailFileName.getOriginalName());
-                        }
-                ).orElseThrow(NoticeIdMisMatchException::new);
+        return noticeService.updateThumbnail(noticeId, thumbnail).map(oldThumbnailFileName -> {
+            if (!oldThumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
+                s3Transferer.deleteOne(oldThumbnailFileName.getSavedName());
+            return new NoticeIdAndFileNamesResponse(noticeId, oldThumbnailFileName.getOriginalName(), thumbnailFileName.getOriginalName());
+        }).orElseThrow(NoticeIdMisMatchException::new);
     }
 
 //=====DELETE=====//
@@ -163,30 +142,22 @@ public class NoticeController {
     //삭제
     @DeleteMapping("/notice/{noticeId}")
     public NoticeIdAndTitleResponse deleteNotice(@PathVariable Long noticeId) {
-        return noticeService.deleteNotice(noticeId)
-                .map(noticeDeletionDto -> {
-                            FileNames thumbnailFileName = noticeDeletionDto.getThumbnailFileName();
-                            if (!thumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
-                                s3Transferer.deleteOne(thumbnailFileName.getSavedName());
-                            List<String> extraFileKeys = noticeDeletionDto.getExtraFileNames().stream()
-                                    .map(FileNames::getSavedName)
-                                    .collect(Collectors.toList());
-                            s3Transferer.deleteAll(extraFileKeys);
-                            return new NoticeIdAndTitleResponse(noticeId, noticeDeletionDto.getNoticeTitle());
-                        }
-                )
-                .orElseThrow(NoticeIdMisMatchException::new);
+        return noticeService.deleteNotice(noticeId).map(noticeDeletionDto -> {
+            FileNames thumbnailFileName = noticeDeletionDto.getThumbnailFileName();
+            if (!thumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
+                s3Transferer.deleteOne(thumbnailFileName.getSavedName());
+            List<String> extraFileKeys = noticeDeletionDto.getExtraFileNames().stream().map(FileNames::getSavedName).collect(Collectors.toList());
+            s3Transferer.deleteAll(extraFileKeys);
+            return new NoticeIdAndTitleResponse(noticeId, noticeDeletionDto.getNoticeTitle());
+        }).orElseThrow(NoticeIdMisMatchException::new);
     }
 
     //특정 파일 삭제
     @DeleteMapping("/notice/{noticeId}/{fileName}")
     public NoticeIdAndDeletedNameResponse deleteFileByOriginalName(@PathVariable Long noticeId, @PathVariable String fileName) {
-        return noticeService.deleteExtraFile(noticeId, fileName)
-                .map(
-                        deletedExtraFileNames -> {
-                            s3Transferer.deleteOne(deletedExtraFileNames.getSavedName());
-                            return new NoticeIdAndDeletedNameResponse(noticeId, deletedExtraFileNames.getOriginalName());
-                        }
-                ).orElseThrow(ExtraFileNameMisMatchException::new);
+        return noticeService.deleteExtraFile(noticeId, fileName).map(deletedExtraFileNames -> {
+            s3Transferer.deleteOne(deletedExtraFileNames.getSavedName());
+            return new NoticeIdAndDeletedNameResponse(noticeId, deletedExtraFileNames.getOriginalName());
+        }).orElseThrow(ExtraFileNameMisMatchException::new);
     }
 }

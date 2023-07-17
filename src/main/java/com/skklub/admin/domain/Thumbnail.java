@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Thumbnail extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "thumnail_id")
+    @Column(name = "thumbnail_id")
     private Long id;
 
     private String originalName;
