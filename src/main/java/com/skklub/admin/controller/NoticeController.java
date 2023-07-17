@@ -78,12 +78,14 @@ public class NoticeController {
     //파일 조회
     @GetMapping("/notice/file")
     public ResponseEntity<byte[]> getFile(@RequestParam String fileSavedName) {
-        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(null, fileSavedName));
+        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(
+                null, fileSavedName));
         String fileName = s3DownloadDto.getFileName();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         httpHeaders.setContentLength(s3DownloadDto.getBytes().length);
         httpHeaders.setContentDispositionFormData("attachment", fileName);
+
 
         return new ResponseEntity<>(s3DownloadDto.getBytes(), httpHeaders, HttpStatus.OK);
     }
