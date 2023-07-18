@@ -4,15 +4,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.skklub.admin.InitDatabase;
 import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.NoticeController;
-import com.skklub.admin.controller.dto.NoticeCreateRequest;
-import com.skklub.admin.controller.dto.NoticeIdAndFileCountResponse;
-import com.skklub.admin.controller.dto.NoticeIdAndFileNamesResponse;
-import com.skklub.admin.controller.dto.NoticeIdAndTitleResponse;
+import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
+import com.skklub.admin.error.exception.ExtraFileNameMisMatchException;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.ExtraFileRepository;
 import com.skklub.admin.repository.NoticeRepository;
@@ -20,6 +18,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.hibernate.proxy.HibernateProxy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -223,7 +223,7 @@ public class NoticeCommandIntegrationTest {
     public void updateThumbnail_FromSomeThumbnail_WithS3Deletion() throws Exception{
         //given
         String default_key = "default_thumb.png";
-        Notice notice = em.createQuery("select n from Notice n inner join fetch n.thumbnail t where t.originalName != :name", Notice.class)
+        Notice notice = em.createQuery("select n from Notice n inner join fetch n.thumbnail t where t.originalName <> :name", Notice.class)
                 .setParameter("name", default_key)
                 .setMaxResults(1)
                 .getSingleResult();
@@ -292,38 +292,88 @@ public class NoticeCommandIntegrationTest {
     @Test
     public void deleteNotice_WithThumbnail_S3Deletion() throws Exception{
         //given
+        String default_key = "default_thumb.png";
+        Notice notice = em.createQuery("select n from Notice n inner join fetch n.thumbnail t where t.originalName <> :name", Notice.class)
+                .setParameter("name", default_key)
+                .setMaxResults(1)
+                .getSingleResult();
+        Long noticeId = notice.getId();
+        Thumbnail thumbnail = notice.getThumbnail();
+        em.clear();
 
         //when
+        NoticeIdAndTitleResponse response = noticeController.deleteNotice(noticeId);
+        em.flush();
+        em.clear();
 
         //then
-
+        Assertions.assertThat(response.getId()).isEqualTo(noticeId);
+        Assertions.assertThat(response.getTitle()).isEqualTo(notice.getTitle());
+        Assertions.assertThat(amazonS3.doesObjectExist(bucket, thumbnail.getUploadedName())).isFalse();
+        Optional<Notice> afterDeletion = noticeRepository.findById(noticeId);
+        Assertions.assertThat(afterDeletion).isEmpty();
+        Assertions.assertThat(em.find(Thumbnail.class, thumbnail.getId())).isNull();
     }
 
     @Test
     public void deleteNotice_NoExtraFile_SkipS3Deletion() throws Exception{
         //given
+        Notice notice = em.createQuery("select n from Notice n left join fetch n.extraFiles e where e.id is null", Notice.class)
+                .setMaxResults(1)
+                .getSingleResult();
+        Long noticeId = notice.getId();
+        Assertions.assertThat(notice.getExtraFiles()).isEmpty();
+        em.clear();
 
         //when
+        NoticeIdAndTitleResponse response = noticeController.deleteNotice(noticeId);
+        em.flush();
+        em.clear();
 
         //then
-
+        Assertions.assertThat(response.getId()).isEqualTo(noticeId);
+        Assertions.assertThat(response.getTitle()).isEqualTo(notice.getTitle());
+        Optional<Notice> afterDeletion = noticeRepository.findById(noticeId);
+        Assertions.assertThat(afterDeletion).isEmpty();
     }
 
     @Test
     public void deleteNotice_WithExtraFiles_S3BulkDeletion() throws Exception{
         //given
+        Notice notice = em.createQuery("select n from Notice n left join fetch n.extraFiles e where e.id is not null", Notice.class)
+                .setMaxResults(1)
+                .getSingleResult();
+        Long noticeId = notice.getId();
+        List<ExtraFile> extraFiles = notice.getExtraFiles();
+        Assertions.assertThat(extraFiles).isNotEmpty();
+        em.clear();
 
         //when
+        NoticeIdAndTitleResponse response = noticeController.deleteNotice(noticeId);
+        em.flush();
+        em.clear();
 
         //then
-
+        Assertions.assertThat(response.getId()).isEqualTo(noticeId);
+        Assertions.assertThat(response.getTitle()).isEqualTo(notice.getTitle());
+        Optional<Notice> afterDeletion = noticeRepository.findById(noticeId);
+        Assertions.assertThat(afterDeletion).isEmpty();
+        List<ExtraFile> findedExtraFiles = extraFileRepository.findAllById(extraFiles.stream().map(ExtraFile::getId).collect(Collectors.toList()));
+        Assertions.assertThat(findedExtraFiles).isEmpty();
+        for (ExtraFile extraFile : extraFiles) {
+            Assertions.assertThat(amazonS3.doesObjectExist(bucket, extraFile.getSavedName())).isFalse();
+        }
     }
 
     @Test
     public void deleteNotice_BadNoticeId_NoticeIdMistMatchException() throws Exception{
         //given
+        Long noticeId = -1L;
 
         //when
+        assertThrows(
+                NoticeIdMisMatchException.class,
+                () -> noticeController.deleteNotice(noticeId));
 
         //then
 
@@ -332,18 +382,45 @@ public class NoticeCommandIntegrationTest {
     @Test
     public void deleteFileByOriginalName_Default_CannotFindFromNotice() throws Exception{
         //given
-        
+        String fileName = "3.pdf";
+        ExtraFile extraFile = em.createQuery("select e from ExtraFile e where e.originalName = :name", ExtraFile.class)
+                .setParameter("name", fileName)
+                .setMaxResults(1)
+                .getSingleResult();
+        Long noticeId = extraFile.getNotice().getId();
+        em.clear();
+
         //when
-        
+        NoticeIdAndDeletedNameResponse response = noticeController.deleteFileByOriginalName(noticeId, fileName);
+        em.flush();
+        em.clear();
+
         //then
-        
+        Assertions.assertThat(response.getNoticeId()).isEqualTo(noticeId);
+        Assertions.assertThat(response.getDeletedFileName()).isEqualTo(fileName);
+        Assertions.assertThat(amazonS3.doesObjectExist(bucket, extraFile.getSavedName())).isFalse();
+        Assertions.assertThat(em.find(ExtraFile.class, extraFile.getId())).isNull();
+        Notice afterFileDeletion = noticeRepository.findDetailById(noticeId).get();
+        Assertions.assertThat(afterFileDeletion.getExtraFiles()).doesNotContain(extraFile);
+        for (ExtraFile file : afterFileDeletion.getExtraFiles()) {
+            log.info("file.getOriginalName() : {}", file.getOriginalName());
+        }
     }
 
     @Test
     public void deleteFileByOriginalName_CannotFindFileInNotice_ExtraFileNameMisMatchException() throws Exception{
         //given
+        String fileName = "3.pdf";
+        ExtraFile extraFile = em.createQuery("select e from ExtraFile e group by e.notice.id having count(e.id) < 3", ExtraFile.class)
+                .setMaxResults(1)
+                .getSingleResult();
+        Long noticeId = extraFile.getNotice().getId();
+        em.clear();
 
         //when
+        assertThrows(
+                ExtraFileNameMisMatchException.class,
+                () -> noticeController.deleteFileByOriginalName(noticeId, fileName));
 
         //then
 
@@ -352,8 +429,13 @@ public class NoticeCommandIntegrationTest {
     @Test
     public void deleteFileByOriginalName_BadNoticeID_NoticeIdMisMatchException() throws Exception{
         //given
+        Long noticeId = -1L;
+        String fileName = "0.pdf";
 
         //when
+        assertThrows(
+                NoticeIdMisMatchException.class,
+                () -> noticeController.deleteFileByOriginalName(noticeId, fileName));
 
         //then
 
