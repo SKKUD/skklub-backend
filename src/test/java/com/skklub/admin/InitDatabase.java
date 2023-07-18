@@ -16,6 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -42,12 +46,12 @@ public class InitDatabase {
     @Autowired
     private InitTestData initTestData;
 
-    @PostConstruct
+    @EventListener(ContextRefreshedEvent.class)
     public void init() throws IOException, InterruptedException {
         initTestData.init();
     }
 
-    @PreDestroy
+    @EventListener(ContextClosedEvent.class)
     public void preDestroy() {
         initTestData.cleanS3();
     }
