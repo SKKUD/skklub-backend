@@ -1,0 +1,2 @@
+===== Get - /notice/{noticeId}
+operation::notice/read/detail[snippets='path-parameters,response-fields']

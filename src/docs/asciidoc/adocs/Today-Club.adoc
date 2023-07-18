@@ -1,0 +1,2 @@
+===== Get - /club/random
+operation::club/get/random[snippets='query-parameters,response-fields']

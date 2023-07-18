@@ -1,0 +1,2 @@
+===== Get - /notice/prev/thumbnail
+operation::notice/read/prevs/thumbnail[snippets='query-parameters,response-fields']

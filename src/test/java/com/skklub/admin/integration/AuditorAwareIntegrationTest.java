@@ -27,7 +27,6 @@ import java.util.Optional;
 @SpringBootTest
 @Transactional
 @Import(TestDataRepository.class)
-
 public class AuditorAwareIntegrationTest {
     @Autowired
     private ClubController clubController;

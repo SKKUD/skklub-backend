@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Entity
 @Getter
-@EqualsAndHashCode(exclude = {"logo", "recruit", "president", "activityImages"})
+@EqualsAndHashCode(exclude = {"logo", "recruit", "president", "activityImages"}, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Club extends BaseEntity {
     @Id

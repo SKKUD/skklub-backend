@@ -1,0 +1,3 @@
+===== Post - /notice/{noticeId}/thumbnail
+===== 기술의 한계로 Post입니다 흑흑 (Patch아님)
+operation::notice/update/thumbnail[snippets='path-parameters,request-parts,response-fields']
