@@ -33,6 +33,7 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.FieldDescriptor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -88,14 +89,15 @@ public class NoticeControllerTest {
 
 
     @Test
-    @WithMockUser
-    public void createNotice_WithThumbnail_Success() throws Exception {
+    @WithMockCustomUser(username = "testerID",password = "testerPW",role = Role.ROLE_MASTER, name = "tester")
+    public void createNotice_WithThumbnail_Success() throws Exception{
         //given
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("Notice Test Title", "Notice Test Content");
         MockMultipartFile mockThumbnail = readyMockThumbnail();
         FileNames fileNames = new FileNames("testThumb.png", "savedTestThumb.png");
         given(s3Transferer.uploadOne(mockThumbnail)).willReturn(fileNames);
-        given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), "testerID", fileNames.toThumbnailEntity()))
+        given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), username, fileNames.toThumbnailEntity()))
                 .willReturn(0L);
 
         //when

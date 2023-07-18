@@ -31,7 +31,6 @@ public class SecurityConfig  {
     private final PrincipalDetailsService principalDetailsService;
     private final RedisUtil redisUtil;
 
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -71,7 +70,7 @@ public class SecurityConfig  {
                                 .requestMatchers(userEndpoints()).access(new WebExpressionAuthorizationManager("hasRole('ROLE_MASTER') or hasRole('ROLE_ADMIN_SEOUL_CENTRAL') or hasRole('ROLE_ADMIN_SUWON_CENTRAL') or hasRole('ROLE_USER')"))
                                 .requestMatchers(adminEndpoints()).access(new WebExpressionAuthorizationManager("hasRole('ROLE_MASTER') or hasRole('ROLE_ADMIN_SEOUL_CENTRAL') or hasRole('ROLE_ADMIN_SUWON_CENTRAL')"))
                                 .requestMatchers(masterEndpoints()).access(new WebExpressionAuthorizationManager("hasRole('ROLE_MASTER')"))
-                                .anyRequest().authenticated();
+                                .anyRequest().permitAll();
 
 
                     } catch (Exception e) {
@@ -85,10 +84,8 @@ public class SecurityConfig  {
 
     private RequestMatcher publicEndpoints() {
         return new OrRequestMatcher(
-                new AntPathRequestMatcher("/"),
                 new AntPathRequestMatcher("/user/login"),
                 new AntPathRequestMatcher("/user/join")
-
         );
     }
 
