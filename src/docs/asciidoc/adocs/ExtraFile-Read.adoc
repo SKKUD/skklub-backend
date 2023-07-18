@@ -7,5 +7,4 @@ operation::notice/read/file[snippets='query-parameters']
 ----
 Content-Type: application/octet-stream
 Content-Length: 파일 용량
-attachment : 원본 파일명
 ----

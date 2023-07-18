@@ -1,7 +1,6 @@
 package com.skklub.admin.controller.notice;
 
 import akka.protobuf.WireFormat;
-import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
@@ -141,7 +140,7 @@ public class NoticeControllerTest {
 
     @Test
     @WithMockUser
-    public void createNotice_NoThumbnail_SaveAsDefaultThumbnail() throws Exception{
+    public void createNotice_NoThumbnail_SaveAsDefaultThumbnail() throws Exception {
         //given
         Long noticeId = 12L;
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("Notice Test Title", "Notice Test Content");
@@ -218,7 +217,7 @@ public class NoticeControllerTest {
 
     private List<FileNames> readyFileNames(int fileCnt) {
         List<FileNames> fileFileNames = new ArrayList<>();
-        for(int i = 0; i < fileCnt; i++) {
+        for (int i = 0; i < fileCnt; i++) {
             fileFileNames.add(new FileNames(i + ".pdf", "saved" + i + ".pdf"));
         }
         return fileFileNames;
@@ -226,7 +225,7 @@ public class NoticeControllerTest {
 
     private List<MockMultipartFile> readyMockFiles(int fileCnt) throws IOException {
         List<MockMultipartFile> multipartFiles = new ArrayList<>();
-        for(int i = 0; i < fileCnt; i++){
+        for (int i = 0; i < fileCnt; i++) {
             Path path = Paths.get("src/test/resources/file/" + i + ".pdf");
             byte[] bytes = Files.readAllBytes(path);
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
@@ -250,7 +249,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void uploadActivityImages_IllegalNoticeId_NoticeIdMisMatchException() throws Exception{
+    public void uploadActivityImages_IllegalNoticeId_NoticeIdMisMatchException() throws Exception {
         Long noticeId = 0L;
         int fileCnt = 10;
         List<MockMultipartFile> multipartFiles = readyMockFiles(fileCnt);
@@ -277,9 +276,9 @@ public class NoticeControllerTest {
         //then
         Assertions.assertThat(badNoticeIdResult.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
     }
-    
+
     @Test
-    public void updateNotice_Default_Success() throws Exception{
+    public void updateNotice_Default_Success() throws Exception {
         //given
         Long noticeId = 0L;
         String updateTitle = "updateTitle";
@@ -317,7 +316,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void updateNotice_BadNoticeId_NoticeMisMatchException() throws Exception{
+    public void updateNotice_BadNoticeId_NoticeMisMatchException() throws Exception {
         //given
         Long noticeId = -1L;
         String updateTitle = "updateTitle";
@@ -338,7 +337,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void updateThumbnail_ChangeFromSomeThumb_CalledS3Deletion() throws Exception{
+    public void updateThumbnail_ChangeFromSomeThumb_CalledS3Deletion() throws Exception {
         //given
         Long noticeId = 0L;
         MockMultipartFile mockMultipartFile = readyMockThumbnail();
@@ -381,7 +380,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void updateThumbnail_ChangeFromDefault_SkipS3Deletion() throws Exception{
+    public void updateThumbnail_ChangeFromDefault_SkipS3Deletion() throws Exception {
         //given
         Long noticeId = 0L;
         MockMultipartFile mockMultipartFile = readyMockThumbnail();
@@ -410,7 +409,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void updateThumbnail_NoticeIsEmpty_NoticeIdMisMatchException() throws Exception{
+    public void updateThumbnail_NoticeIsEmpty_NoticeIdMisMatchException() throws Exception {
         //given
         Long noticeId = -1L;
         MockMultipartFile mockMultipartFile = readyMockThumbnail();
@@ -428,9 +427,9 @@ public class NoticeControllerTest {
         //then
         Assertions.assertThat(noticeNotFound.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
     }
-    
+
     @Test
-    public void deleteNotice_WithThumbnailAndFiles_Success() throws Exception{
+    public void deleteNotice_WithThumbnailAndFiles_Success() throws Exception {
         //given
         Long noticeId = 0L;
         String noticeTitle = "test notice Title";
@@ -471,7 +470,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void deleteNotice_WithDefaultThumbnail_SkipS3ThumbnailDeletion() throws Exception{
+    public void deleteNotice_WithDefaultThumbnail_SkipS3ThumbnailDeletion() throws Exception {
         //given
         Long noticeId = 0L;
         String noticeTitle = "test notice Title";
@@ -502,7 +501,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void deleteNotice_BadNoticeId_NoticeIdMisMatchException() throws Exception{
+    public void deleteNotice_BadNoticeId_NoticeIdMisMatchException() throws Exception {
         //given
         Long noticeId = -1L;
         given(noticeService.deleteNotice(noticeId)).willReturn(Optional.empty());
@@ -516,9 +515,9 @@ public class NoticeControllerTest {
         //then
         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
     }
-    
+
     @Test
-    public void deleteFileByOriginalName_Default_Success() throws Exception{
+    public void deleteFileByOriginalName_Default_Success() throws Exception {
         //given
         Long noticeId = 0L;
         FileNames fileNames = readyFileNames(1).get(0);
@@ -552,7 +551,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void deleteFileByOriginalName_BadNoticeId_NoticeIdMisMatchException() throws Exception{
+    public void deleteFileByOriginalName_BadNoticeId_NoticeIdMisMatchException() throws Exception {
         //given
         Long noticeId = -1L;
         FileNames fileNames = readyFileNames(1).get(0);
@@ -569,19 +568,19 @@ public class NoticeControllerTest {
                 .isExactlyInstanceOf(NoticeIdMisMatchException.class);
 
     }
-    
+
     @Test
-    public void deleteFileByOriginalName_FileNotInNotice_ExtraFileNameMisMatchException() throws Exception{
+    public void deleteFileByOriginalName_FileNotInNotice_ExtraFileNameMisMatchException() throws Exception {
         //given
-        
+
         //when
-        
+
         //then
-        
+
     }
-    
+
     @Test
-    public void getDetailNotice_HasPrePost_Success() throws Exception{
+    public void getDetailNotice_HasPrePost_Success() throws Exception {
         //given
         Long noticeId = 0L;
         User user = new User(null, null, Role.ROLE_ADMIN_SEOUL_CENTRAL, "홍길동", null);
@@ -649,7 +648,7 @@ public class NoticeControllerTest {
                                 fieldWithPath("extraFileNames[].id").type(WireFormat.FieldType.INT64).description("첨부 파일 식별용 ID").attributes(example("1")),
                                 fieldWithPath("extraFileNames[].originalName").type(WireFormat.FieldType.STRING).description("첨부 파일 원 파일명").attributes(example(extraFiles.get(1).getOriginalName())),
                                 fieldWithPath("extraFileNames[].savedName").type(WireFormat.FieldType.STRING).description("첨부 파일 S3 저장명").attributes(example("eb0808d7-83ee-4ee6-aa1e-e0359dcb54b3.hwp"))
-                                )
+                        )
                 )
         );
     }
@@ -661,7 +660,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void getDetailNotice_NoPre_Success() throws Exception{
+    public void getDetailNotice_NoPre_Success() throws Exception {
         //given
         Long noticeId = 0L;
         User user = new User(null, null, Role.ROLE_ADMIN_SEOUL_CENTRAL, "홍길동", null);
@@ -691,7 +690,7 @@ public class NoticeControllerTest {
                 get("/notice/{noticeId}", noticeId)
                         .with(csrf())
         );
-        
+
         //then
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.noticeId").value(noticeId))
@@ -707,11 +706,11 @@ public class NoticeControllerTest {
                     .andExpect(jsonPath("$.extraFileNames[" + i + "].originalName").value(extraFiles.get(i).getOriginalName()))
                     .andExpect(jsonPath("$.extraFileNames[" + i + "].savedName").value(extraFiles.get(i).getSavedName()));
         }
-        
+
     }
 
     @Test
-    public void getDetailNotice_NoPost_Success() throws Exception{
+    public void getDetailNotice_NoPost_Success() throws Exception {
         //given
         Long noticeId = 0L;
         User user = new User(null, null, Role.ROLE_ADMIN_SEOUL_CENTRAL, "홍길동", null);
@@ -758,9 +757,9 @@ public class NoticeControllerTest {
                     .andExpect(jsonPath("$.extraFileNames[" + i + "].savedName").value(extraFiles.get(i).getSavedName()));
         }
     }
-    
+
     @Test
-    public void getDetailNotice_NoPreAndPost_Success() throws Exception{
+    public void getDetailNotice_NoPreAndPost_Success() throws Exception {
         //given
         Long noticeId = 0L;
         User user = new User(null, null, Role.ROLE_ADMIN_SEOUL_CENTRAL, "홍길동", null);
@@ -804,13 +803,13 @@ public class NoticeControllerTest {
                     .andExpect(jsonPath("$.extraFileNames[" + i + "].savedName").value(extraFiles.get(i).getSavedName()));
         }
     }
-    
+
     @Test
-    public void getDetailNotice_BadNoticeId_NoticeIdMisMatchException() throws Exception{
+    public void getDetailNotice_BadNoticeId_NoticeIdMisMatchException() throws Exception {
         //given
         Long noticeId = -1L;
         given(noticeRepository.findDetailById(noticeId)).willReturn(Optional.empty());
-        
+
         //when
         MvcResult badIdResult = mockMvc.perform(
                 get("/notice/{noticeId}", noticeId)
@@ -822,7 +821,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void getNoticePrevWithThumbnail_Default_Success() throws Exception{
+    public void getNoticePrevWithThumbnail_Default_Success() throws Exception {
         //given
         PageRequest request = PageRequest.of(1, 5, Sort.by("createdAt").ascending());
         int noticeCnt = 20;
@@ -851,7 +850,7 @@ public class NoticeControllerTest {
                 .andExpect(jsonPath("$.size").value(5))
                 .andExpect(jsonPath("$.totalPages").value(4))
                 .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             actions.andExpect(jsonPath("$.content[" + i + "].noticeId").value(i))
                     .andExpect(jsonPath("$.content[" + i + "].title").value(notices.get(i).getTitle()))
                     .andExpect(jsonPath("$.content[" + i + "].content").value(notices.get(i).getContent()))
@@ -886,7 +885,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void getNoticePrev_NoRole_전체조회() throws Exception{
+    public void getNoticePrev_NoRole_전체조회() throws Exception {
         //given
         PageRequest request = PageRequest.of(1, 5);
         int noticeCnt = 20;
@@ -909,7 +908,7 @@ public class NoticeControllerTest {
                 .andExpect(jsonPath("$.size").value(5))
                 .andExpect(jsonPath("$.totalPages").value(4))
                 .andExpect(jsonPath("$.pageable.sort.sorted").value("false"));
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             actions.andExpect(jsonPath("$.content[" + i + "].noticeId").value(i))
                     .andExpect(jsonPath("$.content[" + i + "].title").value(notices.get(i).getTitle()))
                     .andExpect(jsonPath("$.content[" + i + "].writerName").value(notices.get(i).getWriter().getName()))
@@ -941,7 +940,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void getNoticePrev_RoleAdmin_관리자권한수정됨에따라변경될테스트() throws Exception{
+    public void getNoticePrev_RoleAdmin_관리자권한수정됨에따라변경될테스트() throws Exception {
         //given
         PageRequest request = PageRequest.of(1, 5);
         Role role = Role.ROLE_ADMIN_SEOUL_CENTRAL;
@@ -953,7 +952,7 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void getNoticePrev_RoleUser_CannotCategorizeByUserException() throws Exception{
+    public void getNoticePrev_RoleUser_CannotCategorizeByUserException() throws Exception {
         //given
         PageRequest request = PageRequest.of(1, 5);
         Role role = Role.ROLE_USER;
@@ -974,7 +973,7 @@ public class NoticeControllerTest {
 
 
     @Test
-    public void getNoticePrev_RoleMaster_CannotCategorizeByMasterException() throws Exception{
+    public void getNoticePrev_RoleMaster_CannotCategorizeByMasterException() throws Exception {
         //given
         PageRequest request = PageRequest.of(1, 5);
         Role role = Role.ROLE_MASTER;
@@ -993,9 +992,9 @@ public class NoticeControllerTest {
                 .isExactlyInstanceOf(CannotCategorizeByMasterException.class);
 
     }
-    
+
     @Test
-    public void getNoticePrevByTitle_Default_Success() throws Exception{
+    public void getNoticePrevByTitle_Default_Success() throws Exception {
         //given
         String keyword = "test";
         PageRequest request = PageRequest.of(0, 2);
@@ -1023,7 +1022,7 @@ public class NoticeControllerTest {
                 .andExpect(jsonPath("$.size").value(2))
                 .andExpect(jsonPath("$.totalPages").value(2))
                 .andExpect(jsonPath("$.pageable.sort.sorted").value("false"));
-        for(int i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) {
             actions.andExpect(jsonPath("$.content[" + i + "].noticeId").value(i))
                     .andExpect(jsonPath("$.content[" + i + "].title").value(notices.get(i).getTitle()))
                     .andExpect(jsonPath("$.content[" + i + "].writerName").value(notices.get(i).getWriter().getName()))
@@ -1083,7 +1082,7 @@ public class NoticeControllerTest {
 
     private List<Notice> readyNoticeWithUserAndThumbnail(int noticeCnt) {
         List<Notice> notices = new ArrayList<>();
-        for(int i = 0; i < noticeCnt; i++){
+        for (int i = 0; i < noticeCnt; i++) {
             Thumbnail thumbnail = new Thumbnail("test_Thumb" + i + ".jpg", "saved_Thumb" + i + ".jpg");
             User user = new User("username " + i, "password " + i, Role.ROLE_ADMIN_SEOUL_CENTRAL, "test name " + i, null);
             notices.add(
@@ -1097,15 +1096,15 @@ public class NoticeControllerTest {
     private void setNoticeIds(List<Notice> notices) throws NoSuchFieldException, IllegalAccessException {
         Field id = notices.get(0).getClass().getDeclaredField("id");
         id.setAccessible(true);
-        for(int i = 0; i < notices.size(); i++){
-            id.set(notices.get(i), (long)i);
+        for (int i = 0; i < notices.size(); i++) {
+            id.set(notices.get(i), (long) i);
         }
     }
 
     private void setNoticeCreatedAt(List<Notice> notices) throws NoSuchFieldException, IllegalAccessException {
         Field createdAt = notices.get(0).getClass().getSuperclass().getSuperclass().getDeclaredField("createdAt");
         createdAt.setAccessible(true);
-        for(int i = 0; i < notices.size(); i++){
+        for (int i = 0; i < notices.size(); i++) {
             createdAt.set(notices.get(i), LocalDateTime.now());
         }
     }
