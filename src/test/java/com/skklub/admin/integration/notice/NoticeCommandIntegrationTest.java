@@ -14,6 +14,7 @@ import com.skklub.admin.error.exception.ExtraFileNameMisMatchException;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.ExtraFileRepository;
 import com.skklub.admin.repository.NoticeRepository;
+import com.skklub.admin.security.auth.PrincipalDetailsService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -54,25 +57,55 @@ public class NoticeCommandIntegrationTest {
     private ExtraFileRepository extraFileRepository;
     @Autowired
     private EntityManager em;
+    @Autowired
+    private PrincipalDetailsService principalDetailsService;
 
     @Test
-    @WithMockCustomUser
+    @WithMockCustomUser(username = "testAdminID0")
     public void createNotice_WithThumbnail_Success() throws Exception{
         //given
+        UserDetails userDetails = principalDetailsService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        MultipartFile thumbnail = readyThumbnail();
+        NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("creation test title", "creation test content");
 
         //when
+        NoticeIdAndTitleResponse response = noticeController.createNotice(noticeCreateRequest, thumbnail, userDetails);
+        em.flush();
+        em.clear();
 
         //then
-
+        Optional<Notice> savedNotice = noticeRepository.findDetailById(response.getId());
+        Assertions.assertThat(savedNotice).isNotEmpty();
+        Assertions.assertThat(savedNotice.get().getTitle()).isEqualTo(noticeCreateRequest.getTitle());
+        Assertions.assertThat(savedNotice.get().getContent()).isEqualTo(noticeCreateRequest.getContent());
+        Assertions.assertThat(savedNotice.get().getThumbnail().getOriginalName()).isEqualTo(thumbnail.getOriginalFilename());
+        Assertions.assertThat(amazonS3.doesObjectExist(bucket, savedNotice.get().getThumbnail().getUploadedName())).isTrue();
+        Assertions.assertThat(savedNotice.get().getWriter().getName()).isEqualTo("testAdminName0");
+        Assertions.assertThat(savedNotice.get().getWriter().getUsername()).isEqualTo("testAdminID0");
     }
 
     @Test
+    @WithMockCustomUser(username = "testAdminID0")
     public void createNotice_WithoutThumbnail_Success() throws Exception{
         //given
+        UserDetails userDetails = principalDetailsService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("creation test title", "creation test content");
 
         //when
+        NoticeIdAndTitleResponse response = noticeController.createNotice(noticeCreateRequest, null, userDetails);
+        em.flush();
+        em.clear();
 
         //then
+        Optional<Notice> savedNotice = noticeRepository.findDetailById(response.getId());
+        Assertions.assertThat(savedNotice).isNotEmpty();
+        Assertions.assertThat(savedNotice.get().getTitle()).isEqualTo(noticeCreateRequest.getTitle());
+        Assertions.assertThat(savedNotice.get().getContent()).isEqualTo(noticeCreateRequest.getContent());
+        Assertions.assertThat(savedNotice.get().getThumbnail().getOriginalName()).isEqualTo("default_thumb.png");
+        Assertions.assertThat(savedNotice.get().getThumbnail().getUploadedName()).isEqualTo("default_thumb.png");
+        Assertions.assertThat(amazonS3.doesObjectExist(bucket, savedNotice.get().getThumbnail().getUploadedName())).isTrue();
+        Assertions.assertThat(savedNotice.get().getWriter().getName()).isEqualTo("testAdminName0");
+        Assertions.assertThat(savedNotice.get().getWriter().getUsername()).isEqualTo("testAdminID0");
 
     }
 

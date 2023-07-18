@@ -1,6 +1,7 @@
 package com.skklub.admin.controller.notice;
 
 import akka.protobuf.WireFormat;
+import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
@@ -89,7 +90,7 @@ public class NoticeControllerTest {
 
 
     @Test
-    @WithMockCustomUser(username = "testerID",password = "testerPW",role = Role.ROLE_MASTER, name = "tester")
+    @WithMockUser
     public void createNotice_WithThumbnail_Success() throws Exception{
         //given
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -940,15 +941,37 @@ public class NoticeControllerTest {
     }
 
     @Test
-    public void getNoticePrev_RoleAdmin_관리자권한수정됨에따라변경될테스트() throws Exception {
+    public void getNoticePrev_RoleAdmin_findAllSpecificNotices() throws Exception {
         //given
-        PageRequest request = PageRequest.of(1, 5);
         Role role = Role.ROLE_ADMIN_SEOUL_CENTRAL;
-        //**수정필요
+        PageRequest request = PageRequest.of(1, 5);
+        int noticeCnt = 20;
+        List<Notice> notices = readyNoticeWithUserAndThumbnail(noticeCnt);
+        setNoticeIds(notices);
+        setNoticeCreatedAt(notices);
+        PageImpl<Notice> noticePages = new PageImpl<>(notices, request, noticeCnt);
+        given(noticeRepository.findAll(request)).willReturn(noticePages);
+
         //when
+        ResultActions actions = mockMvc.perform(
+                get("/notice/prev")
+                        .with(csrf())
+                        .queryParam("role", role.toString())
+                        .queryParam("size", String.valueOf(request.getPageSize()))
+                        .queryParam("page", String.valueOf(request.getPageNumber()))
+        );
 
         //then
-
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalPages").value(4))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("false"));
+        for (int i = 0; i < 5; i++) {
+            actions.andExpect(jsonPath("$.content[" + i + "].noticeId").value(i))
+                    .andExpect(jsonPath("$.content[" + i + "].title").value(notices.get(i).getTitle()))
+                    .andExpect(jsonPath("$.content[" + i + "].writerName").value(notices.get(i).getWriter().getName()))
+                    .andExpect(jsonPath("$.content[" + i + "].createdAt").value(notices.get(i).getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()));
+        }
     }
 
     @Test

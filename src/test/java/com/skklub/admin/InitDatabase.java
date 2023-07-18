@@ -47,10 +47,10 @@ public class InitDatabase {
         initTestData.init();
     }
 
-//    @PreDestroy
-//    public void preDestroy() {
-//        initTestData.cleanS3();
-//    }
+    @PreDestroy
+    public void preDestroy() {
+        initTestData.cleanS3();
+    }
 
     @Component
     @Import(TestDataRepository.class)
