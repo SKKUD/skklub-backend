@@ -1,0 +1,11 @@
+:doctype: book
+:icons: font
+==== 중첩 가능
+==== ex : sort=keyword1.order1&sort=keyword2,order2
+
+[[club-keyowrd]]
+include::{snippets}/code/sorting/club-keyword.adoc[]
+
+[[ordering]]
+include::{snippets}/code/sorting/ordering.adoc[]
+

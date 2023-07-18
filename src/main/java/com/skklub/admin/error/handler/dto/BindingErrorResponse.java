@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class BindingErrorResponse {
     private String url;
     private String exception;
+    @Builder.Default
     private List<ErrorDetail> errorDetails = new ArrayList<>();
 
     public static BindingErrorResponse fromException(BindException bindException, HttpServletRequest request) {

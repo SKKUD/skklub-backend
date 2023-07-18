@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[seoul-belongs]]
+include::{snippets}/code/role_admin.adoc[]

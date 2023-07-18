@@ -38,9 +38,9 @@ public class NoticeRepositoryTest {
     private ExtraFileRepository extraFileRepository;
 
     @Test
-    public void noticeSave_WithThumbnailAndSavedUser_RelationCheck() throws Exception{
+    public void noticeSave_WithThumbnailAndSavedUser_RelationCheck() throws Exception {
         //given
-         String title = "Test Title";
+        String title = "Test Title";
         String content = "Test Content";
         User user = userRepository.findByUsername("userId0");
         Thumbnail thumbnail = new Thumbnail("Test_Thumb.png", "saved_Test_Thumb.png");
@@ -62,7 +62,7 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void extraFileSave_WhenEmptyList_SaveOrderCheck() throws Exception{
+    public void extraFileSave_WhenEmptyList_SaveOrderCheck() throws Exception {
         //given
         String title = "Test Title";
         String content = "Test Content";
@@ -101,7 +101,7 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void extraFileSave_AddToList_SaveOrderCheck() throws Exception{
+    public void extraFileSave_AddToList_SaveOrderCheck() throws Exception {
         //given
         String title = "Test Title";
         String content = "Test Content";
@@ -147,7 +147,7 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void getThumbnail_FromFindedNotice_LazyCheck() throws Exception{
+    public void getThumbnail_FromFindedNotice_LazyCheck() throws Exception {
         //given
         String originalName = "testThumb.jpg";
         String uploadedName = "savedTestThumb.jpg";
@@ -169,7 +169,7 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void noticeUpdate_FromSavedNotice_Success() throws Exception{
+    public void noticeUpdate_FromSavedNotice_Success() throws Exception {
         //given
         Notice notice = new Notice("testTitle", "testContent", null, null);
         em.persist(notice);
@@ -192,7 +192,7 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void thumbnailUpdate_FromSavedNotice_Success() throws Exception{
+    public void thumbnailUpdate_FromSavedNotice_Success() throws Exception {
         //given
         String originalName = "testThumb.jpg";
         String uploadedName = "savedTestThumb.jpg";
@@ -220,7 +220,7 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void noticeDelete_FromSavedNoticeWithFullFiles_CannotFind() throws Exception{
+    public void noticeDelete_FromSavedNoticeWithFullFiles_CannotFind() throws Exception {
         //given
         Thumbnail thumbnail = new Thumbnail("testThumb.jpg", "savedTestThumb.jpg");
         Notice notice = new Notice("testTitle", "testContent", null, thumbnail);
@@ -250,7 +250,7 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void findByOriginalNameAndNotice_FileNameInAnotherNotice_ReturnEmpty() throws Exception{
+    public void findByOriginalNameAndNotice_FileNameInAnotherNotice_ReturnEmpty() throws Exception {
         //given
         Notice noticeA = new Notice("testTitle", "testContent", null, null);
         Notice noticeB = new Notice("testTitle", "testContent", null, null);
@@ -277,7 +277,7 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void extraFileDelete_SavedNotice_CheckListSize() throws Exception{
+    public void extraFileDelete_SavedNotice_CheckListSize() throws Exception {
         //given
         Notice notice = new Notice("testTitle", "testContent", null, null);
         int fileCnt = 10;
@@ -316,9 +316,9 @@ public class NoticeRepositoryTest {
 
 
     }
-    
+
     @Test
-    public void findDetailById_NoticeWithThumbnailAndUserAndExtraFiles_ThumbnailNotLoadedAndOneQuery() throws Exception{
+    public void findDetailById_NoticeWithThumbnailAndUserAndExtraFiles_ThumbnailNotLoadedAndOneQuery() throws Exception {
         //given
         User user = new User("testUserId", "testUserPw", Role.ROLE_USER, "홍길동", "010-1111-1111");
         Thumbnail thumbnail = new Thumbnail("testThumb.jpg", "savedTestThumb.jpg");
@@ -334,7 +334,7 @@ public class NoticeRepositoryTest {
         extraFileRepository.saveAll(extraFiles);
         em.flush();
         em.clear();
-        
+
         //when
         Notice findedDetailNotice = noticeRepository.findDetailById(notice.getId()).get();
 
@@ -350,13 +350,13 @@ public class NoticeRepositoryTest {
         }
         Assertions.assertThat(findedDetailNotice.getExtraFiles()).containsAll(extraFiles);
     }
-    
+
     @Test
-    public void findPreAndPost_10NoticeEverySecond_CheckIdOrder() throws Exception{
+    public void findPreAndPost_10NoticeEverySecond_CheckIdOrder() throws Exception {
         //given
         int noticeCnt = 6;
         List<Notice> notices = new ArrayList<>();
-        for(int i = 0; i < noticeCnt; i++){
+        for (int i = 0; i < noticeCnt; i++) {
             notices.add(new Notice("test title " + i, "test content " + i, null, null));
         }
         for (Notice notice : notices) {
@@ -385,11 +385,11 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void findPreAndPost_NoPre_CheckIdOrder() throws Exception{
+    public void findPreAndPost_NoPre_CheckIdOrder() throws Exception {
         //given
         int noticeCnt = 6;
         List<Notice> notices = new ArrayList<>();
-        for(int i = 0; i < noticeCnt; i++){
+        for (int i = 0; i < noticeCnt; i++) {
             notices.add(new Notice("test title " + i, "test content " + i, null, null));
         }
         for (Notice notice : notices) {
@@ -417,11 +417,11 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void findPreAndPost_NoPost_CheckIdOrder() throws Exception{
+    public void findPreAndPost_NoPost_CheckIdOrder() throws Exception {
         //given
         int noticeCnt = 6;
         List<Notice> notices = new ArrayList<>();
-        for(int i = 0; i < noticeCnt; i++){
+        for (int i = 0; i < noticeCnt; i++) {
             notices.add(new Notice("test title " + i, "test content " + i, null, null));
         }
         for (Notice notice : notices) {
@@ -449,9 +449,9 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void findAllByUserRole_GivenUser_CheckLazy() throws Exception{
+    public void findAllByUserRole_GivenUser_CheckLazy() throws Exception {
         //given
-        User userAdmin = new User("testId0", "password0", Role.ROLE_ADMIN, "testUser", "010-1234-1234");
+        User userAdmin = new User("testId0", "password0", Role.ROLE_ADMIN_SUWON_CENTRAL, "testUser", "010-1234-1234");
         User userUser = new User("testId0", "password0", Role.ROLE_USER, "testUser", "010-1234-1234");
         userRepository.save(userAdmin);
         userRepository.save(userUser);
@@ -480,7 +480,7 @@ public class NoticeRepositoryTest {
 
         //when
         PageRequest pageRequest = PageRequest.of(1, 5);
-        Page<Notice> findedNotices = noticeRepository.findAllByUserRole(Role.ROLE_ADMIN, pageRequest);
+        Page<Notice> findedNotices = noticeRepository.findAllByUserRole(Role.ROLE_ADMIN_SUWON_CENTRAL, pageRequest);
 
         //then
         Assertions.assertThat(findedNotices.getTotalElements()).isEqualTo(10);
@@ -492,16 +492,16 @@ public class NoticeRepositoryTest {
                     .assertDoesNotThrow(
                             () -> findedNotice.getWriter().getContact()
                     );
-            Assertions.assertThat(findedNotice.getWriter().getRole()).isEqualTo(Role.ROLE_ADMIN);
+            Assertions.assertThat(findedNotice.getWriter().getRole()).isEqualTo(Role.ROLE_ADMIN_SUWON_CENTRAL);
         }
     }
 
     @Test
-    public void findAllWithThumbnailBy_WithThumbnailAndWriter_CheckLazy() throws Exception{
+    public void findAllWithThumbnailBy_WithThumbnailAndWriter_CheckLazy() throws Exception {
         //given
         String savedName = "saved_thumb.jpg";
         FileNames thumbnail = new FileNames("test_thumb.jpg", savedName);
-        User userAdmin = new User("testId0", "password0", Role.ROLE_ADMIN, "testUser", "010-1234-1234");
+        User userAdmin = new User("testId0", "password0", Role.ROLE_ADMIN_SUWON_CENTRAL, "testUser", "010-1234-1234");
         userRepository.save(userAdmin);
         int noticeCnt = 10;
         List<Notice> notices = new ArrayList<>();
@@ -532,11 +532,11 @@ public class NoticeRepositoryTest {
     }
 
     @Test
-    public void findWithWriterAllByTitleContainingOrderByCreatedAt_MatchThreeType_CheckLazy() throws Exception{
+    public void findWithWriterAllByTitleContainingOrderByCreatedAt_MatchThreeType_CheckLazy() throws Exception {
         //given
         String keyword = "test";
         PageRequest pageRequest = PageRequest.of(0, 2);
-        User user = new User("userId", "userPassword", Role.ROLE_ADMIN, "test User", "test Contact");
+        User user = new User("userId", "userPassword", Role.ROLE_ADMIN_SUWON_CENTRAL, "test User", "test Contact");
         userRepository.save(user);
         Notice firstMatch = new Notice("test title", "test content", user, null);
         noticeRepository.save(firstMatch);

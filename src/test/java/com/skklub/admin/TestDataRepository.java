@@ -204,12 +204,12 @@ public class TestDataRepository {
         for (int i = 0; i < clubCnt; i++) {
             Club club = new Club(
                     "정상적인 클럽 SKKULOL" + i
-                    , "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다." + i
+                    , "example activity description " + i
                     , "취미교양"
                     , ClubType.중앙동아리
                     , "E-SPORTS" + i
                     , Campus.명륜
-                    , "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^" + i
+                    , "sample About Club Description" + i
                     , 2023 + i
                     , "명륜 게임 동아리입니다" + i
                     , "4학기" + i

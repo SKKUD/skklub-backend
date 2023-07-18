@@ -1,0 +1,2 @@
+===== Get - /notice/prev/search/title
+operation::notice/read/prevs/title[snippets='query-parameters,response-fields']

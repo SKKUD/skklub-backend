@@ -1,6 +1,8 @@
 drop trigger if exists toD$$
 drop trigger if exists toC$$
 
+alter table notice modify column created_at datetime(6) default now()$$
+
 create trigger toD
     after delete on club
     for each row

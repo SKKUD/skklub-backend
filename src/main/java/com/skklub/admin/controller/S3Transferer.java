@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,8 +21,9 @@ import java.util.stream.Collectors;
 
 import static com.amazonaws.services.s3.model.DeleteObjectsRequest.*;
 
-@RequiredArgsConstructor
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class S3Transferer {
 
     private final AmazonS3 amazonS3;
@@ -84,6 +86,7 @@ public class S3Transferer {
     }
 
     public void deleteAll(List<String> keys) {
+        if(keys.isEmpty()) return;
         DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucket)
                 .withKeys(keys.stream().map(KeyVersion::new).collect(Collectors.toList()))
                 .withQuiet(false);
