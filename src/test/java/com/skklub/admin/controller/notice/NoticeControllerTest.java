@@ -6,9 +6,11 @@ import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.NoticeCreateRequest;
-import com.skklub.admin.controller.dto.NoticePrevWithThumbnailResponse;
 import com.skklub.admin.controller.dto.S3DownloadDto;
-import com.skklub.admin.domain.*;
+import com.skklub.admin.domain.ExtraFile;
+import com.skklub.admin.domain.Notice;
+import com.skklub.admin.domain.Thumbnail;
+import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.error.exception.CannotCategorizeByMasterException;
 import com.skklub.admin.error.exception.CannotCategorizeByUserException;
@@ -25,7 +27,6 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -33,8 +34,8 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.FieldDescriptor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -57,16 +58,16 @@ import java.util.stream.Collectors;
 import static com.skklub.admin.controller.RestDocsUtils.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @Slf4j
@@ -89,14 +90,15 @@ public class NoticeControllerTest {
 
 
     @Test
-    @WithMockUser
+    @WithMockCustomUser(username = "testerID",password = "testerPW",role = Role.ROLE_MASTER, name = "tester")
     public void createNotice_WithThumbnail_Success() throws Exception{
         //given
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("Notice Test Title", "Notice Test Content");
         MockMultipartFile mockThumbnail = readyMockThumbnail();
         FileNames fileNames = new FileNames("testThumb.png", "savedTestThumb.png");
         given(s3Transferer.uploadOne(mockThumbnail)).willReturn(fileNames);
-        given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), "testerID", fileNames.toThumbnailEntity()))
+        given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), username, fileNames.toThumbnailEntity()))
                 .willReturn(0L);
 
         //when
