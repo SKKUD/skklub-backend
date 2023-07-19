@@ -1,2 +1,0 @@
-===== Delete - /club/{clubId}/cancel
-operation::club/revive/club[snippets='path-parameters,response-fields']

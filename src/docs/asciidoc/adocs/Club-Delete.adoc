@@ -1,2 +1,0 @@
-===== Delete - /club/{clubId}
-operation::club/delete/club[snippets='path-parameters,response-fields']

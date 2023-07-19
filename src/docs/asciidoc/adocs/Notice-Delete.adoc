@@ -1,2 +1,0 @@
-===== Delete - /notice/{noticeId}
-operation::notice/delete/notice[snippets='path-parameters,response-fields']

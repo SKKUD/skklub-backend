@@ -1,3 +1,0 @@
-===== Patch - /recruit/{recruitId} (application_json)
-operation::recruit/update[snippets='path-parameters,query-parameters']
-Return Only RecruitId When Success

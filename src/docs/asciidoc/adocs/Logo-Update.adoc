@@ -1,3 +1,0 @@
-===== Post - /club/{clubId}/logo
-===== 기술의 한계로 Post입니다 흑흑 (Patch아님)
-operation::club/update/logo[snippets='path-parameters,request-parts,response-fields']

@@ -1,3 +1,0 @@
-===== Get - /notice/prev
-====== role이 NULL 일시 전체 조회
-operation::notice/read/prevs/role[snippets='query-parameters,response-fields']

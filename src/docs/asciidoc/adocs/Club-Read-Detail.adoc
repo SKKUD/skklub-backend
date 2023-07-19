@@ -1,2 +1,0 @@
-===== Get - /club/{clubId}
-operation::club/get/detail/id[snippets='path-parameters,response-fields']

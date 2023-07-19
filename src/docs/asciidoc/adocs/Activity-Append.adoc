@@ -1,2 +1,0 @@
-===== Post - /club/{clubId}/activityImage
-operation::club/create/activityImages[snippets='path-parameters,request-parts,response-fields']

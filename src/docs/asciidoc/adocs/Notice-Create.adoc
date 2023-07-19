@@ -1,3 +1,0 @@
-===== Post - /notice
-operation::notice/create/notice[snippets='query-parameters,request-parts,response-fields']
-
