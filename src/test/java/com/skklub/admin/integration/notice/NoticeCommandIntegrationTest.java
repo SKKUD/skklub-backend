@@ -27,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.test.annotation.Commit;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -253,6 +254,7 @@ public class NoticeCommandIntegrationTest {
     }
 
     @Test
+    @Commit
     public void updateThumbnail_FromSomeThumbnail_WithS3Deletion() throws Exception{
         //given
         String default_key = "default_thumb.png";
@@ -323,6 +325,7 @@ public class NoticeCommandIntegrationTest {
     }
 
     @Test
+    @Commit
     public void deleteNotice_WithThumbnail_S3Deletion() throws Exception{
         //given
         String default_key = "default_thumb.png";
@@ -371,6 +374,7 @@ public class NoticeCommandIntegrationTest {
     }
 
     @Test
+    @Commit
     public void deleteNotice_WithExtraFiles_S3BulkDeletion() throws Exception{
         //given
         Notice notice = em.createQuery("select n from Notice n left join fetch n.extraFiles e where e.id is not null", Notice.class)
@@ -413,6 +417,7 @@ public class NoticeCommandIntegrationTest {
     }
 
     @Test
+    @Commit
     public void deleteFileByOriginalName_Default_CannotFindFromNotice() throws Exception{
         //given
         String fileName = "3.pdf";

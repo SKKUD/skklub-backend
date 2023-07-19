@@ -1,2 +1,0 @@
-===== Patch - /club/{clubId}
-operation::notice/update/notice[snippets='path-parameters,query-parameters,response-fields']

@@ -1,2 +1,0 @@
-===== Post - /notice/{noticeId}/file
-operation::notice/create/files[snippets='path-parameters,request-parts,response-fields']

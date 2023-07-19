@@ -1,2 +1,0 @@
-===== Get - /club/search/prevs
-operation::club/get/prevs/search[snippets='query-parameters,response-fields']

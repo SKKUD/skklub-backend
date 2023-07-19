@@ -1,2 +1,0 @@
-===== Delete - /club/{clubId}/{activityImageName}
-operation::club/delete/activityImage[snippets='path-parameters,response-fields']

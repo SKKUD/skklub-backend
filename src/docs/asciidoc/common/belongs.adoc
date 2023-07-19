@@ -1,8 +1,0 @@
-:doctype: book
-:icons: font
-
-[[seoul-belongs]]
-include::{snippets}/club/code/seoul-belongs.adoc[]
-
-[[suwon-belongs]]
-include::{snippets}/club/code/suwon-belongs.adoc[]

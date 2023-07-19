@@ -1,2 +1,0 @@
-===== Get - /club/prev
-operation::club/get/prevs/category[snippets='query-parameters,response-fields']
