@@ -76,10 +76,11 @@ public class InitDatabase {
 
         @Transactional
         public void init() throws IOException, InterruptedException {
-            readyDefaultLogoInS3();
-            readyClubDomains();
-            readyDefaultThumbnailInS3();
-            readyNoticeDomains();
+            readyAdmin(2);
+//            readyDefaultLogoInS3();
+//            readyClubDomains();
+//            readyDefaultThumbnailInS3();
+//            readyNoticeDomains();
         }
 
         private void readyNoticeDomains() throws IOException, InterruptedException {
