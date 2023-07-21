@@ -28,6 +28,10 @@ public class User extends BaseTimeEntity {
     }
 
     public void update(User updateInfo) {
+        this.password = updateInfo.password;
+        this.name = updateInfo.name;
+        this.contact = updateInfo.contact;
+
 
     }
 

@@ -8,7 +8,9 @@ import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.security.redis.RedisUtil;
-import com.skklub.admin.service.dto.*;
+import com.skklub.admin.service.dto.UserJoinDTO;
+import com.skklub.admin.service.dto.UserLoginDTO;
+import com.skklub.admin.service.dto.UserProcResultDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +34,7 @@ public class UserService {
     private final RedisUtil redisUtil;
 
     //User Join
-    public UserProcResultDTO userJoin(UserJoinDTO userJoinDTO){
+    public UserProcResultDTO joinUser(UserJoinDTO userJoinDTO){
         //username 중복 검사
         usernameDuplicationValidate(userJoinDTO.getUsername());
         //회원가입 진행
@@ -46,6 +48,7 @@ public class UserService {
         userRepository.save(user);
         UserProcResultDTO result = new UserProcResultDTO(user.getId(),user.getUsername(),user.getName(),user.getContact());
         log.info("new user joined -> userId : {}, username : {}", user.getId(), user.getUsername());
+        log.info("new user joined -> userPW : {}", user.getPassword());
         return result;
     }
 
@@ -57,7 +60,7 @@ public class UserService {
     }
 
     //User Login
-    public JwtDTO userLogin(UserLoginDTO userLoginDTO){
+    public JwtDTO loginUser(UserLoginDTO userLoginDTO){
         String username = userLoginDTO.getUsername();
         String password = userLoginDTO.getPassword();
         //기본 username, password 인증
@@ -82,59 +85,54 @@ public class UserService {
     }
 
     //User Update
-    public UserProcResultDTO userUpdate(UserUpdateDTO userUpdateDTO){
+    public Optional<User> updateUser(Long userId, String password, Role role, String name, String contact, UserDetails userDetails, String accessToken){
 
-        validateEditingUserAuthority(userUpdateDTO.getUserDetails(),userUpdateDTO.getId());
+        validateUserAuthority(userDetails,userId);
         //update 진행
-        String username = userRepository.findById(userUpdateDTO.getId()).get().getUsername();
-        String encPwd = bCryptPasswordEncoder.encode(userUpdateDTO.getPassword());
+        String username = userRepository.findById(userId).get().getUsername();
+        String encPwd = bCryptPasswordEncoder.encode(password);
 
-//        User updatedUser =
-//                new User(userUpdateDTO.getId(),
-//                        username,
-//                        encPwd,
-//                        userUpdateDTO.getRole(),
-//                        userUpdateDTO.getName(),
-//                        userUpdateDTO.getContact());
-//        userRepository.save(updatedUser);
-//        UserProcResultDTO result = new UserProcResultDTO(updatedUser.getId(),updatedUser.getUsername(),updatedUser.getName(),updatedUser.getContact());
-//        log.info("user updated -> userId : {}, username : {}", userUpdateDTO.getId(), username);
-//        return result;
-        return null;
-
+        return userRepository.findById(userId)
+                .map(baseUser -> {
+                    baseUser.update(new User(username, encPwd, role, name, contact));
+                    invalidateUserAccessToken(username, accessToken);
+                    log.info("user updated -> userId : {}, username : {}", userId, username);
+                    return baseUser;
+                });
     }
 
     //User Logout
-    public String userLogout(UserLogoutDTO userLogoutDTO) {
-        String accessToken = userLogoutDTO.getAccessToken();
-        String username = userLogoutDTO.getUsername();
+    public String logoutUser(String username,String accessToken) {
+        invalidateUserAccessToken(username, accessToken);
+        return username;
+    }
+
+    public void validateUserAuthority(UserDetails nowUser, Long id){
+        //수정 권한자로 등록된 유저 확인
+        User registeredUser = Optional.of(userRepository.findById(id).get())
+                .orElseThrow(()->
+                        new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
+        //업데이트 대상 계정과 로그인된 계정 일치 여부 확인
+        if(!nowUser.getUsername().equals(registeredUser.getUsername())){
+            //관리자에 의한 직권 수정 허용(MASTER, ADMIN)
+            List<GrantedAuthority> authList = (List<GrantedAuthority>) nowUser.getAuthorities();
+            String authority = authList.get(0).getAuthority();
+            if(authority.equals(String.valueOf(Role.ROLE_ADMIN_SEOUL_CENTRAL))||authority.equals(String.valueOf(Role.ROLE_MASTER))){
+                log.info("now updating with authority of administrator({}): {}",authority, nowUser.getUsername());
+            }else{
+                throw new AuthException(ErrorCode.NO_AUTHORITY,"no authority");
+            }
+        }
+    }
+
+    private void invalidateUserAccessToken(String username, String accessToken) {
         //Redis 에 저장된 refresh token 있을 경우 삭제
         if (redisUtil.hasKeyRefreshToken("RT:" + username)) {
             redisUtil.deleteRefreshToken("RT:" + username);
         }
         //해당 AccessToken 유효시간 반영해서 BlackList 저장
         String bannedToken = TokenProvider.resolveToken(accessToken);
-        redisUtil.setBlackList(bannedToken, "AT:" + username, TokenProvider.getExpiration(bannedToken)+(60 * 10 * 1000), TimeUnit.MILLISECONDS);
-
-        return username;
-    }
-
-    public void validateEditingUserAuthority(UserDetails nowEditingUser, Long id){
-        //수정 권한자로 등록된 유저 확인
-        User registeredUser = Optional.of(userRepository.findById(id).get())
-                .orElseThrow(()->
-                        new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
-        //업데이트 대상 계정과 로그인된 계정 일치 여부 확인
-        if(!nowEditingUser.getUsername().equals(registeredUser.getUsername())){
-            //관리자에 의한 직권 수정 허용(MASTER, ADMIN)
-            List<GrantedAuthority> authList = (List<GrantedAuthority>) nowEditingUser.getAuthorities();
-            String authority = authList.get(0).getAuthority();
-            if(authority.equals(String.valueOf(Role.ROLE_ADMIN_SEOUL_CENTRAL))||authority.equals(String.valueOf(Role.ROLE_MASTER))){
-                log.info("now updating with authority of administrator({}): {}",authority, nowEditingUser.getUsername());
-            }else{
-                throw new AuthException(ErrorCode.NO_AUTHORITY,"no authority");
-            }
-        }
+        redisUtil.setBlackList(bannedToken, "AT:" + username, TokenProvider.getExpiration(bannedToken) + (60 * 10 * 1000), TimeUnit.MILLISECONDS);
     }
 
 }

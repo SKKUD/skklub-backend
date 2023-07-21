@@ -82,7 +82,7 @@ public class UserControllerJoinTest {
     public void join_Success() throws Exception {
 
         //given
-        given(userService.userJoin(any())).willReturn(new UserProcResultDTO(1L,"user","김명륜","010-1234-5678"));
+        given(userService.joinUser(any())).willReturn(new UserProcResultDTO(1L,"user","김명륜","010-1234-5678"));
 
         //when
         ResultActions actions = mockMvc.perform(post("/user/join").with(csrf())

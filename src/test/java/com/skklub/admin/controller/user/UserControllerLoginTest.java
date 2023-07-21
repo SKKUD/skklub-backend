@@ -29,7 +29,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static com.skklub.admin.controller.RestDocsUtils.LINK_CAMPUS_TYPE;
 import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -88,7 +87,7 @@ public class UserControllerLoginTest {
         //given
         String username = "user";
         String password = "1234";
-        given(userService.userLogin(new UserLoginDTO(username, password))).willReturn(new JwtDTO("access-token", "refresh-token"));
+        given(userService.loginUser(new UserLoginDTO(username, password))).willReturn(new JwtDTO("access-token", "refresh-token"));
         
         //when
         ResultActions actions = mockMvc.perform(post("/user/login")
