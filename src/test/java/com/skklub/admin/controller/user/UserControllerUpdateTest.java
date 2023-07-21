@@ -3,8 +3,9 @@ package com.skklub.admin.controller.user;
 import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.controller.UserController;
+import com.skklub.admin.domain.User;
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.service.UserService;
-import com.skklub.admin.service.dto.UserProcResultDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Optional;
+
 import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -36,12 +39,11 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -86,7 +88,7 @@ public class UserControllerUpdateTest {
     public void update_success() throws Exception {
 
         //given
-        given(userService.userUpdate(any())).willReturn(new UserProcResultDTO(1L,"user","이율전","010-8765-4321"));
+        given(userService.updateUser(any(),any(),any(),any(),any(),any(),any())).willReturn(Optional.of(new User("user", "12345", Role.ROLE_USER, "이율전", "010-8765-4321")));
 
         //when
         ResultActions actions = mockMvc.perform(RestDocumentationRequestBuilders.post("/user/{userId}",1L)
