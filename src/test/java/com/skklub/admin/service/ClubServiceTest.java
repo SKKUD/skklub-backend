@@ -7,6 +7,8 @@ import com.skklub.admin.domain.DeletedClub;
 import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.error.exception.CannotDownGradeClubException;
+import com.skklub.admin.error.exception.CannotUpGradeClubException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.DeletedClubRepository;
@@ -441,4 +443,109 @@ class ClubServiceTest {
         Assertions.assertThat(nameShouldEmpty).isEmpty();
     }
 
+    @Test
+    public void downGrade_Given중앙동아리_ChangeTo준중앙동아리() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.중앙동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        Optional<Club> clubAfterDownGrade = clubService.downGrade(clubId);
+
+        //then
+        Assertions.assertThat(clubAfterDownGrade).isNotEmpty();
+        Assertions.assertThat(clubAfterDownGrade.get().getClubType()).isEqualTo(ClubType.준중앙동아리);
+    }
+
+    @Test
+    public void downGrade_Given준중앙동아리_CannotDownGradeClubException() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.준중앙동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        org.junit.jupiter.api.Assertions.assertThrows(
+                CannotDownGradeClubException.class,
+                () -> clubService.downGrade(clubId)
+        );
+
+        //then
+    }
+
+    @Test
+    public void downGrade_Given기타동아리_CannotDownGradeClubException() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.기타동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        org.junit.jupiter.api.Assertions.assertThrows(
+                CannotDownGradeClubException.class,
+                () -> clubService.downGrade(clubId)
+        );
+
+    }
+
+    @Test
+    public void upGrade_Given준중앙동아리_ChangeTo중앙동아리() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.준중앙동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        Optional<Club> clubAfterDownGrade = clubService.upGrade(clubId);
+
+        //then
+        Assertions.assertThat(clubAfterDownGrade).isNotEmpty();
+        Assertions.assertThat(clubAfterDownGrade.get().getClubType()).isEqualTo(ClubType.중앙동아리);
+    }
+
+    @Test
+    public void upGrade_Given중앙동아리_CannotUpGradeClubException() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.중앙동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        org.junit.jupiter.api.Assertions.assertThrows(
+                CannotUpGradeClubException.class,
+                () -> clubService.upGrade(clubId)
+        );
+
+        //then
+
+    }
+
+    @Test
+    public void upGrade_Given기타동아리_CannotUpGradeClubException() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.기타동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        org.junit.jupiter.api.Assertions.assertThrows(
+                CannotUpGradeClubException.class,
+                () -> clubService.upGrade(clubId)
+        );
+        //then
+
+    }
+
+    private void changeClubType(Club club, ClubType clubType) throws NoSuchFieldException, IllegalAccessException {
+        Field clubTypeField = club.getClass().getDeclaredField("clubType");
+        clubTypeField.setAccessible(true);
+        clubTypeField.set(club, clubType);
+    }
 }
