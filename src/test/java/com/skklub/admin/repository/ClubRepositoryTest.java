@@ -243,7 +243,7 @@ class ClubRepositoryTest {
             if(i % 2 == 1){
                 Field declaredField = club.getClass().getDeclaredField("belongs");
                 declaredField.setAccessible(true);
-                declaredField.set(club, "종교분과");
+                declaredField.set(club, "종교");
             }
             recruit.ifPresent(recruitRepository::save);
             clubRepository.save(club);
@@ -253,7 +253,7 @@ class ClubRepositoryTest {
         PageRequest request = PageRequest.of(0, 3, Sort.Direction.ASC, "id");
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
-        String belongs = "종교분과";
+        String belongs = "종교";
 
 
         //when

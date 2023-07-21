@@ -158,6 +158,20 @@ public class ClubController {
                 .orElseThrow(ClubIdMisMatchException::new);
     }
 
+    //중동 -> 준중동
+    @PatchMapping("/club/{clubId}/down")
+    public ClubIdAndCategoryResponse downGradeClub(@PathVariable Long clubId){
+        Club clubAfterUpdate = clubService.downGrade(clubId).orElseThrow(ClubIdMisMatchException::new);
+        return new ClubIdAndCategoryResponse(clubAfterUpdate);
+    }
+
+    //준중동 -> 중동
+    @PatchMapping("/club/{clubId}/up")
+    public ClubIdAndCategoryResponse upGradeClub(@PathVariable Long clubId){
+        Club clubAfterUpdate = clubService.upGrade(clubId).orElseThrow(ClubIdMisMatchException::new);
+        return new ClubIdAndCategoryResponse(clubAfterUpdate);
+    }
+
 //====DELETE=====//
 
     //특정 활동 사진 삭제

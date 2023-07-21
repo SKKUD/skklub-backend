@@ -5,6 +5,8 @@ import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.error.exception.CannotUpGradeClubException;
+import com.skklub.admin.error.exception.CannotDownGradeClubException;
 import com.skklub.admin.error.exception.MissingDeletedClubException;
 import com.skklub.admin.error.exception.MissingAliveClubException;
 import com.skklub.admin.repository.ActivityImageRepository;
@@ -106,12 +108,23 @@ public class ClubService {
                 });
     }
 
-    public Optional<String> updateClubType(Long clubId, Club clubUpdateInfo) {
+    public Optional<Club> downGrade(Long clubId) {
         return clubRepository.findById(clubId)
-                .map(baseClub -> {
-                    baseClub.update(clubUpdateInfo);
-                    return baseClub.getName();
-                });
+                .map(
+                        club -> {
+                            if(!club.downGrade()) throw new CannotDownGradeClubException();
+                            return club;
+                        }
+                );
     }
 
+    public Optional<Club> upGrade(Long clubId) {
+        return clubRepository.findById(clubId)
+                .map(
+                        club -> {
+                            if (!club.upGrade()) throw new CannotUpGradeClubException();
+                            return club;
+                        }
+                );
+    }
 }

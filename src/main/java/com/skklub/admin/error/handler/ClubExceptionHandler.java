@@ -167,11 +167,31 @@ public class ClubExceptionHandler {
     }
 
     @ExceptionHandler(CannotCategorizeByUserException.class)
-    public ResponseEntity<ErrorResponse> ㅊannotCategorizeByUserException(CannotCategorizeByUserException e, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> cannotCategorizeByUserException(CannotCategorizeByUserException e, HttpServletRequest request) {
         ErrorDetail errorDetail = ErrorDetail.builder()
                 .field("role")
                 .given(request.getParameter("role"))
                 .reasonMessage("공지글은 일반 유저로는 분류할 수 없습니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
+    @ExceptionHandler(CannotDownGradeClubException.class)
+    public ResponseEntity<ErrorResponse> cannotDownGradeClubException(CannotDownGradeClubException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("clubId")
+                .given("path parameter")
+                .reasonMessage("중앙동아리만 준중앙동아리로 변경이 가능합니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
+    @ExceptionHandler(CannotUpGradeClubException.class)
+    public ResponseEntity<ErrorResponse> cannotUpGradeClubException(CannotUpGradeClubException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("clubId")
+                .given("path parameter")
+                .reasonMessage("준중앙동아리만 중앙동아리로 변경이 가능합니다")
                 .build();
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
     }
