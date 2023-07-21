@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,10 +48,15 @@ public class NoticeController {
     @PostMapping("/notice")
     public NoticeIdAndTitleResponse createNotice(@ModelAttribute @Valid NoticeCreateRequest noticeCreateRequest
             , @RequestParam(required = false) MultipartFile thumbnailFile
+            ,@RequestParam Optional<List<MultipartFile>> files
             , @AuthenticationPrincipal UserDetails userDetails) {
         Thumbnail thumbnail = Optional.ofNullable(thumbnailFile).map(s3Transferer::uploadOne).orElse(new FileNames(DEFAULT_THUMBNAIL, DEFAULT_THUMBNAIL)).toThumbnailEntity();
+        List<ExtraFile> extraFiles = s3Transferer.uploadAll(files.orElse(new ArrayList<>()))
+                .stream()
+                .map(FileNames::toExtraFileEntity)
+                .collect(Collectors.toList());
         String userName = TokenProvider.getAuthentication(userDetails).getName();
-        Long noticeId = noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), userName, thumbnail);
+        Long noticeId = noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), userName, thumbnail, extraFiles);
         return new NoticeIdAndTitleResponse(noticeId, noticeCreateRequest.getTitle());
     }
 

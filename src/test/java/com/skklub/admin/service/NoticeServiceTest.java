@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -39,6 +40,29 @@ public class NoticeServiceTest {
     private ExtraFileRepository extraFileRepository;
     @Mock
     private UserRepository userRepository;
+
+    @Test
+    public void createNotice_WithThumbAndFiles_CheckExtraFilesRelations() throws Exception{
+        //given
+        String title = "Test Title";
+        String content = "Test Content";
+        Notice notice = new Notice(title, content, null, null);
+        List<ExtraFile> extraFiles = new ArrayList<>();
+         int fileCnt = 10;
+        for (int i = 0; i < fileCnt; i++) {
+            extraFiles.add(new ExtraFile("Test_Ex" + i + ".png", "saved_Test_Ex" + i + ".png"));
+        }
+
+        //when
+        notice.appendExtraFiles(extraFiles);
+
+        //then
+        for (ExtraFile extraFile : extraFiles) {
+            Assertions.assertThat(extraFile.getNotice().getTitle()).isEqualTo(title);
+            Assertions.assertThat(extraFile.getNotice().getContent()).isEqualTo(content);
+        }
+        Assertions.assertThat(notice.getExtraFiles()).hasSize(fileCnt);
+    }
 
     @Test
     public void appendExtraFiles_AddToEmptyList_BiRelation() throws Exception{

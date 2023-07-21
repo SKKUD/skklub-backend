@@ -28,10 +28,12 @@ public class NoticeService {
     private final ExtraFileRepository extraFileRepository;
     private final UserRepository userRepository;
 
-    public Long createNotice(String title, String content, String userName, Thumbnail thumbnail) {
+    public Long createNotice(String title, String content, String userName, Thumbnail thumbnail, List<ExtraFile> extraFiles) {
         User user = userRepository.findByUsername(userName);
         Notice notice = new Notice(title, content, user, thumbnail);
         noticeRepository.save(notice);
+        notice.appendExtraFiles(extraFiles);
+        extraFileRepository.saveAll(extraFiles);
         return notice.getId();
     }
 
