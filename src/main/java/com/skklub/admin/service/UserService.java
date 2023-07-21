@@ -9,7 +9,6 @@ import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.security.redis.RedisUtil;
 import com.skklub.admin.service.dto.*;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,25 +30,6 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final TokenProvider tokenProvider;
     private final RedisUtil redisUtil;
-
-    @PostConstruct
-    public void postConstruct() {
-        userRepository.save(new User(
-                "testAdminId1",
-                bCryptPasswordEncoder.encode("testAdminPw1"),
-                Role.ROLE_ADMIN_SEOUL_CENTRAL,
-                "testAdmin1",
-                "010-0000-0000"
-        ));
-
-        userRepository.save(new User(
-                "testAdminId2",
-                bCryptPasswordEncoder.encode("testAdminPw2"),
-                Role.ROLE_ADMIN_SUWON_CENTRAL,
-                "testAdmin2",
-                "010-1234-1234"
-        ));
-    }
 
     //User Join
     public UserProcResultDTO userJoin(UserJoinDTO userJoinDTO){
