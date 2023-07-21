@@ -144,4 +144,16 @@ public class Club extends BaseEntity {
     public void endRecruit() {
         this.recruit = null;
     }
+
+    public boolean downGrade() {
+        if(!this.getClubType().equals(ClubType.중앙동아리)) return false;
+        this.clubType = ClubType.준중앙동아리;
+        return true;
+    }
+
+    public boolean upGrade() {
+        if(!this.getClubType().equals(ClubType.준중앙동아리)) return false;
+        this.clubType = ClubType.중앙동아리;
+        return true;
+    }
 }

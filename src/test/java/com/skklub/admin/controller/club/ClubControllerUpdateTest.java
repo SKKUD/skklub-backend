@@ -10,6 +10,8 @@ import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.error.exception.CannotDownGradeClubException;
+import com.skklub.admin.error.exception.CannotUpGradeClubException;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.repository.ClubRepository;
@@ -38,13 +40,13 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Optional;
 
-import static com.skklub.admin.controller.RestDocsUtils.example;
+import static com.skklub.admin.controller.RestDocsUtils.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
@@ -127,7 +129,7 @@ class ClubControllerUpdateTest {
                                 ),
                                 queryParameters(
                                         parameterWithName("clubName").description("동아리 이름").attributes(example("클럽 SKKULOL")),
-                                        parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(RestDocsUtils.LINK_CAMPUS_TYPE)),
+                                        parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
                                         parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(RestDocsUtils.LINK_CLUB_TYPE)),
                                         parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(RestDocsUtils.LINK_BELONGS_TYPE)),
                                         parameterWithName("briefActivityDescription").description(" 분류 - 활동 설명").attributes(example("E-SPORTS")),
@@ -324,5 +326,181 @@ class ClubControllerUpdateTest {
         //then
         Assertions.assertThat(noLogoResult.getResolvedException()).isExactlyInstanceOf(MissingServletRequestPartException.class);
 
+    }
+    
+    @Test
+    public void downGradeClub_Given중앙동아리_To준중앙동아리() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(1);
+        setClubId(club, clubId);
+        changeClubType(club, ClubType.중앙동아리);
+        doAnswer(
+                invocation -> {
+                    changeClubType(club,ClubType.준중앙동아리);
+                    return Optional.of(club);
+                }
+        ).when(clubService).downGrade(clubId);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                patch("/club/{clubId}/down", clubId)
+                        .with(csrf())
+        );
+
+        //then
+        Assertions.assertThat(club.getClubType()).isEqualTo(ClubType.준중앙동아리);
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.clubId").value(clubId))
+                .andExpect(jsonPath("$.clubName").value(club.getName()))
+                .andExpect(jsonPath("$.campus").value(club.getCampus().toString()))
+                .andExpect(jsonPath("$.clubType").value(club.getClubType().toString()))
+                .andExpect(jsonPath("$.belongs").value(club.getBelongs()))
+                .andExpect(jsonPath("$.briefDescription").value(club.getBriefActivityDescription()))
+                .andDo(
+                        document(
+                                "club/update/grade/down"
+                                , pathParameters(
+                                        parameterWithName("clubId").description("중앙동아리 ID").attributes(example("1"))
+                                )
+                                , responseFields(
+                                        fieldWithPath("clubId").type(WireFormat.FieldType.INT64).description("강등된 동아리 ID").attributes(example("1")),
+                                        fieldWithPath("clubName").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(club.getName())),
+                                        fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("소속 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
+                                        fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("준중앙동아리").attributes(example(club.getClubType().toString())),
+                                        fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("소속 분과").attributes(example(RestDocsUtils.LINK_BELONGS_TYPE)),
+                                        fieldWithPath("briefDescription").type(WireFormat.FieldType.STRING).description("세부 분류").attributes(example(club.getBriefActivityDescription()))
+                                )
+                        )
+                );
+    }
+
+    @Test
+    public void downGradeClub_BadClubType_CannotDownGradeClubException() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(1);
+        setClubId(club, clubId);
+        changeClubType(club, ClubType.중앙동아리);
+        given(clubService.downGrade(clubId)).willThrow(CannotDownGradeClubException.class);
+
+        //when
+        MvcResult badClubTypeResult = mockMvc.perform(
+                patch("/club/{clubId}/down", clubId)
+                        .with(csrf())
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badClubTypeResult.getResolvedException()).isExactlyInstanceOf(CannotDownGradeClubException.class);
+    }
+
+    @Test
+    public void downGradeClub_BadClubId_ClubIdMisMatchException() throws Exception{
+        //given
+        Long clubId = 31L;
+        given(clubService.downGrade(clubId)).willReturn(Optional.empty());
+
+        //when
+        MvcResult badClubIdResult = mockMvc.perform(
+                patch("/club/{clubId}/down", clubId)
+                        .with(csrf())
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badClubIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
+    }
+
+    @Test
+    public void upGradeClub_Given준중앙동아리_To중앙동아리() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(1);
+        setClubId(club, clubId);
+        changeClubType(club, ClubType.준중앙동아리);
+        doAnswer(
+                invocation -> {
+                    changeClubType(club,ClubType.중앙동아리);
+                    return Optional.of(club);
+                }
+        ).when(clubService).upGrade(clubId);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                patch("/club/{clubId}/up", clubId)
+                        .with(csrf())
+        );
+
+        //then
+        Assertions.assertThat(club.getClubType()).isEqualTo(ClubType.중앙동아리);
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.clubId").value(clubId))
+                .andExpect(jsonPath("$.clubName").value(club.getName()))
+                .andExpect(jsonPath("$.campus").value(club.getCampus().toString()))
+                .andExpect(jsonPath("$.clubType").value(club.getClubType().toString()))
+                .andExpect(jsonPath("$.belongs").value(club.getBelongs()))
+                .andExpect(jsonPath("$.briefDescription").value(club.getBriefActivityDescription()))
+                .andDo(
+                        document(
+                                "club/update/grade/up"
+                                , pathParameters(
+                                        parameterWithName("clubId").description("준중앙동아리 ID").attributes(example("1"))
+                                )
+                                , responseFields(
+                                        fieldWithPath("clubId").type(WireFormat.FieldType.INT64).description("승격된 동아리 ID").attributes(example("1")),
+                                        fieldWithPath("clubName").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(club.getName())),
+                                        fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("소속 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
+                                        fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("중앙동아리").attributes(example(club.getClubType().toString())),
+                                        fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("소속 분과").attributes(example(LINK_BELONGS_TYPE)),
+                                        fieldWithPath("briefDescription").type(WireFormat.FieldType.STRING).description("세부 분류").attributes(example(club.getBriefActivityDescription()))
+                                )
+                        )
+                );
+    }
+
+    @Test
+    public void upGradeClub_BadClubType_CannotUpGradeClubException() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(1);
+        setClubId(club, clubId);
+        changeClubType(club, ClubType.준중앙동아리);
+        given(clubService.upGrade(clubId)).willThrow(CannotUpGradeClubException.class);
+
+        //when
+        MvcResult badClubTypeResult = mockMvc.perform(
+                patch("/club/{clubId}/up", clubId)
+                        .with(csrf())
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badClubTypeResult.getResolvedException()).isExactlyInstanceOf(CannotUpGradeClubException.class);
+    }
+
+    @Test
+    public void upGradeClub_BadClubId_CLubIdMisMatchException() throws Exception{
+        Long clubId = 31L;
+        given(clubService.upGrade(clubId)).willReturn(Optional.empty());
+
+        //when
+        MvcResult badClubIdResult = mockMvc.perform(
+                patch("/club/{clubId}/up", clubId)
+                        .with(csrf())
+        ).andReturn();
+
+        //then
+        Assertions.assertThat(badClubIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
+    }
+
+
+    private void setClubId(Club club, Long clubId) throws NoSuchFieldException, IllegalAccessException {
+        Field clubIdField = club.getClass().getDeclaredField("id");
+        clubIdField.setAccessible(true);
+        clubIdField.set(club, clubId);
+    }
+
+    private void changeClubType(Club club, ClubType clubType) throws NoSuchFieldException, IllegalAccessException {
+        Field clubTypeField = club.getClass().getDeclaredField("clubType");
+        clubTypeField.setAccessible(true);
+        clubTypeField.set(club, clubType);
     }
 }

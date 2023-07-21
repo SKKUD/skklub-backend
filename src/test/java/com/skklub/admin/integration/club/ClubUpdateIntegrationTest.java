@@ -5,6 +5,7 @@ import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
+import com.skklub.admin.controller.dto.ClubIdAndCategoryResponse;
 import com.skklub.admin.controller.dto.ClubIdAndLogoNameDTO;
 import com.skklub.admin.controller.dto.ClubNameAndIdDTO;
 import com.skklub.admin.domain.Club;
@@ -197,6 +198,52 @@ public class ClubUpdateIntegrationTest {
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(
                 () -> s3Transferer.downloadOne(new FileNames("alt.jpg", "alt.jpg")));
 
+
+    }
+    
+    @Test
+    public void upGrade_Given준중앙동아리_UpdateTo중앙동아리() throws Exception{
+        //given
+        Club club = em.createQuery("select c from Club c where c.clubType = :clubType", Club.class)
+                .setMaxResults(1)
+                .setParameter("clubType", ClubType.준중앙동아리)
+                .getSingleResult();
+        em.clear();
+
+        //when
+        ClubIdAndCategoryResponse response = clubController.upGradeClub(club.getId());
+
+        //then
+        Assertions.assertThat(response.getClubId()).isEqualTo(club.getId());
+        Assertions.assertThat(response.getClubName()).isEqualTo(club.getName());
+        Assertions.assertThat(response.getCampus()).isEqualTo(club.getCampus());
+        Assertions.assertThat(response.getClubType()).isNotEqualTo(club.getClubType())
+                .isEqualTo(ClubType.중앙동아리);
+        Assertions.assertThat(response.getBelongs()).isEqualTo(club.getBelongs());
+        Assertions.assertThat(response.getBriefDescription()).isEqualTo(club.getBriefActivityDescription());
+
+    }
+
+    @Test
+    public void downGrade_Given중앙동아리_UpdateTo준중앙동아리() throws Exception{
+        //given
+        Club club = em.createQuery("select c from Club c where c.clubType = :clubType", Club.class)
+                .setMaxResults(1)
+                .setParameter("clubType", ClubType.중앙동아리)
+                .getSingleResult();
+        em.clear();
+
+        //when
+        ClubIdAndCategoryResponse response = clubController.downGradeClub(club.getId());
+
+        //then
+        Assertions.assertThat(response.getClubId()).isEqualTo(club.getId());
+        Assertions.assertThat(response.getClubName()).isEqualTo(club.getName());
+        Assertions.assertThat(response.getCampus()).isEqualTo(club.getCampus());
+        Assertions.assertThat(response.getClubType()).isNotEqualTo(club.getClubType())
+                .isEqualTo(ClubType.준중앙동아리);
+        Assertions.assertThat(response.getBelongs()).isEqualTo(club.getBelongs());
+        Assertions.assertThat(response.getBriefDescription()).isEqualTo(club.getBriefActivityDescription());
 
     }
 

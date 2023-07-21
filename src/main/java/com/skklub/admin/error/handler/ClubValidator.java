@@ -1,6 +1,7 @@
 package com.skklub.admin.error.handler;
 
 import com.skklub.admin.controller.dto.RecruitDto;
+import com.skklub.admin.domain.Club;
 import com.skklub.admin.error.exception.AllTimeRecruitTimeFormattingException;
 import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.domain.enums.BelongsSeoulCentral;
