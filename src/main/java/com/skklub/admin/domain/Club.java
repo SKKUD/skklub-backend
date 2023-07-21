@@ -96,6 +96,16 @@ public class Club extends BaseEntity {
         this.webLink2 = webLink2;
     }
 
+    public Club(String clubName, String activityDescription, String belongs, ClubType clubType, String briefActivityDescription, Campus campus, String clubDescription) {
+        this.name = clubName;
+        this.activityDescription = activityDescription;
+        this.belongs = belongs;
+        this.clubType = clubType;
+        this.briefActivityDescription = briefActivityDescription;
+        this.campus = campus;
+        this.clubDescription = clubDescription;
+    }
+
     public void update(Club updateInfo
     ) {
         this.name = updateInfo.name;
