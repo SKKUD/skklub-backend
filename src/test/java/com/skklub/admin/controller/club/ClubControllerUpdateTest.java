@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Optional;
 
-import static com.skklub.admin.controller.RestDocsUtils.example;
+import static com.skklub.admin.controller.RestDocsUtils.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -129,7 +129,7 @@ class ClubControllerUpdateTest {
                                 ),
                                 queryParameters(
                                         parameterWithName("clubName").description("동아리 이름").attributes(example("클럽 SKKULOL")),
-                                        parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(RestDocsUtils.LINK_CAMPUS_TYPE)),
+                                        parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
                                         parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(RestDocsUtils.LINK_CLUB_TYPE)),
                                         parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(RestDocsUtils.LINK_BELONGS_TYPE)),
                                         parameterWithName("briefActivityDescription").description(" 분류 - 활동 설명").attributes(example("E-SPORTS")),
@@ -366,11 +366,11 @@ class ClubControllerUpdateTest {
                                 , responseFields(
                                         fieldWithPath("clubId").type(WireFormat.FieldType.INT64).description("강등된 동아리 ID").attributes(example("1")),
                                         fieldWithPath("clubName").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(club.getName())),
-                                        fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("소속 캠퍼스").attributes(example(club.getCampus().toString())),
+                                        fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("소속 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
                                         fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("준중앙동아리").attributes(example(club.getClubType().toString())),
-                                        fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("소속 분과").attributes(example(club.getBelongs())),
+                                        fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("소속 분과").attributes(example(RestDocsUtils.LINK_BELONGS_TYPE)),
                                         fieldWithPath("briefDescription").type(WireFormat.FieldType.STRING).description("세부 분류").attributes(example(club.getBriefActivityDescription()))
-                                        )
+                                )
                         )
                 );
     }
@@ -448,9 +448,9 @@ class ClubControllerUpdateTest {
                                 , responseFields(
                                         fieldWithPath("clubId").type(WireFormat.FieldType.INT64).description("승격된 동아리 ID").attributes(example("1")),
                                         fieldWithPath("clubName").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(club.getName())),
-                                        fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("소속 캠퍼스").attributes(example(club.getCampus().toString())),
+                                        fieldWithPath("campus").type(WireFormat.FieldType.STRING).description("소속 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
                                         fieldWithPath("clubType").type(WireFormat.FieldType.STRING).description("중앙동아리").attributes(example(club.getClubType().toString())),
-                                        fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("소속 분과").attributes(example(club.getBelongs())),
+                                        fieldWithPath("belongs").type(WireFormat.FieldType.STRING).description("소속 분과").attributes(example(LINK_BELONGS_TYPE)),
                                         fieldWithPath("briefDescription").type(WireFormat.FieldType.STRING).description("세부 분류").attributes(example(club.getBriefActivityDescription()))
                                 )
                         )
