@@ -63,14 +63,16 @@ public class NoticeCommandIntegrationTest {
 
     @Test
     @WithMockCustomUser(username = "testAdminID0")
-    public void createNotice_WithThumbnail_Success() throws Exception{
+    public void createNotice_WithThumbnailAndFiles_Success() throws Exception{
         //given
         UserDetails userDetails = principalDetailsService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         MultipartFile thumbnail = readyThumbnail();
+        int fileCnt = 10;
+        List<MultipartFile> files = readyFiles(fileCnt);
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("creation test title", "creation test content");
 
         //when
-        NoticeIdAndTitleResponse response = noticeController.createNotice(noticeCreateRequest, thumbnail, userDetails);
+        NoticeIdAndTitleResponse response = noticeController.createNotice(noticeCreateRequest, thumbnail, Optional.of(files), userDetails);
         em.flush();
         em.clear();
 
@@ -83,17 +85,58 @@ public class NoticeCommandIntegrationTest {
         Assertions.assertThat(amazonS3.doesObjectExist(bucket, savedNotice.get().getThumbnail().getUploadedName())).isTrue();
         Assertions.assertThat(savedNotice.get().getWriter().getName()).isEqualTo("testAdminName0");
         Assertions.assertThat(savedNotice.get().getWriter().getUsername()).isEqualTo("testAdminID0");
+        List<ExtraFile> extraFiles = savedNotice.get().getExtraFiles();
+        Assertions.assertThat(extraFiles).hasSize(fileCnt);
+        for (ExtraFile extraFile : extraFiles) {
+            Assertions.assertThat(extraFile.getNotice().getId()).isEqualTo(savedNotice.get().getId());
+            Assertions.assertThat(amazonS3.doesObjectExist(bucket, extraFile.getSavedName())).isTrue();
+            Assertions.assertThat(extraFile.getOriginalName()).isEqualTo("9.pdf");
+        }
     }
 
     @Test
     @WithMockCustomUser(username = "testAdminID0")
-    public void createNotice_WithoutThumbnail_Success() throws Exception{
+    public void createNotice_WithoutThumbnailWithFiles_Success() throws Exception{
+        //given
+        int fileCnt = 10;
+        List<MultipartFile> files = readyFiles(fileCnt);
+        UserDetails userDetails = principalDetailsService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("creation test title", "creation test content");
+
+        //when
+        NoticeIdAndTitleResponse response = noticeController.createNotice(noticeCreateRequest, null, Optional.of(files), userDetails);
+        em.flush();
+        em.clear();
+
+        //then
+        Optional<Notice> savedNotice = noticeRepository.findDetailById(response.getId());
+        Assertions.assertThat(savedNotice).isNotEmpty();
+        Assertions.assertThat(savedNotice.get().getTitle()).isEqualTo(noticeCreateRequest.getTitle());
+        Assertions.assertThat(savedNotice.get().getContent()).isEqualTo(noticeCreateRequest.getContent());
+        Assertions.assertThat(savedNotice.get().getThumbnail().getOriginalName()).isEqualTo("default_thumb.png");
+        Assertions.assertThat(savedNotice.get().getThumbnail().getUploadedName()).isEqualTo("default_thumb.png");
+        Assertions.assertThat(amazonS3.doesObjectExist(bucket, savedNotice.get().getThumbnail().getUploadedName())).isTrue();
+        Assertions.assertThat(savedNotice.get().getWriter().getName()).isEqualTo("testAdminName0");
+        Assertions.assertThat(savedNotice.get().getWriter().getUsername()).isEqualTo("testAdminID0");
+        List<ExtraFile> extraFiles = savedNotice.get().getExtraFiles();
+        Assertions.assertThat(extraFiles).hasSize(fileCnt);
+        for (ExtraFile extraFile : extraFiles) {
+            Assertions.assertThat(extraFile.getNotice().getId()).isEqualTo(savedNotice.get().getId());
+            Assertions.assertThat(amazonS3.doesObjectExist(bucket, extraFile.getSavedName())).isTrue();
+            Assertions.assertThat(extraFile.getOriginalName()).isEqualTo("9.pdf");
+        }
+
+    }
+
+    @Test
+    @WithMockCustomUser(username = "testAdminID0")
+    public void createNotice_WithThumbnailWithoutFiles_Success() throws Exception{
         //given
         UserDetails userDetails = principalDetailsService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("creation test title", "creation test content");
 
         //when
-        NoticeIdAndTitleResponse response = noticeController.createNotice(noticeCreateRequest, null, userDetails);
+        NoticeIdAndTitleResponse response = noticeController.createNotice(noticeCreateRequest, null, Optional.empty(), userDetails);
         em.flush();
         em.clear();
 

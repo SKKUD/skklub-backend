@@ -88,22 +88,38 @@ public class NoticeControllerTest {
     @MockBean
     private NoticeService noticeService;
 
-
     @Test
     @WithMockUser
-    public void createNotice_WithThumbnail_Success() throws Exception{
+    public void createNotice_WithThumbnailAndFiles_Success() throws Exception{
         //given
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("Notice Test Title", "Notice Test Content");
         MockMultipartFile mockThumbnail = readyMockThumbnail();
         FileNames fileNames = new FileNames("testThumb.png", "savedTestThumb.png");
+        int fileCnt = 10;
+        List<MockMultipartFile> multipartFiles = readyMockFiles(fileCnt);
+        List<FileNames> fileFileNames = readyFileNames(fileCnt);
+        List<ExtraFile> extraFiles = fileFileNames.stream()
+                .map(FileNames::toExtraFileEntity)
+                .collect(Collectors.toList());
         given(s3Transferer.uploadOne(mockThumbnail)).willReturn(fileNames);
-        given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), username, fileNames.toThumbnailEntity()))
-                .willReturn(0L);
+        given(s3Transferer.uploadAll(new ArrayList<>(multipartFiles))).willReturn(fileFileNames);
+        given(noticeService.createNotice(noticeCreateRequest.getTitle(), noticeCreateRequest.getContent(), username, fileNames.toThumbnailEntity(), extraFiles))
+                .willReturn(12L);
 
         //when
         ResultActions actions = mockMvc.perform(
                 multipart("/notice")
+                        .file(multipartFiles.get(0))
+                        .file(multipartFiles.get(1))
+                        .file(multipartFiles.get(2))
+                        .file(multipartFiles.get(3))
+                        .file(multipartFiles.get(4))
+                        .file(multipartFiles.get(5))
+                        .file(multipartFiles.get(6))
+                        .file(multipartFiles.get(7))
+                        .file(multipartFiles.get(8))
+                        .file(multipartFiles.get(9))
                         .file(mockThumbnail)
                         .queryParam("title", noticeCreateRequest.getTitle())
                         .queryParam("content", noticeCreateRequest.getContent())
@@ -113,7 +129,7 @@ public class NoticeControllerTest {
 
         //then
         actions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(0L))
+                .andExpect(jsonPath("$.id").value(12L))
                 .andExpect(jsonPath("$.title").value(noticeCreateRequest.getTitle()))
                 .andDo(document(
                                 "notice/create/notice",
@@ -122,7 +138,8 @@ public class NoticeControllerTest {
                                         parameterWithName("content").description("공지 본문").attributes(example("어쩌구저쩌구 초청합니다 어쩌구저쩌구 초청합니다.어쩌구저쩌구 초청합니다.\n어쩌구저쩌구 초청합니다.\n"))
                                 ),
                                 requestParts(
-                                        partWithName("thumbnailFile").description("공지 썸네일").optional()
+                                        partWithName("thumbnailFile").description("공지 썸네일").optional(),
+                                        partWithName("files").description("첨부 파일(형식 제한 없음)").optional()
                                 ),
                                 responseFields(
                                         fieldWithPath("id").type(WireFormat.FieldType.STRING).description("공지 ID").attributes(example("0")),
@@ -144,15 +161,61 @@ public class NoticeControllerTest {
     public void createNotice_NoThumbnail_SaveAsDefaultThumbnail() throws Exception {
         //given
         Long noticeId = 12L;
+        int fileCnt = 10;
+        List<MockMultipartFile> multipartFiles = readyMockFiles(fileCnt);
+        List<FileNames> fileFileNames = readyFileNames(fileCnt);
+        List<ExtraFile> extraFiles = fileFileNames.stream()
+                .map(FileNames::toExtraFileEntity)
+                .collect(Collectors.toList());
         NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("Notice Test Title", "Notice Test Content");
         FileNames fileNames = new FileNames("default_thumb.png", "default_thumb.png");
         doThrow(RuntimeException.class).when(s3Transferer).uploadOne(any(MultipartFile.class));
-        given(noticeService.createNotice(eq(noticeCreateRequest.getTitle()), eq(noticeCreateRequest.getContent()), anyString(), eq(fileNames.toThumbnailEntity())))
+        given(s3Transferer.uploadAll(new ArrayList<>(multipartFiles))).willReturn(fileFileNames);
+        given(noticeService.createNotice(eq(noticeCreateRequest.getTitle()), eq(noticeCreateRequest.getContent()), anyString(), eq(fileNames.toThumbnailEntity()), eq(extraFiles)))
                 .willReturn(noticeId);
 
         //when
         ResultActions actions = mockMvc.perform(
                 multipart("/notice")
+                        .file(multipartFiles.get(0))
+                        .file(multipartFiles.get(1))
+                        .file(multipartFiles.get(2))
+                        .file(multipartFiles.get(3))
+                        .file(multipartFiles.get(4))
+                        .file(multipartFiles.get(5))
+                        .file(multipartFiles.get(6))
+                        .file(multipartFiles.get(7))
+                        .file(multipartFiles.get(8))
+                        .file(multipartFiles.get(9))
+                        .queryParam("title", noticeCreateRequest.getTitle())
+                        .queryParam("content", noticeCreateRequest.getContent())
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(csrf())
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(noticeId))
+                .andExpect(jsonPath("$.title").value(noticeCreateRequest.getTitle()));
+    }
+
+    @Test
+    @WithMockUser
+    public void createNotice_NoFiles_HandlingEmptyList() throws Exception {
+        //given
+        Long noticeId = 12L;
+        List<ExtraFile> extraFiles = new ArrayList<>();
+        NoticeCreateRequest noticeCreateRequest = new NoticeCreateRequest("Notice Test Title", "Notice Test Content");
+        MockMultipartFile mockThumbnail = readyMockThumbnail();
+        FileNames fileNames = new FileNames("testThumb.png", "savedTestThumb.png");
+        given(s3Transferer.uploadOne(mockThumbnail)).willReturn(fileNames);
+        given(noticeService.createNotice(eq(noticeCreateRequest.getTitle()), eq(noticeCreateRequest.getContent()), anyString(), eq(fileNames.toThumbnailEntity()), eq(extraFiles)))
+                .willReturn(noticeId);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                multipart("/notice")
+                        .file(mockThumbnail)
                         .queryParam("title", noticeCreateRequest.getTitle())
                         .queryParam("content", noticeCreateRequest.getContent())
                         .contentType(MediaType.MULTIPART_FORM_DATA)
