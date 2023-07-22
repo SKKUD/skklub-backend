@@ -8,6 +8,9 @@ import com.skklub.admin.domain.PendingClub;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.domain.enums.Role;
+import com.skklub.admin.error.exception.CannotRequestCreationToUserException;
+import com.skklub.admin.error.exception.InvalidApproachException;
 import com.skklub.admin.error.exception.PendingClubIdMisMatchException;
 import com.skklub.admin.error.handler.ClubValidator;
 import com.skklub.admin.repository.PendingClubRepository;
@@ -35,6 +38,7 @@ public class PendingClubController {
     //동아리 생성 요청
     @PostMapping("/pending")
     public PendingInformationResponse createPending(@ModelAttribute @Valid PendingClubRequest pendingClubRequest) {
+        if(pendingClubRequest.getRequestTo().equals(Role.ROLE_USER)) throw new CannotRequestCreationToUserException();
         PendingClub pendingClub = pendingClubService.requestCreation(pendingClubRequest.toEntity());
         return new PendingInformationResponse(pendingClub);
     }
@@ -44,9 +48,9 @@ public class PendingClubController {
     public Page<PendingInformationResponse> getPendingList(@AuthenticationPrincipal UserDetails userDetails, Pageable pageable) {
         String userName = TokenProvider.getAuthentication(userDetails).getName();
         User admin = userRepository.findByUsername(userName);
+        if(admin.getRole().equals(Role.ROLE_USER)) throw new InvalidApproachException();
         return pendingClubRepository.findAllByRequestTo(admin.getRole(), pageable)
                 .map(PendingInformationResponse::new);
-
     }
 
     //요청 승낙
