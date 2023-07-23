@@ -11,12 +11,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PendingClub {
+public class PendingClub extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pending_club_id")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     private Role requestTo;
 
     private String clubName;
@@ -43,7 +44,7 @@ public class PendingClub {
         this.requestTo = role;
     }
 
-    public Club toClubWithDefaultLogo(Campus campus, ClubType clubType, String belongs) {
+    public Club toClubWithDefaultLogo(Campus campus, ClubType clubType, String belongs, User user) {
         Club club = new Club(
                 clubName,
                 activityDescription,
@@ -51,7 +52,8 @@ public class PendingClub {
                 clubType,
                 briefActivityDescription,
                 campus,
-                clubDescription
+                clubDescription,
+                user
         );
         Logo logo = new Logo("alt.jpg", "alt.jpg");
         club.changeLogo(logo);

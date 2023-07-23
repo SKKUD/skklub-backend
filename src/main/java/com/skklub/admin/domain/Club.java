@@ -96,7 +96,7 @@ public class Club extends BaseEntity {
         this.webLink2 = webLink2;
     }
 
-    public Club(String clubName, String activityDescription, String belongs, ClubType clubType, String briefActivityDescription, Campus campus, String clubDescription) {
+    public Club(String clubName, String activityDescription, String belongs, ClubType clubType, String briefActivityDescription, Campus campus, String clubDescription, User user) {
         this.name = clubName;
         this.activityDescription = activityDescription;
         this.belongs = belongs;
@@ -104,6 +104,7 @@ public class Club extends BaseEntity {
         this.briefActivityDescription = briefActivityDescription;
         this.campus = campus;
         this.clubDescription = clubDescription;
+        this.president = user;
     }
 
     public void update(Club updateInfo

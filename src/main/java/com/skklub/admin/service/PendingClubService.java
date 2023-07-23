@@ -34,11 +34,11 @@ public class PendingClubService {
         return pendingClubRepository.findById(pendingClubId)
                 .map(
                         pendingClub -> {
-                            Club club = pendingClub.toClubWithDefaultLogo(campus, clubType, belongs);
                             User user = pendingClub.toUser();
                             userRepository.save(user);
-                            club.setUser(user);
+                            Club club = pendingClub.toClubWithDefaultLogo(campus, clubType, belongs, user);
                             clubRepository.save(club);
+                            pendingClubRepository.delete(pendingClub);
                             return club;
                         }
                 );
