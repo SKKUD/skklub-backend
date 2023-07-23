@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -34,12 +35,14 @@ public class PendingClubController {
     private final PendingClubService pendingClubService;
     private final PendingClubRepository pendingClubRepository;
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     //동아리 생성 요청
     @PostMapping("/pending")
     public PendingInformationResponse createPending(@ModelAttribute @Valid PendingClubRequest pendingClubRequest) {
         if(pendingClubRequest.getRequestTo().equals(Role.ROLE_USER)) throw new CannotRequestCreationToUserException();
-        PendingClub pendingClub = pendingClubService.requestCreation(pendingClubRequest.toEntity());
+        String encodedPw = bCryptPasswordEncoder.encode(pendingClubRequest.getPassword());
+        PendingClub pendingClub = pendingClubService.requestCreation(pendingClubRequest.toEntity(encodedPw));
         return new PendingInformationResponse(pendingClub);
     }
 

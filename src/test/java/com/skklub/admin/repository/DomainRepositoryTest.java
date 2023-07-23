@@ -2,6 +2,9 @@ package com.skklub.admin.repository;
 
 import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.domain.*;
+import com.skklub.admin.domain.enums.Campus;
+import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.domain.enums.Role;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -393,6 +397,86 @@ public class DomainRepositoryTest {
                     Assertions.assertThat(c.getRecruit()).isNull();
                 }
         );
+    }
 
+    @Test
+    public void PendingClubToUser_WithHashedPw_SamePw() throws Exception{
+        //given
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        String encodedPw = bCryptPasswordEncoder.encode("testPw");
+        String username = "testUserId";
+        String name = "testUser";
+        String contact = "testContact";
+        PendingClub pendingClub = new PendingClub(
+                "testPendingName",
+                "testBriefDescription",
+                "testActivityDescription",
+                "testClubDescription",
+                username,
+                encodedPw,
+                name,
+                contact,
+                Role.ROLE_ADMIN_SEOUL_CENTRAL
+        );
+
+        //when
+        User user = pendingClub.toUser();
+
+        //then
+        Assertions.assertThat(user.getUsername()).isEqualTo(username);
+        Assertions.assertThat(user.getName()).isEqualTo(name);
+        Assertions.assertThat(user.getPassword()).isEqualTo(encodedPw);
+        Assertions.assertThat(user.getContact()).isEqualTo(contact);
+    }
+
+    @Test
+    public void PendingClubToClub_GivenUser_NullAtSomeFieldsWithDefaultLogo() throws Exception{
+        //given
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        String encodedPw = bCryptPasswordEncoder.encode("testPw");
+        String username = "testUserId";
+        String name = "testUser";
+        String contact = "testContact";
+        PendingClub pendingClub = new PendingClub(
+                "testPendingName",
+                "testBriefDescription",
+                "testActivityDescription",
+                "testClubDescription",
+                username,
+                encodedPw,
+                name,
+                contact,
+                Role.ROLE_ADMIN_SEOUL_CENTRAL
+        );
+        User user = pendingClub.toUser();
+
+        //when
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.중앙동아리;
+        String belongs = "종교";
+        Club club = pendingClub.toClubWithDefaultLogo(campus, clubType, belongs, user);
+
+        //then
+        Logo logo = club.getLogo();
+        Assertions.assertThat(logo.getOriginalName()).isEqualTo("alt.jpg");
+        Assertions.assertThat(logo.getUploadedName()).isEqualTo("alt.jpg");
+        Assertions.assertThat(club.getName()).isEqualTo(pendingClub.getClubName());
+        Assertions.assertThat(club.getBriefActivityDescription()).isEqualTo(pendingClub.getBriefActivityDescription());
+        Assertions.assertThat(club.getActivityDescription()).isEqualTo(pendingClub.getActivityDescription());
+        Assertions.assertThat(club.getClubDescription()).isEqualTo(pendingClub.getClubDescription());
+        Assertions.assertThat(club.getCampus()).isEqualTo(campus);
+        Assertions.assertThat(club.getClubType()).isEqualTo(clubType);
+        Assertions.assertThat(club.getBelongs()).isEqualTo(belongs);
+        Assertions.assertThat(club.getHeadLine()).isNull();
+        Assertions.assertThat(club.getEstablishAt()).isNull();
+        Assertions.assertThat(club.getRoomLocation()).isNull();
+        Assertions.assertThat(club.getMemberAmount()).isNull();
+        Assertions.assertThat(club.getRegularMeetingTime()).isNull();
+        Assertions.assertThat(club.getMandatoryActivatePeriod()).isNull();
+        Assertions.assertThat(club.getWebLink1()).isNull();
+        Assertions.assertThat(club.getWebLink2()).isNull();
+        Assertions.assertThat(club.getRecruit()).isNull();
+        Assertions.assertThat(club.getActivityImages()).isEmpty();
+        Assertions.assertThat(club.getPresident()).isEqualTo(user);
     }
 }

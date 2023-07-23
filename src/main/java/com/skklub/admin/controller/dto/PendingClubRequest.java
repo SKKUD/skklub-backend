@@ -35,14 +35,14 @@ public class PendingClubRequest {
     @NotBlank
     private String presidentContact;
 
-    public PendingClub toEntity() {
+    public PendingClub toEntity(String encodedPw) {
         return new PendingClub(
                 this.clubName,
                 this.briefActivityDescription,
                 this.activityDescription,
                 this.clubDescription,
                 this.username,
-                this.password,
+                encodedPw,
                 this.presidentName,
                 this.presidentContact,
                 this.requestTo
