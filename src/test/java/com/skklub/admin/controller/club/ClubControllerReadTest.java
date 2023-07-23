@@ -187,7 +187,7 @@ class ClubControllerReadTest {
          MvcResult badIdResult = mockMvc.perform(
                  get("/club/{clubId}", clubId)
                          .with(csrf())
-         ).andReturn();
+         ).andExpect(status().isBadRequest()).andReturn();
 
          //then
          Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
@@ -302,7 +302,7 @@ class ClubControllerReadTest {
                 get("/club/search")
                         .with(csrf())
                         .queryParam("name", clubName)
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badNameResult.getResolvedException()).isExactlyInstanceOf(ClubNameMisMatchException.class);
@@ -509,7 +509,7 @@ class ClubControllerReadTest {
                         .queryParam("size", String.valueOf(5))
                         .queryParam("page", "0")
                         .queryParam("sort", "name,ASC")
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badBelongsResult.getResolvedException()).isExactlyInstanceOf(InvalidBelongsException.class);
@@ -631,7 +631,7 @@ class ClubControllerReadTest {
                         .queryParam("size", String.valueOf(5))
                         .queryParam("page", "0")
                         .queryParam("sort", "name,ASC")
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badBelongsResult.getResolvedException()).isExactlyInstanceOf(InvalidBelongsException.class);

@@ -57,7 +57,7 @@ public class PendingClubController {
     }
 
     //요청 승낙
-    @PostMapping("/pending/{pendingClubId}/accept")
+    @DeleteMapping("/pending/{pendingClubId}/accept")
     public ClubCreateResponse acceptPending(@PathVariable Long pendingClubId, @RequestParam Campus campus, @RequestParam ClubType clubType, @RequestParam String belongs) {
         ClubValidator.validateBelongs(campus, clubType, belongs);
         Club createdClub = pendingClubService.acceptRequest(pendingClubId, campus, clubType, belongs)
@@ -67,7 +67,7 @@ public class PendingClubController {
 
 
     //요청 거절
-    @PostMapping("/pending/{pendingClubId}/deny")
+    @DeleteMapping("/pending/{pendingClubId}/deny")
     public PendingInformationResponse denyPending(@PathVariable Long pendingClubId) {
         PendingClub pendingClub = pendingClubService.denyRequest(pendingClubId)
                 .orElseThrow(PendingClubIdMisMatchException::new);

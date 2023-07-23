@@ -393,7 +393,7 @@ public class NoticeControllerTest {
                         .with(csrf())
                         .queryParam("title", updateTitle)
                         .queryParam("content", updateContent)
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
@@ -485,7 +485,7 @@ public class NoticeControllerTest {
                         .file(mockMultipartFile)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
 
         //then
@@ -574,7 +574,7 @@ public class NoticeControllerTest {
         MvcResult badIdResult = mockMvc.perform(
                 delete("/notice/{noticeId}", noticeId)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
@@ -625,7 +625,7 @@ public class NoticeControllerTest {
         MvcResult badIdResult = mockMvc.perform(
                 delete("/notice/{noticeId}/{fileName}", noticeId, fileNames.getOriginalName())
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badIdResult.getResolvedException())
@@ -878,7 +878,7 @@ public class NoticeControllerTest {
         MvcResult badIdResult = mockMvc.perform(
                 get("/notice/{noticeId}", noticeId)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(NoticeIdMisMatchException.class);
@@ -1050,7 +1050,7 @@ public class NoticeControllerTest {
                         .queryParam("role", role.toString())
                         .queryParam("size", String.valueOf(request.getPageSize()))
                         .queryParam("page", String.valueOf(request.getPageNumber()))
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badRoleResult.getResolvedException())
@@ -1071,7 +1071,7 @@ public class NoticeControllerTest {
                         .queryParam("role", role.toString())
                         .queryParam("size", String.valueOf(request.getPageSize()))
                         .queryParam("page", String.valueOf(request.getPageNumber()))
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badRoleResult.getResolvedException())

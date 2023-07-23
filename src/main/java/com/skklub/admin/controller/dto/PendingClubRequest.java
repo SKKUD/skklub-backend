@@ -2,8 +2,7 @@ package com.skklub.admin.controller.dto;
 
 import com.skklub.admin.domain.PendingClub;
 import com.skklub.admin.domain.enums.Role;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

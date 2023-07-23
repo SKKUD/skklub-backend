@@ -55,6 +55,17 @@ public class ControllerExceptionHandler {
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
     }
 
+    @ExceptionHandler(InvalidBelongsException.class)
+    public ResponseEntity<ErrorResponse> invalidBelongsException(InvalidBelongsException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("belongs")
+                .given(request.getParameter("belongs"))
+                .reasonMessage("적절치 않은 분과입니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
+
     @ExceptionHandler(ClubNameMisMatchException.class)
     public ResponseEntity<ErrorResponse> noMatchClubException(ClubNameMisMatchException e, HttpServletRequest request) {
         ErrorDetail errorDetail = ErrorDetail.builder()
@@ -202,6 +213,16 @@ public class ControllerExceptionHandler {
                 .field("pendingClubId")
                 .given("path parameter")
                 .reasonMessage("해당 ID값을 존재하는 Pending 된 요청이 없습니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
+
+    @ExceptionHandler(CannotRequestCreationToUserException.class)
+    public ResponseEntity<ErrorResponse> cannotRequestCreationToUserException(CannotRequestCreationToUserException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("requestTo")
+                .given(request.getParameter("requestTo"))
+                .reasonMessage("일반 USER 권한에는 동아리 생성을 신청할 수 없습니다")
                 .build();
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
     }

@@ -5,12 +5,14 @@ import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Entity
 @Getter
+@EqualsAndHashCode(exclude = "id", callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PendingClub extends BaseTimeEntity{
     @Id
