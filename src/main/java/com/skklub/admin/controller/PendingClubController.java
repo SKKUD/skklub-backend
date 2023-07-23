@@ -49,7 +49,7 @@ public class PendingClubController {
     //생성 요청 조회
     @GetMapping("/pending")
     public Page<PendingInformationResponse> getPendingList(@AuthenticationPrincipal UserDetails userDetails, Pageable pageable) {
-        String userName = TokenProvider.getAuthentication(userDetails).getName();
+        String userName = userDetails.getUsername();
         User admin = userRepository.findByUsername(userName);
         if(admin.getRole().equals(Role.ROLE_USER)) throw new InvalidApproachException();
         return pendingClubRepository.findAllByRequestTo(admin.getRole(), pageable)

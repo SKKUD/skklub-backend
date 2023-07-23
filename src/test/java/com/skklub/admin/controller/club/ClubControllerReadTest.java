@@ -38,8 +38,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.result.ContentResultMatchers;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -363,7 +361,7 @@ class ClubControllerReadTest {
                                 parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(LINK_BELONGS_TYPE_NULL)).optional(),
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
-                                parameterWithName("sort").optional().description("페이지 정보 - 정렬").attributes(example(RestDocsUtils.LINK_SORT))
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬").attributes(example(RestDocsUtils.LINK_SORT_CLUB))
                         ),
                         responseFields(
                                 pageableResponseFields
@@ -563,7 +561,7 @@ class ClubControllerReadTest {
                                 parameterWithName("keyword").description("동아리 이름 검색 키워드").attributes(example("%Keyword%")),
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
-                                parameterWithName("sort").optional().description("페이지 정보 - 정렬").attributes(example(RestDocsUtils.LINK_SORT))
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬").attributes(example(RestDocsUtils.LINK_SORT_CLUB))
                         ),
                         responseFields(
                                 pageableResponseFields

@@ -11,6 +11,7 @@ import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.error.exception.CannotRequestCreationToUserException;
+import com.skklub.admin.error.exception.InvalidApproachException;
 import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.error.exception.PendingClubIdMisMatchException;
 import com.skklub.admin.repository.PendingClubRepository;
@@ -19,13 +20,17 @@ import com.skklub.admin.service.PendingClubService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,16 +41,19 @@ import org.springframework.validation.BindException;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.skklub.admin.controller.RestDocsUtils.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
@@ -232,20 +240,103 @@ class PendingClubControllerTest {
     @Test
     public void getPendingList_Default_Success() throws Exception{
         //given
+        PageRequest pageRequest = PageRequest.of(1, 3);
+        User user = new User("user", "mockUserPw", Role.ROLE_ADMIN_SEOUL_CENTRAL, "홍길동", "010-0000-0000");
+        given(userRepository.findByUsername("user")).willReturn(user);
+        int pendingClubCnt = 7;
+        List<PendingClub> pendingClubs = new ArrayList<>();
+        for (int i = 0; i < pendingClubCnt; i++) {
+            PendingClub pendingClub = new PendingClub(
+                    "testPendingName" + i,
+                    "testBriefDescription" + i,
+                    "testActivityDescription" + i,
+                    "testClubDescription" + i,
+                    "testUserId" + i,
+                    "testPw" + i,
+                    "testUser" + i,
+                    "testContact" + i,
+                    Role.ROLE_ADMIN_SEOUL_CENTRAL
+            );
+            Field createdAtField = pendingClub.getClass().getSuperclass().getDeclaredField("createdAt");
+            createdAtField.setAccessible(true);
+            createdAtField.set(pendingClub, LocalDateTime.now());
+            Field idField = pendingClub.getClass().getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(pendingClub, Long.valueOf(i));
+            pendingClubs.add(pendingClub);
+        }
+        pendingClubRepository.saveAll(pendingClubs);
+        Page<PendingClub> pendingClubPage = new PageImpl<>(pendingClubs, pageRequest, pendingClubCnt);
+        given(pendingClubRepository.findAllByRequestTo(eq(user.getRole()), any(Pageable.class))).willReturn(pendingClubPage);
 
         //when
+        ResultActions actions = mockMvc.perform(
+                get("/pending")
+                        .queryParam("size", String.valueOf(pageRequest.getPageSize()))
+                        .queryParam("page", String.valueOf(pageRequest.getOffset()))
+        );
 
         //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(3))
+                .andExpect(jsonPath("$.totalPages").value(3))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("false"));
+        List<PendingClub> results = pendingClubPage.get().collect(Collectors.toList());
+        for (int i = 0; i < 3; i++) {
+            actions
+                    .andExpect(jsonPath("$.content[" + i + "].pendingClubId").value(results.get(i).getId()))
+                    .andExpect(jsonPath("$.content[" + i + "].requestTo").value(results.get(i).getRequestTo().toString()))
+                    .andExpect(jsonPath("$.content[" + i + "].requestedAt").value(results.get(i).getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()))
+                    .andExpect(jsonPath("$.content[" + i + "].clubName").value(results.get(i).getClubName()))
+                    .andExpect(jsonPath("$.content[" + i + "].briefActivityDescription").value(results.get(i).getBriefActivityDescription()))
+                    .andExpect(jsonPath("$.content[" + i + "].activityDescription").value(results.get(i).getActivityDescription()))
+                    .andExpect(jsonPath("$.content[" + i + "].clubDescription").value(results.get(i).getClubDescription()))
+                    .andExpect(jsonPath("$.content[" + i + "].presidentName").value(results.get(i).getPresidentName()))
+                    .andExpect(jsonPath("$.content[" + i + "].presidentContact").value(results.get(i).getPresidentContact()));
+        }
+        List<FieldDescriptor> pageableResponseFields = new ArrayList<>();
+        pageableResponseFields.add(fieldWithPath("content[].pendingClubId").type(WireFormat.FieldType.INT64).description("동아리 생성 요청 ID").attributes(example("1")));
+        pageableResponseFields.add(fieldWithPath("content[].requestTo").type(WireFormat.FieldType.STRING).description("요청 수락 담당자 권한").attributes(example(LINK_NON_USER)));
+        pageableResponseFields.add(fieldWithPath("content[].requestedAt").type(WireFormat.FieldType.STRING).description("요청 생성 시점").attributes(example("yyyy-MM-dd'T'HH:mm")));
+        pageableResponseFields.add(fieldWithPath("content[].clubName").type(WireFormat.FieldType.STRING).description("희망 동아리 이름").attributes(example("생성하려는동아리123")));
+        pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.INT64).description("동아리 분류 - 세부 활동").attributes(example("박물관견학")));
+        pageableResponseFields.add(fieldWithPath("content[].activityDescription").type(WireFormat.FieldType.STRING).description("동아리 활동 설명").attributes(example("우리는 xxx, xxxx를 합니다")));
+        pageableResponseFields.add(fieldWithPath("content[].clubDescription").type(WireFormat.FieldType.BYTES).description("동아리 설명").attributes(example("우리는 xxx한 동아리입니다")));
+        pageableResponseFields.add(fieldWithPath("content[].presidentName").type(WireFormat.FieldType.BYTES).description("신청자 이름").attributes(example("홍길동")));
+        pageableResponseFields.add(fieldWithPath("content[].presidentContact").type(WireFormat.FieldType.BYTES).description("신청자 연락처").attributes(example("010-1234-1234")));
+        addPageableResponseFields(pageableResponseFields);
+
+        actions
+                .andDo(document(
+                                "pending/read",
+                                queryParameters(
+                                        parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
+                                        parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
+                                        parameterWithName("sort").optional().description("페이지 정보 - 정렬, 기본 ID (입력 순)").attributes(example(LINK_SORT_PENDING))
+                                ),
+                                responseFields(pageableResponseFields)
+                        )
+                );
 
     }
 
     @Test
     public void getPendingList_LoginWithUser_InvalidApproachException() throws Exception{
         //given
+        PageRequest pageRequest = PageRequest.of(1, 3);
+        User user = new User("user", "mockUserPw", Role.ROLE_USER, "홍길동", "010-0000-0000");
+        given(userRepository.findByUsername("user")).willReturn(user);
 
         //when
+        MvcResult badAccessResult = mockMvc.perform(
+                        get("/pending")
+                                .queryParam("size", String.valueOf(pageRequest.getPageSize()))
+                                .queryParam("page", String.valueOf(pageRequest.getOffset()))
+                ).andExpect(status().isBadRequest())
+                .andReturn();
 
         //then
+        Assertions.assertThat(badAccessResult.getResolvedException()).isExactlyInstanceOf(InvalidApproachException.class);
 
     }
     
