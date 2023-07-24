@@ -103,7 +103,7 @@ public class UserServiceTest {
         userService.joinUser(userJoinDTO);
 
         JwtDTO jwtDTO = userService.loginUser(new UserLoginDTO(username,password1));
-        String accessToken = jwtDTO.getAccessToken();
+        String accessToken = "Bearer "+jwtDTO.getAccessToken();
 
         //when
         UserDetails userDetails = principalDetailsService.loadUserByUsername(username);
