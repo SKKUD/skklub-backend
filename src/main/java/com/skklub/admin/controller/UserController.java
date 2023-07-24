@@ -5,11 +5,13 @@ import com.skklub.admin.controller.dto.UserLoginRequestDto;
 import com.skklub.admin.controller.dto.UserUpdateRequestDTO;
 import com.skklub.admin.controller.dto.UserUpdateResponseDTO;
 import com.skklub.admin.domain.enums.Role;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.exception.UserUpdateFailedException;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.service.UserService;
-import com.skklub.admin.service.dto.*;
+import com.skklub.admin.service.dto.UserJoinDTO;
+import com.skklub.admin.service.dto.UserLoginDTO;
+import com.skklub.admin.service.dto.UserProcResultDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,9 +66,9 @@ public class UserController {
                         role, userUpdateRequestDTO.getName(),
                         userUpdateRequestDTO.getContact(),userDetails
                         ,request.getHeader(HttpHeaders.AUTHORIZATION))
-                .map(updatedUser -> new UserUpdateResponseDTO(updatedUser.getId(), updatedUser.getUsername(),updatedUser.getName(), updatedUser.getName()))
+                .map(updatedUser -> new UserUpdateResponseDTO(userId, updatedUser.getUsername()))
                 .map(ResponseEntity::ok)
-                .orElseThrow(ClubIdMisMatchException::new);
+                .orElseThrow(UserUpdateFailedException::new);
     }
 
     //logout

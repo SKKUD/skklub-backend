@@ -14,12 +14,10 @@ import com.skklub.admin.service.dto.UserProcResultDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -32,11 +30,12 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final TokenProvider tokenProvider;
     private final RedisUtil redisUtil;
+    private final UserValidator userValidator;
 
     //User Join
     public UserProcResultDTO joinUser(UserJoinDTO userJoinDTO){
         //username 중복 검사
-        usernameDuplicationValidate(userJoinDTO.getUsername());
+        userValidator.usernameDuplicationValidate(userJoinDTO.getUsername());
         //회원가입 진행
         String encPwd = bCryptPasswordEncoder.encode(userJoinDTO.getPassword());
         User user =
@@ -52,12 +51,7 @@ public class UserService {
         return result;
     }
 
-    public void usernameDuplicationValidate(String username){
-        Optional.ofNullable(userRepository.findByUsername(username))
-                .ifPresent(user->{
-                    throw new AuthException(ErrorCode.USERNAME_DUPLICATED, username+" is already exists");
-                });
-    }
+
 
     //User Login
     public JwtDTO loginUser(UserLoginDTO userLoginDTO){
@@ -87,7 +81,7 @@ public class UserService {
     //User Update
     public Optional<User> updateUser(Long userId, String password, Role role, String name, String contact, UserDetails userDetails, String accessToken){
 
-        validateUserAuthority(userDetails,userId);
+        userValidator.validateUpdatingUser(userDetails,userId);
         //update 진행
         String username = userRepository.findById(userId).get().getUsername();
         String encPwd = bCryptPasswordEncoder.encode(password);
@@ -107,23 +101,6 @@ public class UserService {
         return username;
     }
 
-    public void validateUserAuthority(UserDetails nowUser, Long id){
-        //수정 권한자로 등록된 유저 확인
-        User registeredUser = Optional.of(userRepository.findById(id).get())
-                .orElseThrow(()->
-                        new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
-        //업데이트 대상 계정과 로그인된 계정 일치 여부 확인
-        if(!nowUser.getUsername().equals(registeredUser.getUsername())){
-            //관리자에 의한 직권 수정 허용(MASTER, ADMIN)
-            List<GrantedAuthority> authList = (List<GrantedAuthority>) nowUser.getAuthorities();
-            String authority = authList.get(0).getAuthority();
-            if(authority.equals(String.valueOf(Role.ROLE_ADMIN_SEOUL_CENTRAL))||authority.equals(String.valueOf(Role.ROLE_MASTER))){
-                log.info("now updating with authority of administrator({}): {}",authority, nowUser.getUsername());
-            }else{
-                throw new AuthException(ErrorCode.NO_AUTHORITY,"no authority");
-            }
-        }
-    }
 
     private void invalidateUserAccessToken(String username, String accessToken) {
         //Redis 에 저장된 refresh token 있을 경우 삭제

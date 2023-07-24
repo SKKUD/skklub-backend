@@ -8,5 +8,4 @@ import lombok.Getter;
 public class AuthException extends RuntimeException{
     private ErrorCode errorCode;
     private String message;
-
 }
