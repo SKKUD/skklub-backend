@@ -130,7 +130,7 @@ class RecruitControllerTest {
                         .queryParam("recruitContact", recruitDto.getRecruitContact())
                         .queryParam("recruitWebLink", recruitDto.getRecruitWebLink())
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badClubIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
@@ -224,7 +224,7 @@ class RecruitControllerTest {
                         .queryParam("recruitContact", startTimeNull.getRecruitContact())
                         .queryParam("recruitWebLink", startTimeNull.getRecruitWebLink())
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
         MvcResult endNullResult = mockMvc.perform(
                 post("/recruit/{clubId}", clubId)
                         .queryParam("recruitStartAt", Optional.ofNullable(endTimeNull.getRecruitStartAt()).map(Object::toString).orElse(""))
@@ -234,7 +234,7 @@ class RecruitControllerTest {
                         .queryParam("recruitContact", endTimeNull.getRecruitContact())
                         .queryParam("recruitWebLink", endTimeNull.getRecruitWebLink())
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(startNullResult.getResolvedException()).isExactlyInstanceOf(AllTimeRecruitTimeFormattingException.class);
@@ -303,7 +303,7 @@ class RecruitControllerTest {
                         .queryParam("recruitContact", nullAtQuota.getRecruitContact())
                         .queryParam("recruitWebLink", nullAtQuota.getRecruitWebLink())
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         MvcResult blankDescriptionResult = mockMvc.perform(
                 patch("/recruit/{recruitId}", recruitId)
@@ -314,7 +314,7 @@ class RecruitControllerTest {
                         .queryParam("recruitContact", blankAtDescription.getRecruitContact())
                         .queryParam("recruitWebLink", blankAtDescription.getRecruitWebLink())
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(blankDescriptionResult.getResolvedException()).isExactlyInstanceOf(BindException.class);
@@ -378,7 +378,7 @@ class RecruitControllerTest {
                         .queryParam("recruitContact", startTimeNull.getRecruitContact())
                         .queryParam("recruitWebLink", startTimeNull.getRecruitWebLink())
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
         MvcResult endNullResult = mockMvc.perform(
                 patch("/recruit/{clubId}", recruitId)
                         .queryParam("recruitStartAt", Optional.ofNullable(endTimeNull.getRecruitStartAt()).map(Object::toString).orElse(""))
@@ -388,7 +388,7 @@ class RecruitControllerTest {
                         .queryParam("recruitContact", endTimeNull.getRecruitContact())
                         .queryParam("recruitWebLink", endTimeNull.getRecruitWebLink())
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(startNullResult.getResolvedException()).isExactlyInstanceOf(AllTimeRecruitTimeFormattingException.class);
@@ -429,7 +429,7 @@ class RecruitControllerTest {
         MvcResult result = mockMvc.perform(
                 delete("/recruit/{clubId}", clubId)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(result.getResolvedException()).isExactlyInstanceOf(RecruitIdMisMatchException.class);
@@ -446,7 +446,7 @@ class RecruitControllerTest {
         MvcResult result = mockMvc.perform(
                 delete("/recruit/{clubId}", clubId)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(result.getResolvedException()).isExactlyInstanceOf(NotRecruitingException.class);
