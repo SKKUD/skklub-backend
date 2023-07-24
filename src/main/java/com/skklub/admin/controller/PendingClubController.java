@@ -52,6 +52,7 @@ public class PendingClubController {
         String userName = userDetails.getUsername();
         User admin = userRepository.findByUsername(userName);
         if(admin.getRole().equals(Role.ROLE_USER)) throw new InvalidApproachException();
+        log.info("admin.getRole() : {}", admin.getRole());
         return pendingClubRepository.findAllByRequestTo(admin.getRole(), pageable)
                 .map(PendingInformationResponse::new);
     }

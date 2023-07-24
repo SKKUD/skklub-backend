@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.amazonaws.auth.policy.actions.S3Actions.DeleteObject;
+import static java.lang.Thread.sleep;
 
 @Slf4j
 @Component
@@ -81,7 +82,21 @@ public class InitDatabase {
             readyClubDomains();
             readyDefaultThumbnailInS3();
             readyNoticeDomains();
+            readyMaster();
             readyPendingClubs();
+        }
+
+        private void readyMaster() {
+            String encodedPw = bCryptPasswordEncoder.encode("testMasterPw");
+            em.persist(
+                    new User(
+                            "testMasterID",
+                            encodedPw,
+                            Role.ROLE_MASTER,
+                            "testMasterName",
+                            "testMasterContact"
+                    )
+            );
         }
 
 
@@ -115,7 +130,7 @@ public class InitDatabase {
                 em.persist(user);
                 Thumbnail thumbnail = readyThumbnail(i);
                 Notice notice = readyNotice(i, user, thumbnail);
-                Thread.sleep(1000);
+                sleep(1000);
                 em.persist(notice);
                 List<ExtraFile> extraFiles = readyExtraFiles(notice, i);
                 extraFiles.stream().forEach(em::persist);
