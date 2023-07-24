@@ -228,7 +228,7 @@ class ClubControllerCreateTest {
                          .queryParam("briefActivityDescription", "E-SPORTS")
                          .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
                          .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
-         ).andReturn();
+         ).andExpect(status().isBadRequest()).andReturn();
          MvcResult wrongCampusResult = mockMvc.perform(
                  multipart("/club")
                          .file(mockLogo)
@@ -241,7 +241,7 @@ class ClubControllerCreateTest {
                          .queryParam("briefActivityDescription", "E-SPORTS")
                          .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
                          .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
-         ).andReturn();
+         ).andExpect(status().isBadRequest()).andReturn();
 
          //then
          Assertions.assertThat(wrongCampusResult.getResolvedException()).isExactlyInstanceOf(BindException.class);
@@ -297,7 +297,7 @@ class ClubControllerCreateTest {
                         .queryParam("briefActivityDescription", "E-SPORTS")
                         .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
                         .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(wrongBelongsResult.getResolvedException()).isInstanceOf(InvalidBelongsException.class);
@@ -395,7 +395,7 @@ class ClubControllerCreateTest {
                         .file(mockActivityImages.get(9))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);

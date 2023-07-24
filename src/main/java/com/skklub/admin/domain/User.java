@@ -7,6 +7,7 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode(exclude = "id", callSuper = false)
 public class User extends BaseTimeEntity {
     @Id @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

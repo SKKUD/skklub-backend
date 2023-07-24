@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.amazonaws.auth.policy.actions.S3Actions.DeleteObject;
+import static java.lang.Thread.sleep;
 
 @Slf4j
 @Component
@@ -63,6 +64,7 @@ public class InitDatabase {
         private EntityManager em;
         private final int clubCnt = 36;
         private final int noticeCnt = 20;
+        private final int pendingClubCnt = 15;
         @Autowired
         private S3Transferer s3Transferer;
         @Autowired
@@ -80,6 +82,46 @@ public class InitDatabase {
             readyClubDomains();
             readyDefaultThumbnailInS3();
             readyNoticeDomains();
+            readyMaster();
+            readyPendingClubs();
+        }
+
+        private void readyMaster() {
+            String encodedPw = bCryptPasswordEncoder.encode("testMasterPw");
+            em.persist(
+                    new User(
+                            "testMasterID",
+                            encodedPw,
+                            Role.ROLE_MASTER,
+                            "testMasterName",
+                            "testMasterContact"
+                    )
+            );
+        }
+
+
+        private void readyPendingClubs() {
+            for (int i = 0; i < pendingClubCnt; i++) {
+                Role reqTo;
+                switch (i % 3) {
+                    case 0 -> reqTo = Role.ROLE_ADMIN_SEOUL_CENTRAL;
+                    case 1 -> reqTo = Role.ROLE_ADMIN_SUWON_CENTRAL;
+                    default -> reqTo = Role.ROLE_MASTER;
+                }
+                em.persist(
+                        new PendingClub(
+                                "testPendingName" + i,
+                                "testBriefDescription" + i,
+                                "testActivityDescription" + i,
+                                "testClubDescription" + i,
+                                "testUserId" + i,
+                                "testPw" + i,
+                                "testUser" + i,
+                                "testContact" + i,
+                                reqTo
+                        )
+                );
+            }
         }
 
         private void readyNoticeDomains() throws IOException, InterruptedException {
@@ -88,7 +130,7 @@ public class InitDatabase {
                 em.persist(user);
                 Thumbnail thumbnail = readyThumbnail(i);
                 Notice notice = readyNotice(i, user, thumbnail);
-                Thread.sleep(1000);
+                sleep(1000);
                 em.persist(notice);
                 List<ExtraFile> extraFiles = readyExtraFiles(notice, i);
                 extraFiles.stream().forEach(em::persist);

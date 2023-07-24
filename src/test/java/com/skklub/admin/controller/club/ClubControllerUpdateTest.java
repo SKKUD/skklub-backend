@@ -183,7 +183,7 @@ class ClubControllerUpdateTest {
                         .queryParam("roomLocation", changeTo.getRoomLocation())
                         .queryParam("webLink1", changeTo.getWebLink1())
                         .queryParam("webLink2", changeTo.getWebLink2())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badBelongsResult.getResolvedException()).isExactlyInstanceOf(InvalidBelongsException.class);
@@ -216,7 +216,7 @@ class ClubControllerUpdateTest {
                         .queryParam("roomLocation", club.getRoomLocation())
                         .queryParam("webLink1", club.getWebLink1())
                         .queryParam("webLink2", club.getWebLink2())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
@@ -304,7 +304,7 @@ class ClubControllerUpdateTest {
                         .file(mockLogo)
                         .with(csrf())
                         .contentType(MediaType.MULTIPART_FORM_DATA)
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
@@ -321,7 +321,7 @@ class ClubControllerUpdateTest {
                 multipart("/club/{clubId}/logo", clubId)
                         .with(csrf())
                         .contentType(MediaType.MULTIPART_FORM_DATA)
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(noLogoResult.getResolvedException()).isExactlyInstanceOf(MissingServletRequestPartException.class);
@@ -388,7 +388,7 @@ class ClubControllerUpdateTest {
         MvcResult badClubTypeResult = mockMvc.perform(
                 patch("/club/{clubId}/down", clubId)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badClubTypeResult.getResolvedException()).isExactlyInstanceOf(CannotDownGradeClubException.class);
@@ -404,7 +404,7 @@ class ClubControllerUpdateTest {
         MvcResult badClubIdResult = mockMvc.perform(
                 patch("/club/{clubId}/down", clubId)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badClubIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
@@ -470,7 +470,7 @@ class ClubControllerUpdateTest {
         MvcResult badClubTypeResult = mockMvc.perform(
                 patch("/club/{clubId}/up", clubId)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badClubTypeResult.getResolvedException()).isExactlyInstanceOf(CannotUpGradeClubException.class);
@@ -485,7 +485,7 @@ class ClubControllerUpdateTest {
         MvcResult badClubIdResult = mockMvc.perform(
                 patch("/club/{clubId}/up", clubId)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badClubIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
