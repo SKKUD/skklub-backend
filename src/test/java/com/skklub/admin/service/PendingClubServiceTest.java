@@ -7,7 +7,9 @@ import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.domain.enums.Role;
-import com.skklub.admin.repository.*;
+import com.skklub.admin.repository.ClubRepository;
+import com.skklub.admin.repository.PendingClubRepository;
+import com.skklub.admin.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -35,6 +36,9 @@ class PendingClubServiceTest {
     private ClubRepository clubRepository;
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserValidator userValidator;
 
     @Test
     public void acceptRequest_Default_ReturnClubWithUser() throws Exception{

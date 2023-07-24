@@ -11,6 +11,7 @@ import com.skklub.admin.security.redis.RedisUtil;
 import com.skklub.admin.service.dto.UserJoinDTO;
 import com.skklub.admin.service.dto.UserLoginDTO;
 import com.skklub.admin.service.dto.UserProcResultDTO;
+import com.skklub.admin.service.enums.ValidatingTypes;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,14 +29,13 @@ import java.util.concurrent.TimeUnit;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final TokenProvider tokenProvider;
     private final RedisUtil redisUtil;
     private final UserValidator userValidator;
 
     //User Join
     public UserProcResultDTO joinUser(UserJoinDTO userJoinDTO){
         //username 중복 검사
-        userValidator.usernameDuplicationValidate(userJoinDTO.getUsername());
+        userValidator.validateUsernameDuplication(userJoinDTO.getUsername());
         //회원가입 진행
         String encPwd = bCryptPasswordEncoder.encode(userJoinDTO.getPassword());
         User user =
@@ -67,7 +67,7 @@ public class UserService {
             throw new AuthException(ErrorCode.USER_NOT_FOUND, "invalid user account");
         }
         //토큰 발급
-        JwtDTO tokens = tokenProvider.createTokens(username);
+        JwtDTO tokens = TokenProvider.createTokens(username);
         String refreshToken = tokens.getRefreshToken();
         String key = "RT:" + username;
         //Redis 저장된 refreshToken 확인 -> 업데이트
@@ -80,8 +80,7 @@ public class UserService {
 
     //User Update
     public Optional<User> updateUser(Long userId, String password, Role role, String name, String contact, UserDetails userDetails, String accessToken){
-
-        userValidator.validateUpdatingUser(userDetails,userId);
+        userValidator.validateUpdate(ValidatingTypes.USER, userId);
         //update 진행
         String username = userRepository.findById(userId).get().getUsername();
         String encPwd = bCryptPasswordEncoder.encode(password);
