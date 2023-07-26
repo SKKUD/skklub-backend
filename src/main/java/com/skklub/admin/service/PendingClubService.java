@@ -1,8 +1,8 @@
 package com.skklub.admin.service;
 
 import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.PendingClub;
+import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.repository.ClubRepository;

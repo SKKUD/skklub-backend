@@ -3,6 +3,7 @@ package com.skklub.admin.controller.user;
 
 import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.UserController;
 import com.skklub.admin.service.UserService;
 import com.skklub.admin.service.dto.UserProcResultDTO;
@@ -58,6 +59,9 @@ public class UserControllerJoinTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    @MockBean
+    AuthValidator authValidator;
+
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -82,7 +86,7 @@ public class UserControllerJoinTest {
     public void join_Success() throws Exception {
 
         //given
-        given(userService.joinUser(any())).willReturn(new UserProcResultDTO(1L,"user","김명륜","010-1234-5678"));
+        given(userService.joinUser(any(),any(),any(),any(),any())).willReturn(new UserProcResultDTO(1L,"user","김명륜","010-1234-5678"));
 
         //when
         ResultActions actions = mockMvc.perform(post("/user/join").with(csrf())

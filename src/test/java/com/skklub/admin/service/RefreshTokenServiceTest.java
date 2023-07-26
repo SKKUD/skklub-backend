@@ -73,11 +73,9 @@ public class RefreshTokenServiceTest {
         String name = "명륜이";
         String contact = "010-1234-5678";
 
-        UserJoinDTO userJoinDTO = new UserJoinDTO(username, password, role, name, contact);
-        userService.joinUser(userJoinDTO);
+        userService.joinUser(username, password, role, name, contact);
 
-        UserLoginDTO userLoginDTO = new UserLoginDTO(username,password);
-        JwtDTO jwtDTO = userService.loginUser(userLoginDTO);
+        JwtDTO jwtDTO = userService.loginUser(username,password);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("refresh-token","Bearer "+jwtDTO.getRefreshToken());
