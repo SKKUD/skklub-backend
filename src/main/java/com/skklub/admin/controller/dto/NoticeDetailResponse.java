@@ -40,7 +40,7 @@ public class NoticeDetailResponse {
         this.extraFileNames = notice.getExtraFiles().stream()
                 .map(FileNames::new)
                 .collect(Collectors.toList());
-        this.createdAt = notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES);
+        this.createdAt = notice.getCreatedAt();
         this.preNotice = preNotice.map(NoticeIdAndTitleResponse::new);
         this.postNotice = postNotice.map(NoticeIdAndTitleResponse::new);
     }
