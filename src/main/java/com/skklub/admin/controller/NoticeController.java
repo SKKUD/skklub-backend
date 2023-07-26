@@ -41,6 +41,7 @@ public class NoticeController {
     private final S3Transferer s3Transferer;
     private final NoticeService noticeService;
     private final NoticeRepository noticeRepository;
+    private final AuthValidator authValidator;
 
 //=====CREATE=====//
 
@@ -123,6 +124,7 @@ public class NoticeController {
     //내용 수정
     @PatchMapping("/notice/{noticeId}")
     public NoticeIdAndTitleResponse updateNotice(@PathVariable Long noticeId, @ModelAttribute @Valid NoticeCreateRequest noticeCreateRequest) {
+        authValidator.validateUpdatingNotice(noticeId);
         Notice updateInfo = noticeCreateRequest.toEntity();
         return noticeService.updateNotice(noticeId, updateInfo).map(title -> new NoticeIdAndTitleResponse(noticeId, title)).orElseThrow(NoticeIdMisMatchException::new);
     }
@@ -131,6 +133,7 @@ public class NoticeController {
     @PostMapping("/notice/{noticeId}/thumbnail")
     public NoticeIdAndFileNamesResponse updateThumbnail(@PathVariable Long noticeId, @RequestParam MultipartFile thumbnailFile) {
         if (!noticeRepository.existsById(noticeId)) throw new NoticeIdMisMatchException();
+        authValidator.validateUpdatingNotice(noticeId);
         FileNames thumbnailFileName = s3Transferer.uploadOne(thumbnailFile);
         Thumbnail thumbnail = thumbnailFileName.toThumbnailEntity();
         return noticeService.updateThumbnail(noticeId, thumbnail).map(oldThumbnailFileName -> {
@@ -145,6 +148,7 @@ public class NoticeController {
     //삭제
     @DeleteMapping("/notice/{noticeId}")
     public NoticeIdAndTitleResponse deleteNotice(@PathVariable Long noticeId) {
+        authValidator.validateUpdatingNotice(noticeId);
         return noticeService.deleteNotice(noticeId).map(noticeDeletionDto -> {
             FileNames thumbnailFileName = noticeDeletionDto.getThumbnailFileName();
             if (!thumbnailFileName.getSavedName().equals(DEFAULT_THUMBNAIL))
@@ -158,6 +162,7 @@ public class NoticeController {
     //특정 파일 삭제
     @DeleteMapping("/notice/{noticeId}/{fileName}")
     public NoticeIdAndDeletedNameResponse deleteFileByOriginalName(@PathVariable Long noticeId, @PathVariable String fileName) {
+        authValidator.validateUpdatingNotice(noticeId);
         return noticeService.deleteExtraFile(noticeId, fileName).map(deletedExtraFileNames -> {
             s3Transferer.deleteOne(deletedExtraFileNames.getSavedName());
             return new NoticeIdAndDeletedNameResponse(noticeId, deletedExtraFileNames.getOriginalName());

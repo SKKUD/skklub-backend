@@ -1,17 +1,16 @@
 package com.skklub.admin;
 
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
-import com.skklub.admin.controller.dto.ClubResponseDTO;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
-import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.Getter;
 import org.springframework.boot.test.context.TestComponent;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -33,6 +32,7 @@ public class TestDataRepository {
     private final List<Club> clubs = new ArrayList<>();
     private final List<Recruit> recruits = new ArrayList<>();
     private final List<User> users = new ArrayList<>();
+
 
     public TestDataRepository() {
         readyUser();
@@ -252,7 +252,8 @@ public class TestDataRepository {
     }
 
     private void readyUser() {
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
         for(int i = 0; i < clubCnt; i++)
-            users.add(new User("userId" + i, "userPw" + i, Role.ROLE_USER, "userName" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4)));
+            users.add(new User("userId" + i, bCryptPasswordEncoder.encode("userPw" + i), Role.ROLE_USER, "userName" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4)));
     }
 }
