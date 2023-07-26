@@ -33,10 +33,6 @@ public class RecruitDto {
     private String recruitWebLink;
 
     public RecruitDto(Recruit recruit) {
-        if(recruit.getEndAt() != null && recruit.getStartAt() != null) {
-            this.recruitStartAt = recruit.getStartAt().truncatedTo(ChronoUnit.MINUTES);
-            this.recruitEndAt = recruit.getEndAt().truncatedTo(ChronoUnit.MINUTES);
-        }
         this.recruitQuota = recruit.getQuota();
         this.recruitProcessDescription = recruit.getProcessDescription();
         this.recruitContact = recruit.getContact();
@@ -44,10 +40,6 @@ public class RecruitDto {
     }
 
     public Recruit toEntity() {
-        if(this.recruitStartAt != null && this.recruitEndAt != null) {
-            this.recruitStartAt = this.recruitStartAt.truncatedTo(ChronoUnit.MINUTES);
-            this.recruitEndAt = this.recruitEndAt.truncatedTo(ChronoUnit.MINUTES);
-        }
         return new Recruit(recruitStartAt, recruitEndAt, recruitQuota, recruitProcessDescription, recruitContact, recruitWebLink);
     }
 }
