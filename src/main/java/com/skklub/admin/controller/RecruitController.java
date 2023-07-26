@@ -19,10 +19,12 @@ import org.springframework.web.bind.annotation.*;
 public class RecruitController {
 
     private final RecruitService recruitService;
+    private final AuthValidator authValidator;
 
     //모집 등록
     @PostMapping("/recruit/{clubId}")
     public ResponseEntity<ClubNameAndIdDTO> startRecruit(@PathVariable Long clubId, @ModelAttribute @Valid RecruitDto recruitDto) {
+        authValidator.validateUpdatingClub(clubId);
         ClubValidator.validateRecruitTimeFormat(recruitDto);
         Recruit recruit = recruitDto.toEntity();
         return recruitService.startRecruit(clubId, recruit)
@@ -34,6 +36,7 @@ public class RecruitController {
     //모집 수정
     @PatchMapping("/recruit/{recruitId}")
     public ResponseEntity<Long> updateRecruit(@PathVariable Long recruitId, @ModelAttribute @Valid RecruitDto recruitDto) {
+        authValidator.validateUpdatingRecruit(recruitId);
         ClubValidator.validateRecruitTimeFormat(recruitDto);
         Recruit recruit = recruitDto.toEntity();
         return recruitService.updateRecruit(recruitId, recruit)
@@ -44,6 +47,7 @@ public class RecruitController {
     //모집 종료
     @DeleteMapping("/recruit/{clubId}")
     public Long endRecruit(@PathVariable Long clubId) {
+        authValidator.validateUpdatingClub(clubId);
         recruitService.endRecruit(clubId);
         return clubId;
     }

@@ -37,9 +37,6 @@ class PendingClubServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private UserValidator userValidator;
-
     @Test
     public void acceptRequest_Default_ReturnClubWithUser() throws Exception{
         //given

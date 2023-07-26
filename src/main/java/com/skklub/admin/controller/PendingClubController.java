@@ -15,7 +15,6 @@ import com.skklub.admin.error.exception.PendingClubIdMisMatchException;
 import com.skklub.admin.error.handler.ClubValidator;
 import com.skklub.admin.repository.PendingClubRepository;
 import com.skklub.admin.repository.UserRepository;
-import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.service.PendingClubService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +35,7 @@ public class PendingClubController {
     private final PendingClubRepository pendingClubRepository;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final AuthValidator authValidator;
 
     //동아리 생성 요청
     @PostMapping("/pending")
@@ -60,6 +60,7 @@ public class PendingClubController {
     //요청 승낙
     @DeleteMapping("/pending/{pendingClubId}/accept")
     public ClubCreateResponse acceptPending(@PathVariable Long pendingClubId, @RequestParam Campus campus, @RequestParam ClubType clubType, @RequestParam String belongs) {
+        authValidator.validatePendingRequestAuthority(pendingClubId);
         ClubValidator.validateBelongs(campus, clubType, belongs);
         Club createdClub = pendingClubService.acceptRequest(pendingClubId, campus, clubType, belongs)
                 .orElseThrow(PendingClubIdMisMatchException::new);
@@ -70,6 +71,7 @@ public class PendingClubController {
     //요청 거절
     @DeleteMapping("/pending/{pendingClubId}/deny")
     public PendingInformationResponse denyPending(@PathVariable Long pendingClubId) {
+        authValidator.validatePendingRequestAuthority(pendingClubId);
         PendingClub pendingClub = pendingClubService.denyRequest(pendingClubId)
                 .orElseThrow(PendingClubIdMisMatchException::new);
         return new PendingInformationResponse(pendingClub);

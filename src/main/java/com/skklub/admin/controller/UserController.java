@@ -10,7 +10,6 @@ import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.service.UserService;
 import com.skklub.admin.service.dto.UserJoinDTO;
-import com.skklub.admin.service.dto.UserLoginDTO;
 import com.skklub.admin.service.dto.UserProcResultDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +32,14 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 public class UserController {
 
     private final UserService userService;
+    private final AuthValidator authValidator;
     private static final Role role = Role.valueOf("ROLE_USER");
 
     //join
     @PostMapping(value = "/user/join")
     public ResponseEntity<UserProcResultDTO> join(@ModelAttribute UserJoinRequestDTO userJoinRequestDTO) {
         log.info("username : {}, password : {}", userJoinRequestDTO.getUsername(), userJoinRequestDTO.getPassword());
-        UserProcResultDTO joined = userService.joinUser(new UserJoinDTO(userJoinRequestDTO.getUsername(), userJoinRequestDTO.getPassword(), role, userJoinRequestDTO.getName(), userJoinRequestDTO.getContact()));
+        UserProcResultDTO joined = userService.joinUser(userJoinRequestDTO.getUsername(), userJoinRequestDTO.getPassword(), role, userJoinRequestDTO.getName(), userJoinRequestDTO.getContact());
         return ResponseEntity.ok().body(joined);
     }
 
@@ -47,7 +47,7 @@ public class UserController {
     @PostMapping(value = "/user/login")
     public ResponseEntity<String> login(@ModelAttribute UserLoginRequestDto userLoginRequestDto) {
         log.info("username : {}, password : {}", userLoginRequestDto.getUsername(), userLoginRequestDto.getPassword());
-        JwtDTO tokens = userService.loginUser(new UserLoginDTO(userLoginRequestDto.getUsername(), userLoginRequestDto.getPassword()));
+        JwtDTO tokens = userService.loginUser(userLoginRequestDto.getUsername(), userLoginRequestDto.getPassword());
 
         HttpHeaders headers = new HttpHeaders();
         headers.set(AUTHORIZATION,"Bearer " + tokens.getAccessToken());
@@ -60,11 +60,11 @@ public class UserController {
 
     //update
     @PostMapping(value = "/user/{userId}")
-    public ResponseEntity<UserUpdateResponseDTO> update(HttpServletRequest request,@PathVariable Long userId, @ModelAttribute UserUpdateRequestDTO userUpdateRequestDTO, @AuthenticationPrincipal UserDetails userDetails){
-
+    public ResponseEntity<UserUpdateResponseDTO> update(HttpServletRequest request,@PathVariable Long userId, @ModelAttribute UserUpdateRequestDTO userUpdateRequestDTO){
+        authValidator.validateUpdatingUser(userId);
         return userService.updateUser(userId, userUpdateRequestDTO.getPassword(),
                         role, userUpdateRequestDTO.getName(),
-                        userUpdateRequestDTO.getContact(),userDetails
+                        userUpdateRequestDTO.getContact()
                         ,request.getHeader(HttpHeaders.AUTHORIZATION))
                 .map(updatedUser -> new UserUpdateResponseDTO(userId, updatedUser.getUsername()))
                 .map(ResponseEntity::ok)

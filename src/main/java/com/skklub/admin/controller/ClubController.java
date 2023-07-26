@@ -34,6 +34,7 @@ public class ClubController {
     private final ClubService clubService;
     private final ClubRepository clubRepository;
     private final S3Transferer s3Transferer;
+    private final AuthValidator authValidator;
     private final static String DEFAULT_LOGO_NAME = "alt.jpg";
 
 //=====CREATE=====//
@@ -137,6 +138,7 @@ public class ClubController {
     //정보 변경
     @PatchMapping("/club/{clubId}")
     public ResponseEntity<ClubNameAndIdDTO> updateClub(@PathVariable Long clubId, @ModelAttribute ClubCreateRequestDTO clubCreateRequestDTO) {
+        authValidator.validateUpdatingClub(clubId);
         ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
         Club club = clubCreateRequestDTO.toEntity();
         return clubService.updateClub(clubId, club)
@@ -148,6 +150,7 @@ public class ClubController {
     //로고 변경
     @PostMapping("/club/{clubId}/logo")
     public ResponseEntity<ClubIdAndLogoNameDTO> updateLogo(@PathVariable Long clubId, @RequestParam MultipartFile logo) {
+        authValidator.validateUpdatingClub(clubId);
         Logo logoUpdateInfo = s3Transferer.uploadOne(logo).toLogoEntity();
         return clubService.updateLogo(clubId, logoUpdateInfo)
                 .map(oldLogoName -> {
@@ -161,6 +164,7 @@ public class ClubController {
     //중동 -> 준중동
     @PatchMapping("/club/{clubId}/down")
     public ClubIdAndCategoryResponse downGradeClub(@PathVariable Long clubId){
+        authValidator.validateUpdatingClub(clubId);
         Club clubAfterUpdate = clubService.downGrade(clubId).orElseThrow(ClubIdMisMatchException::new);
         return new ClubIdAndCategoryResponse(clubAfterUpdate);
     }
@@ -168,6 +172,7 @@ public class ClubController {
     //준중동 -> 중동
     @PatchMapping("/club/{clubId}/up")
     public ClubIdAndCategoryResponse upGradeClub(@PathVariable Long clubId){
+        authValidator.validateUpdatingClub(clubId);
         Club clubAfterUpdate = clubService.upGrade(clubId).orElseThrow(ClubIdMisMatchException::new);
         return new ClubIdAndCategoryResponse(clubAfterUpdate);
     }
@@ -177,6 +182,7 @@ public class ClubController {
     //특정 활동 사진 삭제
     @DeleteMapping("/club/{clubId}/activityImage")
     public ResponseEntity<ActivityImageDeletionDTO> deleteActivityImage(@PathVariable Long clubId, @RequestParam String activityImageName) {
+        authValidator.validateUpdatingClub(clubId);
         return clubService.deleteActivityImage(clubId, activityImageName)
                 .map(uploadedName -> {
                     s3Transferer.deleteOne(uploadedName);
@@ -189,6 +195,7 @@ public class ClubController {
     //삭제
     @DeleteMapping("/club/{clubId}")
     public ResponseEntity<ClubNameAndIdDTO> deleteClubById(@PathVariable Long clubId) {
+        authValidator.validateUpdatingClub(clubId);
         return clubService.deleteClub(clubId)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
@@ -198,6 +205,7 @@ public class ClubController {
     //삭제 취소 (복구)
     @DeleteMapping("/club/{clubId}/cancel")
     public ResponseEntity<ClubNameAndIdDTO> cancelClubDeletionById(@PathVariable Long clubId) {
+        authValidator.validateUpdatingClub(clubId);
         return clubService.reviveClub(clubId)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
