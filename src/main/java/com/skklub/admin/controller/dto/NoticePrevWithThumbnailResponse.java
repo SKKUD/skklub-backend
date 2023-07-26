@@ -26,7 +26,7 @@ public class NoticePrevWithThumbnailResponse {
         this.noticeId = notice.getId();
         this.title = notice.getTitle();
         this.content = notice.getContent();
-        this.createdAt = notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES);
+        this.createdAt = notice.getCreatedAt();
         this.thumbnail = thumbnail;
     }
 }

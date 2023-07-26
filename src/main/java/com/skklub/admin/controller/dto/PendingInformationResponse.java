@@ -32,7 +32,7 @@ public class PendingInformationResponse {
     public PendingInformationResponse(PendingClub pendingClub) {
         this.pendingClubId = pendingClub.getId();
         this.requestTo = pendingClub.getRequestTo();
-        this.requestedAt = pendingClub.getCreatedAt().truncatedTo(ChronoUnit.MINUTES);
+        this.requestedAt = pendingClub.getCreatedAt();
         this.clubName = pendingClub.getClubName();
         this.briefActivityDescription = pendingClub.getBriefActivityDescription();
         this.activityDescription = pendingClub.getActivityDescription();

@@ -25,6 +25,6 @@ public class NoticePrevResponse {
         this.noticeId = notice.getId();
         this.title = notice.getTitle();
         this.writerName = notice.getWriter().getName();
-        this.createdAt = notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES);
+        this.createdAt = notice.getCreatedAt();
     }
 }
