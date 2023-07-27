@@ -32,9 +32,10 @@ public class AuthValidator {
     private final NoticeRepository noticeRepository;
     private final PendingClubRepository pendingClubRepository;
 
-    public void validateUpdatingUser(Long updatedUserId) throws AuthException{
+    public void validateUpdatingUser(Long userId) throws AuthException{
+        System.out.println(userId);
         //수정 권한자로 등록된 유저 확인
-        User registeredUser = Optional.of(userRepository.findById(updatedUserId).get())
+        User registeredUser = Optional.of(userRepository.findById(userId).get())
                 .orElseThrow(() ->
                         new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
         //업데이트 대상 계정과 로그인된 계정 일치 여부 확인

@@ -87,27 +87,59 @@ public class SecurityConfig  {
 
     private RequestMatcher publicEndpoints() {
         return new OrRequestMatcher(
-                new AntPathRequestMatcher("/user/login"),
-                new AntPathRequestMatcher("/user/join")
+                //user
+                new AntPathRequestMatcher("/user/login","POST"),
+                new AntPathRequestMatcher("/user/join","POST"),
+                //pending
+                new AntPathRequestMatcher("/pending/**","POST"),
+                //notice
+                new AntPathRequestMatcher("/notice/**","GET"),
+                //club
+                new AntPathRequestMatcher("/club/**}","GET"),
+                new AntPathRequestMatcher("/club/prev","GET"),
+                new AntPathRequestMatcher("/club/search","GET"),
+                new AntPathRequestMatcher("/club/search/prevs","GET"),
+                new AntPathRequestMatcher("/club/random","GET")
         );
     }
 
     private RequestMatcher userEndpoints() {
         return new OrRequestMatcher(
-                new AntPathRequestMatcher("/user/**"), //update
-                new AntPathRequestMatcher("/user/logout"),
-                new AntPathRequestMatcher("/refresh")
+                //user
+                new AntPathRequestMatcher("/user/**","POST"), //update
+                new AntPathRequestMatcher("/user/logout","POST"),
+                //refresh
+                new AntPathRequestMatcher("/refresh","POST"),
+                //notice
+                new AntPathRequestMatcher("/notice/**","POST"),
+                new AntPathRequestMatcher("/notice/**","PATCH"),
+                new AntPathRequestMatcher("/notice/**","DELETE"),
+                new AntPathRequestMatcher("/notice/**/**","DELETE"),
+                //recruit
+                new AntPathRequestMatcher("/recruit/**","POST"),
+                new AntPathRequestMatcher("/recruit/**","PATCH"),
+                new AntPathRequestMatcher("/recruit/**","DELETE"),
+                //club
+                new AntPathRequestMatcher("/club/**","PATCH"),
+                new AntPathRequestMatcher("/club/**/logo","PATCH"),
+                new AntPathRequestMatcher("/club/**/activityImage","DELETE"),
+                new AntPathRequestMatcher("/club/**","DELETE")
         );
+
     }
     private RequestMatcher adminEndpoints() {
         return new OrRequestMatcher(
-                new AntPathRequestMatcher("/admin/**")
+                //pending
+                new AntPathRequestMatcher("/pending/**","GET"),
+                new AntPathRequestMatcher("/pending/**","DELETE"),
+                //club
+                new AntPathRequestMatcher("/club/**/up","PATCH"),
+                new AntPathRequestMatcher("/club/**/down","PATCH")
         );
     }
 
     private RequestMatcher masterEndpoints() {
         return new OrRequestMatcher(
-                new AntPathRequestMatcher("/master/**")
         );
     }
 
