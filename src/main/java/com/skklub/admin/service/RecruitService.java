@@ -34,11 +34,11 @@ public class RecruitService {
     }
 
 
-    public Optional<Long> updateRecruit(Long recruitId, Recruit updateInfo) {
-        return recruitRepository.findById(recruitId)
+    public Optional<Long> updateRecruit(Long clubId, Recruit updateInfo) {
+        return recruitRepository.findByClubId(clubId)
                 .map(recruitBase -> {
                     recruitBase.update(updateInfo);
-                    return recruitBase.getId();
+                    return clubId;
                 });
     }
 

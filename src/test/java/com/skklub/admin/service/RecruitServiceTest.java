@@ -112,7 +112,7 @@ class RecruitServiceTest {
         setIdReflection(baseRecruitId, baseRecruit);
         Recruit updateRecruitInfo = testDataRepository.getRecruits().get(updateRecruitInfoId.intValue());
         setIdReflection(null, updateRecruitInfo);
-        given(recruitRepository.findById(baseRecruitId)).willReturn(Optional.ofNullable(baseRecruit));
+        given(recruitRepository.findByClubId(baseRecruitId)).willReturn(Optional.ofNullable(baseRecruit));
 
         //when
         Optional<Long> recruitId = recruitService.updateRecruit(baseRecruitId, updateRecruitInfo);
@@ -129,13 +129,13 @@ class RecruitServiceTest {
     }
 
     @Test
-    public void updateRecruit_BadRecruitId_ReturnOptionalEmpty() throws Exception{
+    public void updateRecruit_BadClubId_ReturnOptionalEmpty() throws Exception{
         //given
-        Long recruitId = -1L;
-        given(recruitRepository.findById(recruitId)).willReturn(Optional.empty());
+        Long clubId = -1L;
+        given(recruitRepository.findByClubId(clubId)).willReturn(Optional.empty());
 
         //when
-        Optional<Long> idShouldNull = recruitService.updateRecruit(recruitId, null);
+        Optional<Long> idShouldNull = recruitService.updateRecruit(clubId, null);
 
         //then
         Assertions.assertThat(idShouldNull).isEmpty();
