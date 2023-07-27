@@ -42,7 +42,6 @@ public class ClubController {
     //추가
     @PostMapping(value = "/club")
     public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam(required = false) MultipartFile logo) {
-        log.info("clubCreateRequestDTO.getClubType() : {}", clubCreateRequestDTO.getClubType());
         ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
         FileNames uploadedLogo = Optional.ofNullable(logo)
                 .map(s3Transferer::uploadOne)
@@ -137,10 +136,9 @@ public class ClubController {
 
     //정보 변경
     @PatchMapping("/club/{clubId}")
-    public ResponseEntity<ClubNameAndIdDTO> updateClub(@PathVariable Long clubId, @ModelAttribute ClubCreateRequestDTO clubCreateRequestDTO) {
+    public ResponseEntity<ClubNameAndIdDTO> updateClub(@PathVariable Long clubId, @ModelAttribute ClubUpdateRequest clubUpdateRequest) {
         authValidator.validateUpdatingClub(clubId);
-        ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
-        Club club = clubCreateRequestDTO.toEntity();
+        Club club = clubUpdateRequest.toEntity();
         return clubService.updateClub(clubId, club)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)

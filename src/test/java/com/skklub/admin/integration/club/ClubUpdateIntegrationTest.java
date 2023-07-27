@@ -2,16 +2,15 @@ package com.skklub.admin.integration.club;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;
-import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
-import com.skklub.admin.controller.dto.ClubIdAndCategoryResponse;
-import com.skklub.admin.controller.dto.ClubIdAndLogoNameDTO;
-import com.skklub.admin.controller.dto.ClubNameAndIdDTO;
+import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.persistence.EntityManager;
@@ -52,16 +51,15 @@ public class ClubUpdateIntegrationTest {
     @Test
     public void updateClub_GivenClub_CheckUpdatedInfo() throws Exception{
         //given
-        ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
-        ClubNameAndIdDTO clubNameAndIdDTO = clubController.createClub(clubCreateRequestDTO, null);
+        Club club = em.createQuery("select c from Club c", Club.class)
+                .setMaxResults(1)
+                .getSingleResult();
+        em.clear();
 
         String clubName = "changedClubName";
         String activityDescription = "changedActivityDescription";
         String briefActivityDescription = "changedBriefActivityDescription";
         String clubDescription = "changedClubDescription";
-        String belongs = "평면예술";
-        Campus campus = Campus.명륜;
-        ClubType clubType = ClubType.중앙동아리;
         Integer establishDate = 1398;
         String headLine = "changedHeadLine";
         String mandatoryActivatePeriod = "changedMandatoryActivatePeriod";
@@ -71,14 +69,11 @@ public class ClubUpdateIntegrationTest {
         String webLink1 = "changedWebLink1";
         String webLink2 = "changedWebLink2";
 
-        ClubCreateRequestDTO clubChangeInfo = ClubCreateRequestDTO.builder()
+        ClubUpdateRequest clubChangeInfo = ClubUpdateRequest.builder()
                 .clubName(clubName)
                 .activityDescription(activityDescription)
                 .briefActivityDescription(briefActivityDescription)
                 .clubDescription(clubDescription)
-                .belongs(belongs)
-                .campus(campus)
-                .clubType(clubType)
                 .establishDate(establishDate)
                 .headLine(headLine)
                 .mandatoryActivatePeriod(mandatoryActivatePeriod)
@@ -90,22 +85,22 @@ public class ClubUpdateIntegrationTest {
                 .build();
 
         //when
-        ClubNameAndIdDTO changedClubNameAndId = clubController.updateClub(clubNameAndIdDTO.getId(), clubChangeInfo).getBody();
+        ClubNameAndIdDTO changedClubNameAndId = clubController.updateClub(club.getId(), clubChangeInfo).getBody();
 
         //then
-        Assertions.assertThat(changedClubNameAndId.getId()).isEqualTo(clubNameAndIdDTO.getId());
-        Optional<Club> club = clubRepository.findById(changedClubNameAndId.getId());
-        Assertions.assertThat(club).isNotEmpty();
-        club.ifPresent(
+        Assertions.assertThat(changedClubNameAndId.getId()).isEqualTo(club.getId());
+        Optional<Club> clubAfterUpdate = clubRepository.findById(changedClubNameAndId.getId());
+        Assertions.assertThat(clubAfterUpdate).isNotEmpty();
+        clubAfterUpdate.ifPresent(
                 c ->{
                     Assertions.assertThat(c.getId()).isNotNull();
                     Assertions.assertThat(c.getName()).isEqualTo(clubChangeInfo.getClubName());
                     Assertions.assertThat(c.getActivityDescription()).isEqualTo(clubChangeInfo.getActivityDescription());
                     Assertions.assertThat(c.getBriefActivityDescription()).isEqualTo(clubChangeInfo.getBriefActivityDescription());
                     Assertions.assertThat(c.getClubDescription()).isEqualTo(clubChangeInfo.getClubDescription());
-                    Assertions.assertThat(c.getBelongs()).isEqualTo(clubChangeInfo.getBelongs());
-                    Assertions.assertThat(c.getCampus()).isEqualTo(clubChangeInfo.getCampus());
-                    Assertions.assertThat(c.getClubType()).isEqualTo(clubChangeInfo.getClubType());
+                    Assertions.assertThat(c.getBelongs()).isEqualTo(club.getBelongs());
+                    Assertions.assertThat(c.getCampus()).isEqualTo(club.getCampus());
+                    Assertions.assertThat(c.getClubType()).isEqualTo(club.getClubType());
                     Assertions.assertThat(c.getEstablishAt()).isEqualTo(clubChangeInfo.getEstablishDate());
                     Assertions.assertThat(c.getHeadLine()).isEqualTo(clubChangeInfo.getHeadLine());
                     Assertions.assertThat(c.getMandatoryActivatePeriod()).isEqualTo(clubChangeInfo.getMandatoryActivatePeriod());

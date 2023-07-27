@@ -34,14 +34,14 @@ public class RecruitController {
     }
 
     //모집 수정
-    @PatchMapping("/recruit/{recruitId}")
-    public ResponseEntity<Long> updateRecruit(@PathVariable Long recruitId, @ModelAttribute @Valid RecruitDto recruitDto) {
-        authValidator.validateUpdatingRecruit(recruitId);
+    @PatchMapping("/recruit/{clubId}")
+    public ResponseEntity<Long> updateRecruit(@PathVariable Long clubId, @ModelAttribute @Valid RecruitDto recruitDto) {
+        authValidator.validateUpdatingClub(clubId);
         ClubValidator.validateRecruitTimeFormat(recruitDto);
         Recruit recruit = recruitDto.toEntity();
-        return recruitService.updateRecruit(recruitId, recruit)
+        return recruitService.updateRecruit(clubId, recruit)
                 .map(ResponseEntity::ok)
-                .orElseThrow(RecruitIdMisMatchException::new);
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
     //모집 종료
