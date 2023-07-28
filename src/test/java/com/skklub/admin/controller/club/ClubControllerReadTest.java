@@ -329,12 +329,11 @@ class ClubControllerReadTest {
         PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
         List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
-        List<ClubPrevDTO> clubPrevs = clubs.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
 
         given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPage);
-        clubs.stream()
-                .forEach(club -> given(s3Transferer.downloadOne(new FileNames(club.getLogo()))).willReturn(testDataRepository.getLogoS3DownloadDto(club.getId().intValue())));
+        clubPage.stream()
+                .forEach(page -> given(s3Transferer.downloadOne(new FileNames(page.getLogo()))).willReturn(testDataRepository.getLogoS3DownloadDto(page.getId().intValue())));
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/prev")
@@ -357,12 +356,14 @@ class ClubControllerReadTest {
         }
 
         List<FieldDescriptor> pageableResponseFields = new ArrayList<>();
-        pageableResponseFields.add(fieldWithPath("content[].id").type(WireFormat.FieldType.INT64).description("동아리 아이디").attributes(example(clubPrevs.get(0).getId().toString())));
-        pageableResponseFields.add(fieldWithPath("content[].name").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(clubPrevs.get(0).getName())));
-        pageableResponseFields.add(fieldWithPath("content[].belongs").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명").attributes(example(clubPrevs.get(0).getBelongs())));
-        pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("클럽 ").attributes(example(clubPrevs.get(0).getBriefActivityDescription())));
-        pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getId().toString())));
-        pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명").attributes(example(testDataRepository.getLogoS3DownloadDto((int) (long) clubPrevs.get(0).getId()).getFileName())));
+        pageableResponseFields.add(fieldWithPath("content[].id").type(WireFormat.FieldType.INT64).description("동아리 아이디").attributes(example(clubs.get(0).getId().toString())));
+        pageableResponseFields.add(fieldWithPath("content[].name").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(clubs.get(0).getName())));
+        pageableResponseFields.add(fieldWithPath("content[].campus").type(WireFormat.FieldType.STRING).description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)));
+        pageableResponseFields.add(fieldWithPath("content[].clubType").type(WireFormat.FieldType.STRING).description("분류 - 동아리 종류").attributes(example(LINK_CLUB_TYPE)));
+        pageableResponseFields.add(fieldWithPath("content[].belongs").type(WireFormat.FieldType.STRING).description("분류 - 분과").attributes(example(LINK_BELONGS_TYPE)));
+        pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명").attributes(example(clubs.get(0).getBriefActivityDescription())));
+        pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디").attributes(example(testDataRepository.getLogoS3DownloadDto(clubs.get(0).getId().intValue()).getId().toString())));
+        pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명").attributes(example(testDataRepository.getLogoS3DownloadDto(clubs.get(0).getId().intValue()).getFileName())));
         pageableResponseFields.add(fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트").attributes(example("바이트 배열")));
         addPageableResponseFields(pageableResponseFields);
 
@@ -401,12 +402,11 @@ class ClubControllerReadTest {
         PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
         List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
-        List<ClubPrevDTO> clubPrevs = clubs.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
 
         given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPage);
-        clubPrevs.stream()
-                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
+        clubPage.stream()
+                .forEach(pages -> given(s3Transferer.downloadOne(new FileNames(pages.getLogo()))).willReturn(testDataRepository.getLogoS3DownloadDto(pages.getId().intValue())));
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/prev")
@@ -438,12 +438,11 @@ class ClubControllerReadTest {
         PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
         List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
-        List<ClubPrevDTO> clubPrevs = clubs.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
 
         given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPage);
-        clubPrevs.stream()
-                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
+        clubPage.stream()
+                .forEach(page -> given(s3Transferer.downloadOne(new FileNames(page.getLogo()))).willReturn(testDataRepository.getLogoS3DownloadDto(page.getId().intValue())));
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -476,12 +475,11 @@ class ClubControllerReadTest {
         PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
         List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
-        List<ClubPrevDTO> clubPrevs = clubs.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
 
         given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPage);
-        clubPrevs.stream()
-                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
+        clubPage.stream()
+                .forEach(page -> given(s3Transferer.downloadOne(new FileNames(page.getLogo()))).willReturn(testDataRepository.getLogoS3DownloadDto(page.getId().intValue())));
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -534,11 +532,10 @@ class ClubControllerReadTest {
         PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
         List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
-        List<ClubPrevDTO> clubPrevDTOs = clubs.stream().map(ClubPrevDTO::fromEntity).collect(Collectors.toList());
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
         given(clubRepository.findClubByNameContainingOrderByName(keyword, request)).willReturn(clubPage);
-        clubPrevDTOs.stream()
-                .forEach(prevs -> given(s3Transferer.downloadOne(prevs.getLogo())).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) prevs.getId())));
+        clubPage.stream()
+                .forEach(page -> given(s3Transferer.downloadOne(new FileNames(page.getLogo()))).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) page.getId())));
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -559,13 +556,15 @@ class ClubControllerReadTest {
             actions = buildPageableResponseContentChecker(actions, i);
         }
         List<FieldDescriptor> pageableResponseFields = new ArrayList<>();
-        pageableResponseFields.add(fieldWithPath("content[].id").type(WireFormat.FieldType.INT64).description("동아리 아이디"));
-        pageableResponseFields.add(fieldWithPath("content[].name").type(WireFormat.FieldType.STRING).description("동아리 이름"));
-        pageableResponseFields.add(fieldWithPath("content[].belongs").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명"));
-        pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("클럽 "));
-        pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디"));
-        pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명"));
-        pageableResponseFields.add(fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트"));
+        pageableResponseFields.add(fieldWithPath("content[].id").type(WireFormat.FieldType.INT64).description("동아리 아이디").attributes(example(clubs.get(0).getId().toString())));
+        pageableResponseFields.add(fieldWithPath("content[].name").type(WireFormat.FieldType.STRING).description("동아리 이름").attributes(example(clubs.get(0).getName())));
+        pageableResponseFields.add(fieldWithPath("content[].campus").type(WireFormat.FieldType.STRING).description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)));
+        pageableResponseFields.add(fieldWithPath("content[].clubType").type(WireFormat.FieldType.STRING).description("분류 - 동아리 종류").attributes(example(LINK_CLUB_TYPE)));
+        pageableResponseFields.add(fieldWithPath("content[].belongs").type(WireFormat.FieldType.STRING).description("분류 - 분과").attributes(example(LINK_BELONGS_TYPE)));
+        pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명").attributes(example(clubs.get(0).getBriefActivityDescription())));
+        pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디").attributes(example(testDataRepository.getLogoS3DownloadDto(clubs.get(0).getId().intValue()).getId().toString())));
+        pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명").attributes(example(testDataRepository.getLogoS3DownloadDto(clubs.get(0).getId().intValue()).getFileName())));
+        pageableResponseFields.add(fieldWithPath("content[].logo.bytes").type(WireFormat.FieldType.BYTES).description("로고 바이트").attributes(example("바이트 배열")));
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(
@@ -581,7 +580,31 @@ class ClubControllerReadTest {
                         )
                 )
         );
+     }
 
+    @Test
+    public void getClubPrevByKeyword_BlankKeyword_ReturnEmptyPage() throws Exception{
+        //given
+        String keyword = "";
+        int clubPerPage = 5;
+        List<Club> clubs = testDataRepository.getClubs();
+        setClubIds(clubs);
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/club/search/prevs")
+                        .with(csrf())
+                        .queryParam("keyword", keyword)
+                        .queryParam("size", String.valueOf(clubPerPage))
+                        .queryParam("page", "0")
+                        .queryParam("sort", "name,ASC")
+        );
+
+        //then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(0))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.totalElements").value(0));
      }
 
     @Test
@@ -668,6 +691,8 @@ class ClubControllerReadTest {
         return actions
                 .andExpect(jsonPath("$.content[" + index + "].id").value(index))
                 .andExpect(jsonPath("$.content[" + index + "].name").value(club.getName()))
+                .andExpect(jsonPath("$.content[" + index + "].campus").value(club.getCampus().toString()))
+                .andExpect(jsonPath("$.content[" + index + "].clubType").value(club.getClubType().toString()))
                 .andExpect(jsonPath("$.content[" + index + "].belongs").value(club.getBelongs()))
                 .andExpect(jsonPath("$.content[" + index + "].briefActivityDescription").value(club.getBriefActivityDescription()))
                 .andExpect(jsonPath("$.content[" + index + "].logo.id").value(s3Dto.getId()))

@@ -627,6 +627,8 @@ public class ClubReadIntegrationTest {
         prevs.stream()
                 .forEach(
                         dto -> {
+                            Assertions.assertThat(dto.getCampus()).isEqualTo(campus);
+                            Assertions.assertThat(dto.getClubType()).isEqualTo(clubType);
                             Assertions.assertThat(dto.getBelongs()).isEqualTo(belongs);
                             Assertions.assertThat(dto.getLogo()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getBytes()).isNotNull();
@@ -658,6 +660,8 @@ public class ClubReadIntegrationTest {
         prevs.stream()
                 .forEach(
                         dto -> {
+                            Assertions.assertThat(dto.getCampus()).isEqualTo(campus);
+                            Assertions.assertThat(dto.getClubType()).isEqualTo(clubType);
                             Assertions.assertThat(dto.getLogo()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getBytes()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getFileName()).contains(".jpg");
@@ -688,6 +692,7 @@ public class ClubReadIntegrationTest {
         prevs.stream()
                 .forEach(
                         dto -> {
+                            Assertions.assertThat(dto.getCampus()).isEqualTo(campus);
                             Assertions.assertThat(dto.getLogo()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getBytes()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getFileName()).contains(".jpg");
@@ -716,6 +721,9 @@ public class ClubReadIntegrationTest {
         prevs.stream()
                 .forEach(
                         dto -> {
+                            Assertions.assertThat(dto.getCampus()).isNotNull();
+                            Assertions.assertThat(dto.getClubType()).isNotNull();
+                            Assertions.assertThat(dto.getBelongs()).isNotNull();
                             Assertions.assertThat(dto.getLogo()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getBytes()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getFileName()).contains(".jpg");
@@ -744,6 +752,9 @@ public class ClubReadIntegrationTest {
         prevs.stream()
                 .forEach(
                         dto -> {
+                            Assertions.assertThat(dto.getCampus()).isNotNull();
+                            Assertions.assertThat(dto.getClubType()).isNotNull();
+                            Assertions.assertThat(dto.getBelongs()).isNotNull();
                             Assertions.assertThat(dto.getLogo()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getBytes()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getFileName()).contains(".jpg");
@@ -755,6 +766,18 @@ public class ClubReadIntegrationTest {
     public void getClubPrevByKeyword_NoMatch() throws Exception {
         //given
         String keyword = "NoMatch";
+
+        //when
+        Page<ClubPrevResponseDTO> prevPages = clubController.getClubPrevByKeyword(keyword, null);
+
+        //then
+        Assertions.assertThat(prevPages).isEmpty();
+    }
+
+    @Test
+    public void getClubPrevByKeyword_BlankKeyword() throws Exception {
+        //given
+        String keyword = "";
 
         //when
         Page<ClubPrevResponseDTO> prevPages = clubController.getClubPrevByKeyword(keyword, null);
