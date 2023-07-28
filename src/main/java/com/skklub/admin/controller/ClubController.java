@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -83,9 +84,8 @@ public class ClubController {
                                                              @RequestParam(required = false, defaultValue = "전체") String belongs,
                                                              Pageable pageable) {
         ClubValidator.validateBelongs(campus, clubType, belongs);
-        Page<ClubPrevDTO> clubPrevs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable)
-                .map(ClubPrevDTO::fromEntity);
-        return convertClubPrevsLogoToFile(clubPrevs);
+        Page<Club> clubs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
+        return convertClubsLogoToFile(clubs);
     }
 
     //이름 검색 완전 일치
@@ -101,9 +101,9 @@ public class ClubController {
     //이름 검색 부분 일치
     @GetMapping("/club/search/prevs")
     public Page<ClubPrevResponseDTO> getClubPrevByKeyword(@RequestParam String keyword, Pageable pageable) {
-        Page<ClubPrevDTO> clubPrevs = clubRepository.findClubByNameContainingOrderByName(keyword, pageable)
-                .map(ClubPrevDTO::fromEntity);
-        return convertClubPrevsLogoToFile(clubPrevs);
+        if(!StringUtils.hasText(keyword)) return Page.empty();
+        Page<Club> clubs = clubRepository.findClubByNameContainingOrderByName(keyword, pageable);
+        return convertClubsLogoToFile(clubs);
     }
 
     //오늘의 추천 동아리
@@ -117,11 +117,11 @@ public class ClubController {
                 .collect(Collectors.toList());
     }
 
-    private Page<ClubPrevResponseDTO> convertClubPrevsLogoToFile(Page<ClubPrevDTO> clubPrevs) {
-        Page<ClubPrevResponseDTO> response = clubPrevs.map(clubPrevDTO -> {
-            FileNames logo = clubPrevDTO.getLogo();
+    private Page<ClubPrevResponseDTO> convertClubsLogoToFile(Page<Club> clubs) {
+        Page<ClubPrevResponseDTO> response = clubs.map(club -> {
+            FileNames logo = new FileNames(club.getLogo());
             S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(logo);
-            return new ClubPrevResponseDTO(clubPrevDTO, s3DownloadDto);
+            return new ClubPrevResponseDTO(club, s3DownloadDto);
         });
         return response;
     }
