@@ -20,7 +20,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -48,12 +50,13 @@ public class PendingClubController {
 
     //생성 요청 조회
     @GetMapping("/pending")
-    public Page<PendingInformationResponse> getPendingList(@AuthenticationPrincipal UserDetails userDetails, Pageable pageable) {
+    public Page<PendingInformationResponse> getPendings(@AuthenticationPrincipal UserDetails userDetails, Pageable pageable) {
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort().and(Sort.by("clubName").ascending()));
         String userName = userDetails.getUsername();
         User admin = userRepository.findByUsername(userName);
         if(admin.getRole().equals(Role.ROLE_USER)) throw new InvalidApproachException();
         log.info("admin.getRole() : {}", admin.getRole());
-        return pendingClubRepository.findAllByRequestTo(admin.getRole(), pageable)
+        return pendingClubRepository.findAllByRequestTo(admin.getRole(), pageRequest)
                 .map(PendingInformationResponse::new);
     }
 

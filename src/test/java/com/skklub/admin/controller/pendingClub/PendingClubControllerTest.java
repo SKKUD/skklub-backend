@@ -27,10 +27,7 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -252,9 +249,9 @@ class PendingClubControllerTest {
     }
 
     @Test
-    public void getPendingList_Default_Success() throws Exception{
+    public void getPendings_Default_Success() throws Exception{
         //given
-        PageRequest pageRequest = PageRequest.of(1, 3);
+        PageRequest pageRequest = PageRequest.of(1, 3, Sort.by("clubName").ascending());
         User user = new User("user", "mockUserPw", Role.ROLE_ADMIN_SEOUL_CENTRAL, "홍길동", "010-0000-0000");
         given(userRepository.findByUsername("user")).willReturn(user);
         int pendingClubCnt = 7;
@@ -294,7 +291,7 @@ class PendingClubControllerTest {
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.size").value(3))
                 .andExpect(jsonPath("$.totalPages").value(3))
-                .andExpect(jsonPath("$.pageable.sort.sorted").value("false"));
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
         List<PendingClub> results = pendingClubPage.get().collect(Collectors.toList());
         for (int i = 0; i < 3; i++) {
             actions
@@ -335,9 +332,9 @@ class PendingClubControllerTest {
     }
 
     @Test
-    public void getPendingList_LoginWithUser_InvalidApproachException() throws Exception{
+    public void getPendings_LoginWithUser_InvalidApproachException() throws Exception{
         //given
-        PageRequest pageRequest = PageRequest.of(1, 3);
+        PageRequest pageRequest = PageRequest.of(1, 3, Sort.by("clubName").ascending());
         User user = new User("user", "mockUserPw", Role.ROLE_USER, "홍길동", "010-0000-0000");
         given(userRepository.findByUsername("user")).willReturn(user);
 
