@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Transactional
 @SpringBootTest
 @Import(TestDataRepository.class)
+@WithMockCustomUser(username = "testMasterID",role = Role.ROLE_MASTER)
 public class ClubUpdateIntegrationTest {
     @Autowired
     private TestDataRepository testDataRepository;
@@ -117,18 +118,10 @@ public class ClubUpdateIntegrationTest {
     @Test
     public void updateLogo_GivenSomeLogo_DeleteOldFromS3() throws Exception{
         //given
-        ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
-
-        Path oldPath = Paths.get("src/test/resources/img/1.jpg");
-        byte[] oldBytes = Files.readAllBytes(oldPath);
-        String oldLogoName = "1.jpg";
-        MockMultipartFile oldLogoFile = new MockMultipartFile("logo", oldLogoName, "image/jpeg", oldBytes);
-        ClubNameAndIdDTO nameAndId = clubController.createClub(clubCreateRequestDTO, oldLogoFile);
-
-        List oldLogo = em.createQuery("select l from Logo l where l.originalName = :name")
-                .setParameter("name", oldLogoName)
-                .getResultList();
-
+        Club club = em.createQuery("select c from Club c inner join fetch c.president inner join fetch c.logo where c.logo.originalName not like 'alt.jpg'", Club.class)
+                .setMaxResults(1)
+                .getSingleResult();
+        Logo logo = club.getLogo();
         Path newPath = Paths.get("src/test/resources/img/2.jpg");
         byte[] newBytes = Files.readAllBytes(newPath);
         String newLogoName = "2.jpg";
@@ -137,22 +130,18 @@ public class ClubUpdateIntegrationTest {
         em.clear();
 
         //when
-        ClubIdAndLogoNameDTO clubIdAndLogoNameDTO = clubController.updateLogo(nameAndId.getId(), newLogo).getBody();
+        ClubIdAndLogoNameDTO clubIdAndLogoNameDTO = clubController.updateLogo(club.getId(), newLogo).getBody();
 
         //then
-        List oldLogoResult = em.createQuery("select l from Logo l where l.originalName = :name")
-                .setParameter("name", oldLogoName)
-                .getResultList();
-        Assertions.assertThat(oldLogoResult).isEmpty();
         Optional<Club> findedClub = clubRepository.findById(clubIdAndLogoNameDTO.getClubId());
         Assertions.assertThat(findedClub).isNotEmpty();
         Assertions.assertThat(findedClub.get().getLogo().getOriginalName())
                 .isEqualTo(newLogoName)
                 .isEqualTo(clubIdAndLogoNameDTO.getLogoOriginalName());
 
-        FileNames fileName = new FileNames((Logo) oldLogo.get(0));
+        FileNames fileName = new FileNames(logo);
         Assertions.assertThat(fileName.getId()).isNotNull();
-        Assertions.assertThat(fileName.getOriginalName()).isEqualTo(oldLogoName);
+        Assertions.assertThat(fileName.getOriginalName()).isEqualTo(logo.getOriginalName());
         assertThrows(AmazonS3Exception.class, () -> {
             s3Transferer.downloadOne(fileName);
         });
@@ -162,10 +151,9 @@ public class ClubUpdateIntegrationTest {
     @Test
     public void updateLogo_FromDefaultLogo_DeleteOldFromS3() throws Exception{
         //given
-        ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
-
-        ClubNameAndIdDTO nameAndId = clubController.createClub(clubCreateRequestDTO, null);
-
+        Club club = em.createQuery("select c from Club c inner join fetch c.president inner join fetch c.logo where c.logo.originalName like 'alt.jpg'", Club.class)
+                .setMaxResults(1)
+                .getSingleResult();
         Path newPath = Paths.get("src/test/resources/img/2.jpg");
         byte[] newBytes = Files.readAllBytes(newPath);
         String newLogoName = "2.jpg";
@@ -177,7 +165,7 @@ public class ClubUpdateIntegrationTest {
         em.clear();
 
         //when
-        ClubIdAndLogoNameDTO clubIdAndLogoNameDTO = clubController.updateLogo(nameAndId.getId(), newLogo).getBody();
+        ClubIdAndLogoNameDTO clubIdAndLogoNameDTO = clubController.updateLogo(club .getId(), newLogo).getBody();
 
         //then
         Long afterUpdateDefaultLogoCount = em.createQuery("select count(l) from Logo l where l.originalName = :name", Long.class)

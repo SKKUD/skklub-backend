@@ -3,6 +3,7 @@ package com.skklub.admin.controller.user;
 import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.UserController;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.service.UserService;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -61,7 +63,8 @@ public class UserControllerUpdateTest {
     MockMvc mockMvc;
     @MockBean
     UserService userService;
-
+    @MockBean
+    private AuthValidator authValidator;
     @Autowired
     ObjectMapper objectMapper;
 
@@ -97,7 +100,8 @@ public class UserControllerUpdateTest {
         User changeTo = testDataRepository.getUsers().get(changeToId.intValue());
 
         //given
-        given(userService.updateUser(eq(userId),eq(changeTo.getPassword()),eq(changeTo.getRole()),eq(changeTo.getName()),eq(changeTo.getContact()),eq("Bearer (access_token)"))).willReturn(Optional.of(new User(user.getUsername(),changeTo.getPassword(),changeTo.getRole(),changeTo.getName(),changeTo.getContact())));
+        given(userService.updateUser(eq(userId),eq(changeTo.getPassword()),eq(changeTo.getRole()),eq(changeTo.getName()),eq(changeTo.getContact()),eq("Bearer (access_token)")))
+                .willReturn(Optional.of(new User(user.getUsername(),changeTo.getPassword(),changeTo.getRole(),changeTo.getName(),changeTo.getContact())));
 
 
         //when

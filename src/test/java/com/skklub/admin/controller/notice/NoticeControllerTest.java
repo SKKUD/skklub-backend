@@ -1,6 +1,7 @@
 package com.skklub.admin.controller.notice;
 
 import akka.protobuf.WireFormat;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
@@ -20,7 +21,9 @@ import com.skklub.admin.service.dto.FileNames;
 import com.skklub.admin.service.dto.NoticeDeletionDto;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -86,6 +89,17 @@ public class NoticeControllerTest {
     private NoticeRepository noticeRepository;
     @MockBean
     private NoticeService noticeService;
+    @MockBean
+    private AuthValidator authValidator;
+
+    @BeforeEach
+    public void beforeEach() {
+        doNothing().when(authValidator).validateUpdatingClub(anyLong());
+        doNothing().when(authValidator).validateUpdatingNotice(anyLong());
+        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
+        doNothing().when(authValidator).validateUpdatingUser(anyLong());
+        doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
+    }
 
     @Test
     @WithMockUser

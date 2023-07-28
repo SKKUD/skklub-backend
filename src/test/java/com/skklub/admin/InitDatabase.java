@@ -231,6 +231,7 @@ public class InitDatabase {
                 byte[] bytes = Files.readAllBytes(path);
                 MultipartFile multipartFile = new MockMultipartFile("4.jpg", "4.jpg", "image", bytes);
                 FileNames fileNames = s3Transferer.uploadOne(multipartFile);
+                fileNames.setOriginalName(i + ".jpg");
                 activityImages.add(fileNames.toActivityImageEntity());
             }
             return activityImages;

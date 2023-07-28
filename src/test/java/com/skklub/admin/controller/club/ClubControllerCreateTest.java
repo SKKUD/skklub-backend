@@ -1,6 +1,7 @@
 package com.skklub.admin.controller.club;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
@@ -50,6 +51,7 @@ import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -77,8 +79,8 @@ class ClubControllerCreateTest {
     private S3Transferer s3Transferer;
     @InjectMocks
     private TestDataRepository testDataRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
+    @MockBean
+    private AuthValidator authValidator;
 
     private MockMultipartFile mockLogo;
     private List<MockMultipartFile> mockActivityImages = new ArrayList<>();
@@ -100,6 +102,11 @@ class ClubControllerCreateTest {
                     new FileInputStream("src/main/resources/2020-12-25 (5).png")
             ));
         }
+        doNothing().when(authValidator).validateUpdatingClub(anyLong());
+        doNothing().when(authValidator).validateUpdatingNotice(anyLong());
+        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
+        doNothing().when(authValidator).validateUpdatingUser(anyLong());
+        doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }
 
     @Test

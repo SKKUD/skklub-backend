@@ -1,6 +1,7 @@
 package com.skklub.admin.controller.club;
 
 import akka.protobuf.WireFormat;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.error.exception.ActivityImageMisMatchException;
@@ -11,6 +12,7 @@ import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -26,7 +28,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.Optional;
 
 import static com.skklub.admin.controller.RestDocsUtils.example;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -47,12 +51,21 @@ class ClubControllerDeleteTest {
     private ClubService clubService;
     @MockBean
     private ClubRepository clubRepository;
-
     @MockBean
     private S3Transferer s3Transferer;
-
+    @MockBean
+    private AuthValidator authValidator;
     @Autowired
     private MockMvc mockMvc;
+
+    @BeforeEach
+    public void beforeEach() {
+        doNothing().when(authValidator).validateUpdatingClub(anyLong());
+        doNothing().when(authValidator).validateUpdatingNotice(anyLong());
+        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
+        doNothing().when(authValidator).validateUpdatingUser(anyLong());
+        doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
+    }
 
     @Test
     public void deleteClubById_Default_Success() throws Exception {
