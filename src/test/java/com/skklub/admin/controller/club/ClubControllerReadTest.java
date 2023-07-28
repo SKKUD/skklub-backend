@@ -16,7 +16,6 @@ import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
-import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.skklub.admin.controller.RestDocsUtils.*;
 import static java.time.LocalTime.now;
@@ -326,7 +324,7 @@ class ClubControllerReadTest {
         ClubType clubType = ClubType.중앙동아리;
         String belongs = "취미교양";
         int clubPerPage = 5;
-        PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.by("id").ascending().and(Sort.by("name").ascending()));
         List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
@@ -343,7 +341,7 @@ class ClubControllerReadTest {
                         .queryParam("belongs", belongs)
                         .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
-                        .queryParam("sort", "name,ASC")
+                        .queryParam("sort", "id,ASC")
         );
 
         //then
@@ -393,13 +391,13 @@ class ClubControllerReadTest {
     }
 
     @Test
-    public void getClubPrevByCategories_NoBelongs_Success() throws Exception{
+    public void getClubPrevByCategories_NoSort_SortByNameASC() throws Exception{
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.준중앙동아리;
         String belongs = "전체";
         int clubPerPage = 5;
-        PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.by("name").ascending());
         List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
@@ -415,7 +413,41 @@ class ClubControllerReadTest {
                         .queryParam("clubType", clubType.toString())
                         .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
-                        .queryParam("sort", "name,ASC")
+        );
+
+        //then
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(clubPerPage))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        for(int i = 0; i < clubPerPage; i++) {
+            actions = buildPageableResponseContentChecker(actions, i);
+        }
+    }
+    @Test
+    public void getClubPrevByCategories_NoBelongs_Success() throws Exception{
+        //given
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.준중앙동아리;
+        String belongs = "전체";
+        int clubPerPage = 5;
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.by("id").ascending().and(Sort.by("name").ascending()));
+        List<Club> clubs = testDataRepository.getClubs();
+        setClubIds(clubs);
+        Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
+
+        given(clubService.getClubPrevsByCategories(campus, clubType, belongs, request)).willReturn(clubPage);
+        clubPage.stream()
+                .forEach(pages -> given(s3Transferer.downloadOne(new FileNames(pages.getLogo()))).willReturn(testDataRepository.getLogoS3DownloadDto(pages.getId().intValue())));
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/club/prev")
+                        .with(csrf())
+                        .queryParam("campus", campus.toString())
+                        .queryParam("clubType", clubType.toString())
+                        .queryParam("size", String.valueOf(clubPerPage))
+                        .queryParam("page", "0")
+                        .queryParam("sort", "id,ASC")
         );
 
         //then
@@ -435,7 +467,7 @@ class ClubControllerReadTest {
         ClubType clubType = ClubType.전체;
         String belongs = "AnyBelongsString";
         int clubPerPage = 5;
-        PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.by("id").ascending().and(Sort.by("name").ascending()));
         List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
@@ -452,7 +484,7 @@ class ClubControllerReadTest {
                         .queryParam("belongs", belongs)
                         .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
-                        .queryParam("sort", "name,ASC")
+                        .queryParam("sort", "id,ASC")
         );
 
         //then
@@ -472,7 +504,7 @@ class ClubControllerReadTest {
         ClubType clubType = ClubType.전체;
         String belongs = "전체";
         int clubPerPage = 5;
-        PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.by("id").ascending().and(Sort.by("name").ascending()));
         List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
@@ -489,7 +521,7 @@ class ClubControllerReadTest {
                         .queryParam("clubType", "")
                         .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
-                        .queryParam("sort", "name,ASC")
+                        .queryParam("sort", "id,ASC")
         );
 
         //then
@@ -517,7 +549,7 @@ class ClubControllerReadTest {
                         .queryParam("belongs", belongs)
                         .queryParam("size", String.valueOf(5))
                         .queryParam("page", "0")
-                        .queryParam("sort", "name,ASC")
+                        .queryParam("sort", "campus,ASC")
         ).andExpect(status().isBadRequest()).andReturn();
 
         //then
@@ -529,11 +561,11 @@ class ClubControllerReadTest {
         //given
         String keyword = "SKKU";
         int clubPerPage = 5;
-        PageRequest request = PageRequest.of(0, clubPerPage, Sort.Direction.ASC, "name");
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.by("campus").ascending().and(Sort.by("name").ascending()));
         List<Club> clubs = testDataRepository.getClubs();
         setClubIds(clubs);
         Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
-        given(clubRepository.findClubByNameContainingOrderByName(keyword, request)).willReturn(clubPage);
+        given(clubRepository.findClubByNameContaining(keyword, request)).willReturn(clubPage);
         clubPage.stream()
                 .forEach(page -> given(s3Transferer.downloadOne(new FileNames(page.getLogo()))).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) page.getId())));
 
@@ -544,7 +576,7 @@ class ClubControllerReadTest {
                         .queryParam("keyword", keyword)
                         .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
-                        .queryParam("sort", "name,ASC")
+                        .queryParam("sort", "campus,ASC")
         );
 
         //then
@@ -583,6 +615,38 @@ class ClubControllerReadTest {
      }
 
     @Test
+    public void getClubPrevByKeyword_NoSort_SortByNameASC() throws Exception{
+        //given
+        String keyword = "SKKU";
+        int clubPerPage = 5;
+        PageRequest request = PageRequest.of(0, clubPerPage, Sort.by("name").ascending());
+        List<Club> clubs = testDataRepository.getClubs();
+        setClubIds(clubs);
+        Page<Club> clubPage = new PageImpl<>(clubs, request, clubs.size());
+        given(clubRepository.findClubByNameContaining(keyword, request)).willReturn(clubPage);
+        clubPage.stream()
+                .forEach(page -> given(s3Transferer.downloadOne(new FileNames(page.getLogo()))).willReturn(testDataRepository.getLogoS3DownloadDto((int) (long) page.getId())));
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/club/search/prevs")
+                        .with(csrf())
+                        .queryParam("keyword", keyword)
+                        .queryParam("size", String.valueOf(clubPerPage))
+                        .queryParam("page", "0")
+        );
+
+        //then
+        actions = actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(clubPerPage))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value("true"));
+        for(int i = 0; i < clubPerPage; i++) {
+            actions = buildPageableResponseContentChecker(actions, i);
+        }
+     }
+
+    @Test
     public void getClubPrevByKeyword_BlankKeyword_ReturnEmptyPage() throws Exception{
         //given
         String keyword = "";
@@ -597,7 +661,7 @@ class ClubControllerReadTest {
                         .queryParam("keyword", keyword)
                         .queryParam("size", String.valueOf(clubPerPage))
                         .queryParam("page", "0")
-                        .queryParam("sort", "name,ASC")
+                        .queryParam("sort", "campus,ASC")
         );
 
         //then

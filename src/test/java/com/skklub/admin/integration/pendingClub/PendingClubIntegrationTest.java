@@ -25,12 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Slf4j
@@ -146,10 +146,10 @@ public class PendingClubIntegrationTest {
 
     @Test
     @WithMockCustomUser(username = "testAdminID1")
-    public void getPendingList_LoginWithSuwonCentralAdmin_OnlyIncludeSuwonAdmin() throws Exception {
+    public void getPendings_LoginWithSuwonCentralAdmin_OnlyIncludeSuwonAdmin() throws Exception {
         //given
         Role role = Role.ROLE_ADMIN_SUWON_CENTRAL;
-        PageRequest pageRequest = PageRequest.of(1, 3);
+        PageRequest pageRequest = PageRequest.of(1, 3, Sort.by("clubName").ascending());
         Page<PendingInformationResponse> pendingClubs = pendingClubRepository.findAllByRequestTo(role, pageRequest)
                 .map(PendingInformationResponse::new);
         em.flush();
@@ -157,10 +157,11 @@ public class PendingClubIntegrationTest {
         UserDetails userDetails = principalDetailsService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
         //when
-        Page<PendingInformationResponse> response = pendingClubController.getPendingList(userDetails, pageRequest);
+        Page<PendingInformationResponse> response = pendingClubController.getPendings(userDetails, PageRequest.of(1, 3));
 
         //then
         Assertions.assertThat(response.getContent()).isNotEmpty();
+        Assertions.assertThat(response.getSort()).isEqualTo(Sort.by("clubName").ascending());
         Assertions.assertThat(response.getTotalPages()).isEqualTo(pendingClubs.getTotalPages());
         Assertions.assertThat(response.getTotalElements()).isEqualTo(pendingClubs.getTotalElements());
         Assertions.assertThat(response.getSize()).isEqualTo(pendingClubs.getSize());
@@ -178,10 +179,10 @@ public class PendingClubIntegrationTest {
 
     @Test
     @WithMockCustomUser(username = "testMasterID")
-    public void getPendingList_LoginWithMaster_OnlyIncludeMaster() throws Exception {
+    public void getPendings_LoginWithMaster_OnlyIncludeMaster() throws Exception {
         //given
         Role role = Role.ROLE_MASTER;
-        PageRequest pageRequest = PageRequest.of(1, 3);
+        PageRequest pageRequest = PageRequest.of(1, 3, Sort.by("clubName").ascending());
         Page<PendingInformationResponse> pendingClubs = pendingClubRepository.findAllByRequestTo(role, pageRequest)
                 .map(PendingInformationResponse::new);
         em.flush();
@@ -189,10 +190,11 @@ public class PendingClubIntegrationTest {
         UserDetails userDetails = principalDetailsService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
         //when
-        Page<PendingInformationResponse> response = pendingClubController.getPendingList(userDetails, pageRequest);
+        Page<PendingInformationResponse> response = pendingClubController.getPendings(userDetails, PageRequest.of(1, 3));
 
         //then
         Assertions.assertThat(response.getContent()).isNotEmpty();
+        Assertions.assertThat(response.getSort()).isEqualTo(Sort.by("clubName").ascending());
         Assertions.assertThat(response.getTotalPages()).isEqualTo(pendingClubs.getTotalPages());
         Assertions.assertThat(response.getTotalElements()).isEqualTo(pendingClubs.getTotalElements());
         Assertions.assertThat(response.getSize()).isEqualTo(pendingClubs.getSize());

@@ -53,10 +53,10 @@ public class ClubService {
 
     public Page<Club> getClubPrevsByCategories(Campus campus, ClubType clubType, String belongs, Pageable pageable) {
         if (!belongs.equals("전체"))
-            return clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, pageable);
+            return clubRepository.findClubByCampusAndClubTypeAndBelongs(campus, clubType, belongs, pageable);
         if (!clubType.equals(ClubType.전체))
-            return clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, pageable);
-        return clubRepository.findClubByCampusOrderByName(campus, pageable);
+            return clubRepository.findClubByCampusAndClubType(campus, clubType, pageable);
+        return clubRepository.findClubByCampus(campus, pageable);
     }
 
     public List<Club> getRandomClubsByCategories(Campus campus, ClubType clubType, String belongs) {

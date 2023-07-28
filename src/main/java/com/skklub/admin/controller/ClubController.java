@@ -9,7 +9,6 @@ import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.repository.ClubRepository;
-import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
@@ -17,7 +16,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -83,8 +84,9 @@ public class ClubController {
                                                              @RequestParam(required = false, defaultValue = "전체") ClubType clubType,
                                                              @RequestParam(required = false, defaultValue = "전체") String belongs,
                                                              Pageable pageable) {
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort().and(Sort.by("name").ascending()));
         ClubValidator.validateBelongs(campus, clubType, belongs);
-        Page<Club> clubs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageable);
+        Page<Club> clubs = clubService.getClubPrevsByCategories(campus, clubType, belongs, pageRequest);
         return convertClubsLogoToFile(clubs);
     }
 
@@ -102,7 +104,8 @@ public class ClubController {
     @GetMapping("/club/search/prevs")
     public Page<ClubPrevResponseDTO> getClubPrevByKeyword(@RequestParam String keyword, Pageable pageable) {
         if(!StringUtils.hasText(keyword)) return Page.empty();
-        Page<Club> clubs = clubRepository.findClubByNameContainingOrderByName(keyword, pageable);
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort().and(Sort.by("name").ascending()));
+        Page<Club> clubs = clubRepository.findClubByNameContaining(keyword, pageRequest);
         return convertClubsLogoToFile(clubs);
     }
 

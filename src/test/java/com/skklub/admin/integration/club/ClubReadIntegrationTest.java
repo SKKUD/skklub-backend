@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -674,9 +675,10 @@ public class ClubReadIntegrationTest {
     public void getClubPrevByCategories_NoClubType() throws Exception {
         //given
         Campus campus = Campus.명륜;
+        Pageable pageable = PageRequest.of(0, 16);
 
         //when
-        Page<ClubPrevResponseDTO> prevPages = clubController.getClubPrevByCategories(campus, ClubType.전체, "전체", null);
+        Page<ClubPrevResponseDTO> prevPages = clubController.getClubPrevByCategories(campus, ClubType.전체, "전체", pageable);
 
         //then
         Assertions.assertThat(prevPages.getTotalElements()).isEqualTo(16);
@@ -766,9 +768,10 @@ public class ClubReadIntegrationTest {
     public void getClubPrevByKeyword_NoMatch() throws Exception {
         //given
         String keyword = "NoMatch";
+        Pageable pageable = PageRequest.of(0, 20);
 
         //when
-        Page<ClubPrevResponseDTO> prevPages = clubController.getClubPrevByKeyword(keyword, null);
+        Page<ClubPrevResponseDTO> prevPages = clubController.getClubPrevByKeyword(keyword, pageable);
 
         //then
         Assertions.assertThat(prevPages).isEmpty();
@@ -778,9 +781,10 @@ public class ClubReadIntegrationTest {
     public void getClubPrevByKeyword_BlankKeyword() throws Exception {
         //given
         String keyword = "";
+        Pageable pageable = PageRequest.of(0, 20);
 
         //when
-        Page<ClubPrevResponseDTO> prevPages = clubController.getClubPrevByKeyword(keyword, null);
+        Page<ClubPrevResponseDTO> prevPages = clubController.getClubPrevByKeyword(keyword, pageable);
 
         //then
         Assertions.assertThat(prevPages).isEmpty();

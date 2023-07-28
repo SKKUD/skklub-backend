@@ -21,11 +21,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import java.awt.print.Pageable;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -130,7 +128,7 @@ class ClubRepositoryTest {
     }
 
     @Test
-    public void findClubByNameContainingOrderByName_Default_Success() throws Exception{
+    public void findClubByNameContaining_Default_Success() throws Exception{
         //given
         PageRequest request = PageRequest.of(0, 3, Sort.Direction.ASC, "name");
         clubRepository.save(testDataRepository.getCleanClub(0));
@@ -143,11 +141,11 @@ class ClubRepositoryTest {
         em.clear();
 
         //when
-        Page<Club> firstWordSame = clubRepository.findClubByNameContainingOrderByName("정", request);
+        Page<Club> firstWordSame = clubRepository.findClubByNameContaining("정", request);
         em.clear();
-        Page<Club> middleWordSame = clubRepository.findClubByNameContainingOrderByName("럽 S", request);
-        Page<Club> blank = clubRepository.findClubByNameContainingOrderByName(" ", request);
-        Page<Club> exactlySame = clubRepository.findClubByNameContainingOrderByName("정상적인 클럽 SKKULOL0", request);
+        Page<Club> middleWordSame = clubRepository.findClubByNameContaining("럽 S", request);
+        Page<Club> blank = clubRepository.findClubByNameContaining(" ", request);
+        Page<Club> exactlySame = clubRepository.findClubByNameContaining("정상적인 클럽 SKKULOL0", request);
 
         //then
         Assertions.assertThat(firstWordSame.getTotalElements()).isEqualTo(6);
@@ -158,7 +156,7 @@ class ClubRepositoryTest {
     }
     
     @Test
-    public void findClubByCampusOrderByName_Default_FetchLogoAndOrderByNameFirst() throws Exception{
+    public void findClubByCampus_Default_FetchLogoAndOrderByNameFirst() throws Exception{
         //given
         Campus campus = Campus.율전;
         Long cnt = em.createQuery("select count(c) from Club c inner join c.logo l where c.campus = :campus", Long.class)
@@ -181,10 +179,10 @@ class ClubRepositoryTest {
         }
         em.flush();
         em.clear();
-        PageRequest request = PageRequest.of(0, 3, Sort.Direction.ASC, "id");
+        PageRequest request = PageRequest.of(0, 3, Sort.Direction.ASC, "name");
 
         //when
-        Page<Club> clubs = clubRepository.findClubByCampusOrderByName(campus, request);
+        Page<Club> clubs = clubRepository.findClubByCampus(campus, request);
 
         //then
         Assertions.assertThat(clubs.getTotalElements()).isEqualTo(cnt + 4);
@@ -198,7 +196,7 @@ class ClubRepositoryTest {
     }
 
     @Test
-    public void findClubByCampusAndClubTypeOrderByName_Default_FetchLogoAndorderByNameFirst() throws Exception{
+    public void findClubByCampusAndClubType_Default_FetchLogoAndorderByNameFirst() throws Exception{
         //given
         for(int i = 0; i < 8; i++){
             Logo logo = testDataRepository.getLogos().get(i);
@@ -216,12 +214,12 @@ class ClubRepositoryTest {
         }
         em.flush();
         em.clear();
-        PageRequest request = PageRequest.of(0, 3, Sort.Direction.ASC, "id");
+        PageRequest request = PageRequest.of(0, 3, Sort.Direction.ASC, "name");
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.기타동아리;
 
         //when
-        Page<Club> clubs = clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, request);
+        Page<Club> clubs = clubRepository.findClubByCampusAndClubType(campus, clubType, request);
 
         //then
         Assertions.assertThat(clubs.getTotalElements()).isEqualTo(4);
@@ -232,7 +230,7 @@ class ClubRepositoryTest {
     }
 
     @Test
-    public void findClubByCampusAndClubTypeAndBelongsOrderByName_Default_FetchLogoAndorderByNameFirst() throws Exception{
+    public void findClubByCampusAndClubTypeAndBelongs_Default_FetchLogoAndorderByNameFirst() throws Exception{
         //given
         for(int i = 0; i < 8; i++){
             Logo logo = testDataRepository.getLogos().get(i);
@@ -250,14 +248,14 @@ class ClubRepositoryTest {
         }
         em.flush();
         em.clear();
-        PageRequest request = PageRequest.of(0, 3, Sort.Direction.ASC, "id");
+        PageRequest request = PageRequest.of(0, 3, Sort.Direction.ASC, "name");
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.중앙동아리;
         String belongs = "종교";
 
 
         //when
-        Page<Club> clubs = clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, request);
+        Page<Club> clubs = clubRepository.findClubByCampusAndClubTypeAndBelongs(campus, clubType, belongs, request);
 
         //then
         Assertions.assertThat(clubs.getTotalElements()).isEqualTo(4);
