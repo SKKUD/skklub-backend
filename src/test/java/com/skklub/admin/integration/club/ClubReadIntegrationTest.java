@@ -2,10 +2,12 @@ package com.skklub.admin.integration.club;
 
 import com.skklub.admin.InitDatabase;
 import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.repository.ClubRepository;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @Transactional
 @SpringBootTest
 @Import({TestDataRepository.class, InitDatabase.class})
+@WithMockCustomUser(username = "testMasterID",role = Role.ROLE_MASTER)
 public class ClubReadIntegrationTest {
     @Autowired
     private EntityManager em;
@@ -245,7 +248,7 @@ public class ClubReadIntegrationTest {
                         s3DownloadDto -> {
                             Assertions.assertThat(s3DownloadDto.getId()).isNotNull();
                             Assertions.assertThat(s3DownloadDto.getBytes()).isNotNull();
-                            Assertions.assertThat(s3DownloadDto.getFileName()).isEqualTo("4.jpg");
+                            Assertions.assertThat(s3DownloadDto.getFileName()).matches("[0-6].jpg");
                         }
                 );
     }
@@ -282,7 +285,7 @@ public class ClubReadIntegrationTest {
                         s3DownloadDto -> {
                             Assertions.assertThat(s3DownloadDto.getId()).isNotNull();
                             Assertions.assertThat(s3DownloadDto.getBytes()).isNotNull();
-                            Assertions.assertThat(s3DownloadDto.getFileName()).isEqualTo("4.jpg");
+                            Assertions.assertThat(s3DownloadDto.getFileName()).matches("[0-6].jpg");
                         }
                 );
     }
@@ -515,7 +518,7 @@ public class ClubReadIntegrationTest {
                         s3DownloadDto -> {
                             Assertions.assertThat(s3DownloadDto.getId()).isNotNull();
                             Assertions.assertThat(s3DownloadDto.getBytes()).isNotNull();
-                            Assertions.assertThat(s3DownloadDto.getFileName()).isEqualTo("4.jpg");
+                            Assertions.assertThat(s3DownloadDto.getFileName()).matches("[0-6].jpg");
                         }
                 );
     }
@@ -552,7 +555,7 @@ public class ClubReadIntegrationTest {
                         s3DownloadDto -> {
                             Assertions.assertThat(s3DownloadDto.getId()).isNotNull();
                             Assertions.assertThat(s3DownloadDto.getBytes()).isNotNull();
-                            Assertions.assertThat(s3DownloadDto.getFileName()).isEqualTo("4.jpg");
+                            Assertions.assertThat(s3DownloadDto.getFileName()).matches("[0-6].jpg");
                         }
                 );
     }

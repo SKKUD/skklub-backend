@@ -3,6 +3,7 @@ package com.skklub.admin.controller.recruit;
 import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.RecruitController;
 import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.domain.Club;
@@ -11,6 +12,7 @@ import com.skklub.admin.error.exception.*;
 import com.skklub.admin.service.RecruitService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +34,8 @@ import java.lang.reflect.Field;
 import java.util.Optional;
 
 import static com.skklub.admin.controller.RestDocsUtils.example;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -56,10 +58,19 @@ class RecruitControllerTest {
     private MockMvc mockMvc;
     @MockBean
     private RecruitService recruitService;
+    @MockBean
+    private AuthValidator authValidator;
     @InjectMocks
     private TestDataRepository testDataRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
+
+    @BeforeEach
+    public void beforeEach() {
+        doNothing().when(authValidator).validateUpdatingClub(anyLong());
+        doNothing().when(authValidator).validateUpdatingNotice(anyLong());
+        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
+        doNothing().when(authValidator).validateUpdatingUser(anyLong());
+        doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
+    }
 
 
     @Test
@@ -71,6 +82,7 @@ class RecruitControllerTest {
         RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         Recruit recruit = recruitDto.toEntity();
         given(recruitService.startRecruit(clubId, recruit)).willReturn(Optional.of(club.getName()));
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -117,8 +129,8 @@ class RecruitControllerTest {
         Long recruitId = 0L;
         RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         Recruit recruit = recruitDto.toEntity();
-        String recruitDtoJson = objectMapper.writeValueAsString(recruitDto);
         given(recruitService.startRecruit(clubId, recruit)).willReturn(Optional.empty());
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         MvcResult badClubIdResult = mockMvc.perform(
@@ -144,6 +156,7 @@ class RecruitControllerTest {
         RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         Recruit recruit = recruitDto.toEntity();
         given(recruitService.startRecruit(clubId, recruit)).willThrow(AlreadyRecruitingException.class);
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         MvcResult doubleRecruitResult = mockMvc.perform(
@@ -175,6 +188,7 @@ class RecruitControllerTest {
         bothNull.setRecruitStartAt(null);
         bothNull.setRecruitEndAt(null);
         given(recruitService.startRecruit(eq(clubId), any(Recruit.class))).willReturn(Optional.of(clubName));
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         mockMvc.perform(
@@ -213,6 +227,7 @@ class RecruitControllerTest {
         RecruitDto startTimeNull = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
         startTimeNull.setRecruitStartAt(null);
         given(recruitService.startRecruit(eq(clubId), any(Recruit.class))).willReturn(Optional.of(clubName));
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         MvcResult startNullResult = mockMvc.perform(
@@ -245,14 +260,15 @@ class RecruitControllerTest {
     @Test
     public void updateRecruit_Default_Success() throws Exception {
         //given
-        Long recruitId = 0L;
-        RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
+        Long clubId = 0L;
+        RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
         Recruit recruit = recruitDto.toEntity();
-        given(recruitService.updateRecruit(recruitId, recruit)).willReturn(Optional.of(recruitId));
+        given(recruitService.updateRecruit(clubId, recruit)).willReturn(Optional.of(clubId));
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         ResultActions actions = mockMvc.perform(
-                patch("/recruit/{recruitId}", recruitId)
+                patch("/recruit/{clubId}", clubId)
                         .queryParam("recruitStartAt", Optional.ofNullable(recruitDto.getRecruitStartAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitEndAt", Optional.ofNullable(recruitDto.getRecruitEndAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitQuota", recruitDto.getRecruitQuota())
@@ -264,11 +280,11 @@ class RecruitControllerTest {
 
         //then
         actions.andExpect(status().isOk())
-                .andExpect(content().json(recruitId.toString()))
+                .andExpect(content().json(clubId.toString()))
                 .andDo(
                         document("recruit/update",
                                 pathParameters(
-                                        parameterWithName("recruitId").description("모집 정보 ID").attributes(example("1"))
+                                        parameterWithName("clubId").description("모집중인 동아리 ID").attributes(example("1"))
                                 ),
                                 queryParameters(
                                         parameterWithName("recruitStartAt").description("모집 시작일").attributes(example("yyyy-MM-ddTHH:mm(T는 날짜랑 시간 구분용 문자)")).optional(),
@@ -286,16 +302,17 @@ class RecruitControllerTest {
     @Test
     public void updateRecruit_NullAtNotNull_BindException() throws Exception {
         //given
-        Long recruitId = 0L;
-        RecruitDto nullAtQuota = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
+        Long clubId = 0L;
+        RecruitDto nullAtQuota = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
         nullAtQuota.setRecruitQuota(null);
 
-        RecruitDto blankAtDescription = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto blankAtDescription = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
         blankAtDescription.setRecruitProcessDescription("  ");
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         MvcResult nullQuotaResult = mockMvc.perform(
-                patch("/recruit/{recruitId}", recruitId)
+                patch("/recruit/{clubId}", clubId)
                         .queryParam("recruitStartAt", Optional.ofNullable(nullAtQuota.getRecruitStartAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitEndAt", Optional.ofNullable(nullAtQuota.getRecruitEndAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitQuota", nullAtQuota.getRecruitQuota())
@@ -306,7 +323,7 @@ class RecruitControllerTest {
         ).andExpect(status().isBadRequest()).andReturn();
 
         MvcResult blankDescriptionResult = mockMvc.perform(
-                patch("/recruit/{recruitId}", recruitId)
+                patch("/recruit/{clubId}", clubId)
                         .queryParam("recruitStartAt", Optional.ofNullable(blankAtDescription.getRecruitStartAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitEndAt", Optional.ofNullable(blankAtDescription.getRecruitEndAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitQuota", blankAtDescription.getRecruitQuota())
@@ -325,16 +342,17 @@ class RecruitControllerTest {
     @Test
     public void updateRecruit_BothTimeNullOrNotNUll_Success() throws Exception {
         //given
-        Long recruitId = 0L;
-        RecruitDto fullTime = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
-        RecruitDto bothNull = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
+        Long clubId = 0L;
+        RecruitDto fullTime = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
+        RecruitDto bothNull = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
         bothNull.setRecruitStartAt(null);
         bothNull.setRecruitEndAt(null);
-        given(recruitService.updateRecruit(eq(recruitId), any(Recruit.class))).willReturn(Optional.of(recruitId));
+        given(recruitService.updateRecruit(eq(clubId), any(Recruit.class))).willReturn(Optional.of(clubId));
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         mockMvc.perform(
-                patch("/recruit/{clubId}", recruitId)
+                patch("/recruit/{clubId}", clubId)
                         .queryParam("recruitStartAt", Optional.ofNullable(fullTime.getRecruitStartAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitEndAt", Optional.ofNullable(fullTime.getRecruitEndAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitQuota", fullTime.getRecruitQuota())
@@ -344,7 +362,7 @@ class RecruitControllerTest {
                         .with(csrf())
         ).andExpect(status().isOk());
         mockMvc.perform(
-                patch("/recruit/{clubId}", recruitId)
+                patch("/recruit/{clubId}", clubId)
                         .queryParam("recruitStartAt", Optional.ofNullable(bothNull.getRecruitStartAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitEndAt", Optional.ofNullable(bothNull.getRecruitEndAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitQuota", bothNull.getRecruitQuota())
@@ -360,18 +378,18 @@ class RecruitControllerTest {
     @Test
     public void updateRecruit_OnlyOneTimeNull_AllTimeRecruitTimeFormattingException() throws Exception {
         //given
-        Long recruitId = 0L;
-        RecruitDto endTimeNull = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
+        Long clubId = 0L;
+        RecruitDto endTimeNull = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
         endTimeNull.setRecruitEndAt(null);
 
-        RecruitDto startTimeNull = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitDto startTimeNull = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
         startTimeNull.setRecruitStartAt(null);
-        given(recruitService.updateRecruit(eq(recruitId), any(Recruit.class))).willReturn(Optional.of(recruitId));
+        given(recruitService.updateRecruit(eq(clubId), any(Recruit.class))).willReturn(Optional.of(clubId));
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         MvcResult startNullResult = mockMvc.perform(
-                patch("/recruit/{clubId}", recruitId)
-                        .queryParam("recruitStartAt", Optional.ofNullable(startTimeNull.getRecruitStartAt()).map(Object::toString).orElse(""))
+                patch("/recruit/{clubId}", clubId)
                         .queryParam("recruitEndAt", Optional.ofNullable(startTimeNull.getRecruitEndAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitQuota", startTimeNull.getRecruitQuota())
                         .queryParam("recruitProcessDescription", startTimeNull.getRecruitProcessDescription())
@@ -380,9 +398,8 @@ class RecruitControllerTest {
                         .with(csrf())
         ).andExpect(status().isBadRequest()).andReturn();
         MvcResult endNullResult = mockMvc.perform(
-                patch("/recruit/{clubId}", recruitId)
+                patch("/recruit/{clubId}", clubId)
                         .queryParam("recruitStartAt", Optional.ofNullable(endTimeNull.getRecruitStartAt()).map(Object::toString).orElse(""))
-                        .queryParam("recruitEndAt", Optional.ofNullable(endTimeNull.getRecruitEndAt()).map(Object::toString).orElse(""))
                         .queryParam("recruitQuota", endTimeNull.getRecruitQuota())
                         .queryParam("recruitProcessDescription", endTimeNull.getRecruitProcessDescription())
                         .queryParam("recruitContact", endTimeNull.getRecruitContact())
@@ -401,6 +418,7 @@ class RecruitControllerTest {
         //given
         Long clubId = 0L;
         doNothing().when(recruitService).endRecruit(clubId);
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -424,6 +442,7 @@ class RecruitControllerTest {
         //given
         Long clubId = -1L;
         doThrow(RecruitIdMisMatchException.class).when(recruitService).endRecruit(clubId);
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         MvcResult result = mockMvc.perform(
@@ -441,6 +460,7 @@ class RecruitControllerTest {
         //given
         Long clubId = -1L;
         doThrow(NotRecruitingException.class).when(recruitService).endRecruit(clubId);
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         MvcResult result = mockMvc.perform(

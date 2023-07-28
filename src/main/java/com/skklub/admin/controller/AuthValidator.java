@@ -1,15 +1,17 @@
 
 package com.skklub.admin.controller;
 
+import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.DeletedClub;
+import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.error.exception.PendingClubIdMisMatchException;
 import com.skklub.admin.exception.AuthException;
 import com.skklub.admin.exception.ErrorCode;
-import com.skklub.admin.repository.ClubRepository;
-import com.skklub.admin.repository.NoticeRepository;
-import com.skklub.admin.repository.PendingClubRepository;
-import com.skklub.admin.repository.UserRepository;
+import com.skklub.admin.repository.*;
 import com.skklub.admin.security.auth.PrincipalDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,10 +33,11 @@ public class AuthValidator {
     private final ClubRepository clubRepository;
     private final NoticeRepository noticeRepository;
     private final PendingClubRepository pendingClubRepository;
+    private final DeletedClubRepository deletedClubRepository;
 
-    public void validateUpdatingUser(Long updatedUserId) throws AuthException{
+    public void validateUpdatingUser(Long userId) throws AuthException{
         //수정 권한자로 등록된 유저 확인
-        User registeredUser = Optional.of(userRepository.findById(updatedUserId).get())
+        User registeredUser = Optional.of(userRepository.findById(userId).get())
                 .orElseThrow(() ->
                         new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
         //업데이트 대상 계정과 로그인된 계정 일치 여부 확인
@@ -50,17 +53,24 @@ public class AuthValidator {
     }
 
     public void validateUpdatingClub(Long clubId) throws AuthException{
-        User registeredUser = Optional.of(clubRepository.findById(clubId).get().getPresident())
-                .orElseThrow(() ->
-                        new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
-        validateUpdatingUser(registeredUser.getId());
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(ClubIdMisMatchException::new);
+        User user = club.getPresident();
+        validateUpdatingUser(user.getId());
+    }
+
+    public void validateDeletionAuth(Long deletedClubId) throws AuthException{
+        DeletedClub club = deletedClubRepository.findById(deletedClubId)
+                .orElseThrow(ClubIdMisMatchException::new);
+        User user = userRepository.findById(club.getUserId()).orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
+        validateUpdatingUser(user.getId());
     }
 
     public void validateUpdatingNotice(Long noticeId) throws AuthException{
-        User registeredUser = Optional.of(noticeRepository.findById(noticeId).get().getWriter())
-                .orElseThrow(() ->
-                        new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
-        validateUpdatingUser(registeredUser.getId());
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(NoticeIdMisMatchException::new);
+        User writer = notice.getWriter();
+        validateUpdatingUser(writer.getId());
     }
 
     public void validateUpdatingRecruit(Long recruitId) throws AuthException{

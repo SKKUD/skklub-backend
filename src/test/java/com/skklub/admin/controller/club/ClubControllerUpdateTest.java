@@ -2,6 +2,7 @@ package com.skklub.admin.controller.club;
 
 
 import akka.protobuf.WireFormat;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
@@ -73,6 +74,8 @@ class ClubControllerUpdateTest {
     private S3Transferer s3Transferer;
     @MockBean
     private ClubRepository clubRepository;
+    @MockBean
+    private AuthValidator authValidator;
     @InjectMocks
     private TestDataRepository testDataRepository;
 
@@ -86,6 +89,11 @@ class ClubControllerUpdateTest {
                 ContentType.MULTIPART_FORM_DATA.toString(),
                 new FileInputStream("src/main/resources/2020-12-25 (5).png")
         );
+        doNothing().when(authValidator).validateUpdatingClub(anyLong());
+        doNothing().when(authValidator).validateUpdatingNotice(anyLong());
+        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
+        doNothing().when(authValidator).validateUpdatingUser(anyLong());
+        doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }
 
     @Test
@@ -93,8 +101,8 @@ class ClubControllerUpdateTest {
         //given
         Long clubId = 0L;
         Long changeToId = 1L;
-        Club club = testDataRepository.getClubs().get(clubId.intValue());
         Club changeTo = testDataRepository.getClubs().get(changeToId.intValue());
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         given(clubService.updateClub(eq(clubId), any(Club.class))).willReturn(Optional.ofNullable(changeTo.getName()));
 
         //when
@@ -102,9 +110,6 @@ class ClubControllerUpdateTest {
                 patch("/club/{clubId}", clubId)
                         .with(csrf())
                         .queryParam("clubName", changeTo.getName())
-                        .queryParam("campus", changeTo.getCampus().toString())
-                        .queryParam("clubType", changeTo.getClubType().toString())
-                        .queryParam("belongs", changeTo.getBelongs())
                         .queryParam("briefActivityDescription", changeTo.getBriefActivityDescription())
                         .queryParam("activityDescription", changeTo.getActivityDescription())
                         .queryParam("clubDescription", changeTo.getClubDescription())
@@ -129,9 +134,6 @@ class ClubControllerUpdateTest {
                                 ),
                                 queryParameters(
                                         parameterWithName("clubName").description("동아리 이름").attributes(example("클럽 SKKULOL")),
-                                        parameterWithName("campus").description("분류 - 캠퍼스").attributes(example(LINK_CAMPUS_TYPE)),
-                                        parameterWithName("clubType").description("분류 - 동아리 종류").attributes(example(RestDocsUtils.LINK_CLUB_TYPE)),
-                                        parameterWithName("belongs").description("분류 - 동아리 분과").attributes(example(RestDocsUtils.LINK_BELONGS_TYPE)),
                                         parameterWithName("briefActivityDescription").description(" 분류 - 활동 설명").attributes(example("E-SPORTS")),
                                         parameterWithName("activityDescription").description("자세한 활동 설명").attributes(example("1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")),
                                         parameterWithName("clubDescription").description("자세한 동아리 설명").attributes(example("여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")),
@@ -154,47 +156,11 @@ class ClubControllerUpdateTest {
     }
 
     @Test
-    public void updateClub_IllegalBelongs_InvalidBelongsException() throws Exception {
-        //given
-        Long clubId = 0L;
-        Long changeToId = 1L;
-        Club changeTo = testDataRepository.getClubs().get(changeToId.intValue());
-
-        Campus campus = Campus.명륜;
-        ClubType clubType = ClubType.중앙동아리;
-        String belongs = "IllegalBelongs";
-
-        //when
-        MvcResult badBelongsResult = mockMvc.perform(
-                patch("/club/{clubId}", clubId)
-                        .with(csrf())
-                        .queryParam("clubName", changeTo.getName())
-                        .queryParam("campus", campus.toString())
-                        .queryParam("clubType", clubType.toString())
-                        .queryParam("belongs", belongs)
-                        .queryParam("briefActivityDescription", changeTo.getBriefActivityDescription())
-                        .queryParam("activityDescription", changeTo.getActivityDescription())
-                        .queryParam("clubDescription", changeTo.getClubDescription())
-                        .queryParam("establishDate", changeTo.getEstablishAt().toString())
-                        .queryParam("headLine", changeTo.getHeadLine())
-                        .queryParam("mandatoryActivatePeriod", changeTo.getMandatoryActivatePeriod())
-                        .queryParam("memberAmount", changeTo.getMemberAmount().toString())
-                        .queryParam("regularMeetingTime", changeTo.getRegularMeetingTime())
-                        .queryParam("roomLocation", changeTo.getRoomLocation())
-                        .queryParam("webLink1", changeTo.getWebLink1())
-                        .queryParam("webLink2", changeTo.getWebLink2())
-        ).andExpect(status().isBadRequest()).andReturn();
-
-        //then
-        Assertions.assertThat(badBelongsResult.getResolvedException()).isExactlyInstanceOf(InvalidBelongsException.class);
-
-    }
-
-    @Test
     public void updateClub_IllegalClubId_ClubIdMisMatchException() throws Exception {
         //given
         Long clubId = -1L;
         Club club = testDataRepository.getClubs().get(0);
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         given(clubService.updateClub(eq(clubId), any(Club.class))).willReturn(Optional.empty());
 
         //when
@@ -228,6 +194,7 @@ class ClubControllerUpdateTest {
         String oldLogoName = "savedOldLogo.jpg";
         FileNames fileNames = new FileNames("TestLogo.jpg", "savedTestLogo.jpg");
         Logo logo = fileNames.toLogoEntity();
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         given(s3Transferer.uploadOne(mockLogo)).willReturn(fileNames);
         given(clubService.updateLogo(clubId, logo)).willReturn(Optional.of(oldLogoName));
         doNothing().when(s3Transferer).deleteOne(oldLogoName);
@@ -270,6 +237,7 @@ class ClubControllerUpdateTest {
         Long clubId = 0L;
         String oldLogoName = "alt.jpg";
         FileNames fileNames = new FileNames("TestLogo.jpg", "savedTestLogo.jpg");
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         given(s3Transferer.uploadOne(mockLogo)).willReturn(fileNames);
         given(clubService.updateLogo(clubId, fileNames.toLogoEntity())).willReturn(Optional.of(oldLogoName));
         doThrow(IllegalCallerException.class).when(s3Transferer).deleteOne(anyString());
@@ -295,6 +263,7 @@ class ClubControllerUpdateTest {
         //given
         Long clubId = -1L;
         FileNames fileNames = new FileNames("TestLogo.jpg", "savedTestLogo.jpg");
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         given(s3Transferer.uploadOne(mockLogo)).willReturn(fileNames);
         given(clubService.updateLogo(clubId, fileNames.toLogoEntity())).willReturn(Optional.empty());
 
@@ -315,6 +284,7 @@ class ClubControllerUpdateTest {
     public void updateLogo_NoLogoFile_MissingServletRequestParameterException() throws Exception {
         //given
         Long clubId = 0L;
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         MvcResult noLogoResult = mockMvc.perform(
@@ -335,6 +305,7 @@ class ClubControllerUpdateTest {
         Club club = testDataRepository.getCleanClub(1);
         setClubId(club, clubId);
         changeClubType(club, ClubType.중앙동아리);
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         doAnswer(
                 invocation -> {
                     changeClubType(club,ClubType.준중앙동아리);
@@ -382,6 +353,7 @@ class ClubControllerUpdateTest {
         Club club = testDataRepository.getCleanClub(1);
         setClubId(club, clubId);
         changeClubType(club, ClubType.중앙동아리);
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         given(clubService.downGrade(clubId)).willThrow(CannotDownGradeClubException.class);
 
         //when
@@ -398,6 +370,7 @@ class ClubControllerUpdateTest {
     public void downGradeClub_BadClubId_ClubIdMisMatchException() throws Exception{
         //given
         Long clubId = 31L;
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         given(clubService.downGrade(clubId)).willReturn(Optional.empty());
 
         //when
@@ -417,6 +390,7 @@ class ClubControllerUpdateTest {
         Club club = testDataRepository.getCleanClub(1);
         setClubId(club, clubId);
         changeClubType(club, ClubType.준중앙동아리);
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         doAnswer(
                 invocation -> {
                     changeClubType(club,ClubType.중앙동아리);
@@ -464,6 +438,7 @@ class ClubControllerUpdateTest {
         Club club = testDataRepository.getCleanClub(1);
         setClubId(club, clubId);
         changeClubType(club, ClubType.준중앙동아리);
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         given(clubService.upGrade(clubId)).willThrow(CannotUpGradeClubException.class);
 
         //when
@@ -477,8 +452,9 @@ class ClubControllerUpdateTest {
     }
 
     @Test
-    public void upGradeClub_BadClubId_CLubIdMisMatchException() throws Exception{
+    public void upGradeClub_BadClubId_ClubIdMisMatchException() throws Exception{
         Long clubId = 31L;
+        doNothing().when(authValidator).validateUpdatingClub(clubId);
         given(clubService.upGrade(clubId)).willReturn(Optional.empty());
 
         //when

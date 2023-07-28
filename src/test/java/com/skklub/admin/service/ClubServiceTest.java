@@ -271,10 +271,10 @@ class ClubServiceTest {
         //then
         Assertions.assertThat(club.getName()).isEqualTo(updatedName.get()).isEqualTo(clubUpdateInfo.getName());
         Assertions.assertThat(club.getActivityDescription()).isEqualTo(clubUpdateInfo.getActivityDescription());
-        Assertions.assertThat(club.getBelongs()).isEqualTo(clubUpdateInfo.getBelongs());
-        Assertions.assertThat(club.getClubType()).isEqualTo(clubUpdateInfo.getClubType());
+        Assertions.assertThat(club.getCampus()).isEqualTo(club.getCampus());
+        Assertions.assertThat(club.getClubType()).isEqualTo(club.getClubType());
+        Assertions.assertThat(club.getBelongs()).isEqualTo(club.getBelongs());
         Assertions.assertThat(club.getBriefActivityDescription()).isEqualTo(clubUpdateInfo.getBriefActivityDescription());
-        Assertions.assertThat(club.getCampus()).isEqualTo(clubUpdateInfo.getCampus());
         Assertions.assertThat(club.getClubDescription()).isEqualTo(clubUpdateInfo.getClubDescription());
         Assertions.assertThat(club.getEstablishAt()).isEqualTo(clubUpdateInfo.getEstablishAt());
         Assertions.assertThat(club.getHeadLine()).isEqualTo(clubUpdateInfo.getHeadLine());

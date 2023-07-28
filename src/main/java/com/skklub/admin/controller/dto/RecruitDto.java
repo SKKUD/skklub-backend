@@ -33,6 +33,8 @@ public class RecruitDto {
     private String recruitWebLink;
 
     public RecruitDto(Recruit recruit) {
+        this.recruitStartAt = recruit.getStartAt();
+        this.recruitEndAt = recruit.getEndAt();
         this.recruitQuota = recruit.getQuota();
         this.recruitProcessDescription = recruit.getProcessDescription();
         this.recruitContact = recruit.getContact();

@@ -1,5 +1,6 @@
 package com.skklub.admin.integration.notice;
 
+import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.*;
@@ -40,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Slf4j
 @SpringBootTest
 @Transactional
+@WithMockCustomUser(username = "testMasterID",role = Role.ROLE_MASTER)
 public class NoticeQueryIntegrationTest {
     @Autowired
     private EntityManager em;
@@ -75,7 +77,7 @@ public class NoticeQueryIntegrationTest {
         Assertions.assertThat(response.getNoticeId()).isEqualTo(noticeId);
         Assertions.assertThat(response.getTitle()).isEqualTo(notice.getTitle());
         Assertions.assertThat(response.getContent()).isEqualTo(notice.getContent());
-        Assertions.assertThat(response.getCreatedAt()).isEqualTo(notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES));
+        Assertions.assertThat(response.getCreatedAt()).isEqualTo(notice.getCreatedAt());
         Assertions.assertThat(response.getWriterName()).isEqualTo(writer.getName());
         Assertions.assertThat(response.getExtraFileNames()).hasSize(extraFiles.size());
         Assertions.assertThat(response.getExtraFileNames()).containsAll(
@@ -115,7 +117,7 @@ public class NoticeQueryIntegrationTest {
         Assertions.assertThat(response.getNoticeId()).isEqualTo(noticeId);
         Assertions.assertThat(response.getTitle()).isEqualTo(notice.getTitle());
         Assertions.assertThat(response.getContent()).isEqualTo(notice.getContent());
-        Assertions.assertThat(response.getCreatedAt()).isEqualTo(notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES));
+        Assertions.assertThat(response.getCreatedAt()).isEqualTo(notice.getCreatedAt());
         Assertions.assertThat(response.getWriterName()).isEqualTo(writer.getName());
         Assertions.assertThat(response.getExtraFileNames()).hasSize(extraFiles.size());
         Assertions.assertThat(response.getExtraFileNames()).containsAll(
@@ -154,7 +156,7 @@ public class NoticeQueryIntegrationTest {
         Assertions.assertThat(response.getNoticeId()).isEqualTo(noticeId);
         Assertions.assertThat(response.getTitle()).isEqualTo(notice.getTitle());
         Assertions.assertThat(response.getContent()).isEqualTo(notice.getContent());
-        Assertions.assertThat(response.getCreatedAt()).isEqualTo(notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES));
+        Assertions.assertThat(response.getCreatedAt()).isEqualTo(notice.getCreatedAt());
         Assertions.assertThat(response.getWriterName()).isEqualTo(writer.getName());
         Assertions.assertThat(response.getExtraFileNames()).hasSize(extraFiles.size());
         Assertions.assertThat(response.getExtraFileNames()).containsAll(
@@ -201,7 +203,7 @@ public class NoticeQueryIntegrationTest {
             Assertions.assertThat(notices.stream().map(Notice::getId)).contains(r.getNoticeId());
             Assertions.assertThat(notices.stream().map(Notice::getContent)).contains(r.getContent());
             Assertions.assertThat(notices.stream().map(Notice::getTitle)).contains(r.getTitle());
-            Assertions.assertThat(notices.stream().map(Notice::getCreatedAt).map(c -> c.truncatedTo(ChronoUnit.MINUTES))).contains(r.getCreatedAt());
+            Assertions.assertThat(notices.stream().map(Notice::getCreatedAt)).contains(r.getCreatedAt());
         }
         List<S3DownloadDto> s3DownloadDtos = notices.stream()
                 .map(Notice::getThumbnail)
@@ -245,7 +247,7 @@ public class NoticeQueryIntegrationTest {
             Assertions.assertThat(notices.stream().map(Notice::getId)).contains(r.getNoticeId());
             Assertions.assertThat(notices.stream().map(Notice::getTitle)).contains(r.getTitle());
             Assertions.assertThat(notices.stream().map(Notice::getWriter).map(User::getName)).contains(r.getWriterName());
-            Assertions.assertThat(notices.stream().map(Notice::getCreatedAt).map(c -> c.truncatedTo(ChronoUnit.MINUTES))).contains(r.getCreatedAt());
+            Assertions.assertThat(notices.stream().map(Notice::getCreatedAt)).contains(r.getCreatedAt());
         }
 
     }
@@ -274,7 +276,7 @@ public class NoticeQueryIntegrationTest {
             Assertions.assertThat(notices.stream().map(Notice::getId)).contains(r.getNoticeId());
             Assertions.assertThat(notices.stream().map(Notice::getTitle)).contains(r.getTitle());
             Assertions.assertThat(notices.stream().map(Notice::getWriter).map(User::getName)).contains(r.getWriterName());
-            Assertions.assertThat(notices.stream().map(Notice::getCreatedAt).map(c -> c.truncatedTo(ChronoUnit.MINUTES))).contains(r.getCreatedAt());
+            Assertions.assertThat(notices.stream().map(Notice::getCreatedAt)).contains(r.getCreatedAt());
         }
 
     }

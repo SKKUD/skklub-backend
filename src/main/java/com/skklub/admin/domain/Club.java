@@ -107,12 +107,24 @@ public class Club extends BaseEntity {
         this.president = user;
     }
 
+    public Club(String clubName, String activityDescription, String briefActivityDescription, String clubDescription, Integer establishDate, String headLine, String mandatoryActivatePeriod, Integer memberAmount, String regularMeetingTime, String roomLocation, String webLink1, String webLink2) {
+        this.name = clubName;
+        this.activityDescription = activityDescription;
+        this.briefActivityDescription = briefActivityDescription;
+        this.clubDescription = clubDescription;
+        this.establishAt = establishDate;
+        this.headLine = headLine;
+        this.mandatoryActivatePeriod = mandatoryActivatePeriod;
+        this.memberAmount = memberAmount;
+        this.regularMeetingTime = regularMeetingTime;
+        this.roomLocation = roomLocation;
+        this.webLink1 = webLink1;
+        this.webLink2 = webLink2;
+    }
+
     public void update(Club updateInfo
     ) {
         this.name = updateInfo.name;
-        this.campus = updateInfo.campus;
-        this.clubType = updateInfo.clubType;
-        this.belongs = updateInfo.belongs;
         this.activityDescription = updateInfo.activityDescription;
         this.briefActivityDescription = updateInfo.briefActivityDescription;
         this.clubDescription = updateInfo.clubDescription;

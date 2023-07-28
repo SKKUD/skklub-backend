@@ -1,6 +1,7 @@
-package com.skklub.admin.integration;
+package com.skklub.admin.integration.recruit;
 
 import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.RecruitController;
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
@@ -8,6 +9,7 @@ import com.skklub.admin.controller.dto.ClubNameAndIdDTO;
 import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Recruit;
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.RecruitRepository;
 import jakarta.persistence.EntityManager;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -26,6 +29,7 @@ import java.util.Optional;
 @SpringBootTest
 @Transactional
 @Import(TestDataRepository.class)
+@WithMockCustomUser(username = "testMasterID",role = Role.ROLE_MASTER)
 public class RecruitIntegrationTest {
     @Autowired
     private EntityManager em;
@@ -43,8 +47,9 @@ public class RecruitIntegrationTest {
     @Test
     public void startRecruit_WhenTimeIs() throws Exception{
         //given
-        ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
-        ClubNameAndIdDTO clubNameAndId = clubController.createClub(clubCreateRequestDTO, null);
+        Club club = em.createQuery("select c from Club c where c.president is not null ", Club.class)
+                .setMaxResults(1)
+                .getSingleResult();
 
         String recruitQuota = "40~50명";
         String recruitProcessDescription = "test Description";
@@ -58,18 +63,16 @@ public class RecruitIntegrationTest {
         em.clear();
 
         //when
-        ClubNameAndIdDTO response = recruitController.startRecruit(clubNameAndId.getId(), recruitDto).getBody();
+        ClubNameAndIdDTO response = recruitController.startRecruit(club.getId(), recruitDto).getBody();
         em.flush();
         em.clear();
 
         //then
-        Assertions.assertThat(response.getId()).isEqualTo(clubNameAndId.getId());
-        Assertions.assertThat(response.getName()).isEqualTo(clubNameAndId.getName());
-        Optional<Club> club = clubRepository.findById(clubNameAndId.getId());
-        Recruit recruit = club.get().getRecruit();
+        Assertions.assertThat(response.getId()).isEqualTo(club.getId());
+        Assertions.assertThat(response.getName()).isEqualTo(club.getName());
+        Optional<Club> clubAfterRecruit = clubRepository.findById(club.getId());
+        Recruit recruit = clubAfterRecruit.get().getRecruit();
         Assertions.assertThat(recruit.getId()).isNotNull();
-        Assertions.assertThat(recruit.getStartAt()).isEqualTo(recruitDto.getRecruitStartAt());
-        Assertions.assertThat(recruit.getEndAt()).isEqualTo(recruitDto.getRecruitEndAt());
         Assertions.assertThat(recruit.getQuota()).isEqualTo(recruitDto.getRecruitQuota());
         Assertions.assertThat(recruit.getProcessDescription()).isEqualTo(recruitDto.getRecruitProcessDescription());
         Assertions.assertThat(recruit.getContact()).isNull();
@@ -79,8 +82,9 @@ public class RecruitIntegrationTest {
     @Test
     public void startRecruit_WhenTimeNull() throws Exception{
         //given
-        ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
-        ClubNameAndIdDTO clubNameAndId = clubController.createClub(clubCreateRequestDTO, null);
+        Club club = em.createQuery("select c from Club c where c.president is not null ", Club.class)
+                .setMaxResults(1)
+                .getSingleResult();
 
         String recruitQuota = "40~50명";
         String recruitProcessDescription = "test Description";
@@ -92,15 +96,15 @@ public class RecruitIntegrationTest {
         em.clear();
 
         //when
-        ClubNameAndIdDTO response = recruitController.startRecruit(clubNameAndId.getId(), recruitDto).getBody();
+        ClubNameAndIdDTO response = recruitController.startRecruit(club.getId(), recruitDto).getBody();
         em.flush();
         em.clear();
 
         //then
-        Assertions.assertThat(response.getId()).isEqualTo(clubNameAndId.getId());
-        Assertions.assertThat(response.getName()).isEqualTo(clubNameAndId.getName());
-        Optional<Club> club = clubRepository.findById(clubNameAndId.getId());
-        Recruit recruit = club.get().getRecruit();
+        Assertions.assertThat(response.getId()).isEqualTo(club.getId());
+        Assertions.assertThat(response.getName()).isEqualTo(club.getName());
+        Optional<Club> clubAfterRecruit = clubRepository.findById(club.getId());
+        Recruit recruit = clubAfterRecruit.get().getRecruit();
         Assertions.assertThat(recruit.getId()).isNotNull();
         Assertions.assertThat(recruit.getStartAt()).isNull();
         Assertions.assertThat(recruit.getEndAt()).isNull();
@@ -113,17 +117,9 @@ public class RecruitIntegrationTest {
     @Test
     public void updateRecruit() throws Exception{
         //given
-        ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
-        ClubNameAndIdDTO clubNameAndId = clubController.createClub(clubCreateRequestDTO, null);
-
-        String recruitQuota = "00명";
-        String recruitProcessDescription = "test Description";
-        RecruitDto recruitDto = RecruitDto.builder()
-                .recruitQuota(recruitQuota)
-                .recruitProcessDescription(recruitProcessDescription)
-                .build();
-        recruitController.startRecruit(clubNameAndId.getId(), recruitDto);
-        em.flush();
+        Club club = em.createQuery("select c from Club c inner join fetch c.recruit r where c.recruit is not null", Club.class)
+                .setMaxResults(1)
+                .getSingleResult();
         em.clear();
 
         String updateRecruitQuota = "40~50명";
@@ -136,40 +132,40 @@ public class RecruitIntegrationTest {
                 .build();
         
         //when
+        ResponseEntity<Long> response = recruitController.updateRecruit(club.getId(), updateInfo);
+        em.flush();
+        em.clear();
 
         //then
-        
+        Assertions.assertThat(response.getBody()).isEqualTo(club.getId());
+        Recruit recruitAfterUpdate = em.createQuery("select r from Club c inner join c.recruit r where c.id = :clubId", Recruit.class)
+                .setParameter("clubId", club.getId())
+                .getSingleResult();
+        Assertions.assertThat(recruitAfterUpdate.getContact()).isNull();
+        Assertions.assertThat(recruitAfterUpdate.getWebLink()).isNull();
+        Assertions.assertThat(recruitAfterUpdate.getProcessDescription()).isEqualTo(updateRecruitProcessDescription);
+        Assertions.assertThat(recruitAfterUpdate.getQuota()).isEqualTo(updateRecruitQuota);
     }
 
     @Test
     public void endRecruit() throws Exception{
         //given
-        ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO();
-        ClubNameAndIdDTO clubNameAndId = clubController.createClub(clubCreateRequestDTO, null);
-
-        String recruitQuota = "40~50명";
-        String recruitProcessDescription = "test Description";
-        RecruitDto recruitDto = RecruitDto.builder()
-                .recruitQuota(recruitQuota)
-                .recruitProcessDescription(recruitProcessDescription)
-                .build();
-        recruitController.startRecruit(clubNameAndId.getId(), recruitDto);
-        Optional<Recruit> recruit = recruitRepository.findByClubId(clubNameAndId.getId());
-        Assertions.assertThat(recruit).isNotEmpty();
-        Long recruitId = recruit.get().getId();
-        em.flush();
+        Club club = em.createQuery("select c from Club c inner join fetch c.recruit r where c.recruit is not null", Club.class)
+                .setMaxResults(1)
+                .getSingleResult();
+        Recruit recruit = club.getRecruit();
         em.clear();
 
         //when
-        Long clubId = recruitController.endRecruit(clubNameAndId.getId());
+        Long clubId = recruitController.endRecruit(club.getId());
         em.flush();
         em.clear();
 
         //then
-        Assertions.assertThat(clubId).isEqualTo(clubNameAndId.getId());
-        Optional<Club> club = clubRepository.findById(clubId);
-        Assertions.assertThat(club.get().getRecruit()).isNull();
-        Optional<Recruit> recruitShouldEmpty = recruitRepository.findById(recruitId);
+        Assertions.assertThat(clubId).isEqualTo(club.getId());
+        Optional<Club> clubAfterRecruitEnd = clubRepository.findById(clubId);
+        Assertions.assertThat(clubAfterRecruitEnd.get().getRecruit()).isNull();
+        Optional<Recruit> recruitShouldEmpty = recruitRepository.findById(recruit.getId());
         Assertions.assertThat(recruitShouldEmpty).isEmpty();
     }
 }
