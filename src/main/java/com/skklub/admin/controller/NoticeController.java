@@ -17,7 +17,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -95,7 +97,8 @@ public class NoticeController {
     //목록 조회(with 썸네일)
     @GetMapping("/notice/prev/thumbnail")
     public Page<NoticePrevWithThumbnailResponse> getNoticePrevWithThumbnail(Pageable pageable) {
-        return noticeRepository.findAllWithThumbnailBy(pageable).map(notice -> {
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort().and(Sort.by("createdAt").ascending()));
+        return noticeRepository.findAllWithThumbnailBy(pageRequest).map(notice -> {
             Thumbnail thumbnail = notice.getThumbnail();
             S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(thumbnail));
             return new NoticePrevWithThumbnailResponse(notice, s3DownloadDto);
@@ -105,18 +108,20 @@ public class NoticeController {
     //목록 조회(전체(작성자 선택), 시간순)
     @GetMapping("/notice/prev")
     public Page<NoticePrevResponse> getNoticePrev(@RequestParam(required = false) Optional<Role> role, Pageable pageable) {
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort().and(Sort.by("createdAt").ascending()));
         Page<Notice> notices = role.map(r -> {
             if (r.equals(Role.ROLE_MASTER)) throw new CannotCategorizeByMasterException();
             if (r.equals(Role.ROLE_USER)) throw new CannotCategorizeByUserException();
-            return noticeRepository.findAllByUserRole(r, pageable);
-        }).orElseGet(() -> noticeRepository.findAll(pageable));
+            return noticeRepository.findAllByUserRole(r, pageRequest);
+        }).orElseGet(() -> noticeRepository.findAll(pageRequest));
         return notices.map(NoticePrevResponse::new);
     }
 
     //목록 조회(제목 검색, 시간순)
     @GetMapping("/notice/prev/search/title")
     public Page<NoticePrevResponse> getNoticePrevByTitle(@RequestParam String title, Pageable pageable) {
-        return noticeRepository.findWithWriterAllByTitleContainingOrderByCreatedAt(title, pageable).map(NoticePrevResponse::new);
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort().and(Sort.by("createdAt").ascending()));
+        return noticeRepository.findWithWriterAllByTitleContainingOrderByCreatedAt(title, pageRequest).map(NoticePrevResponse::new);
     }
 
 //=====UPDATE=====//

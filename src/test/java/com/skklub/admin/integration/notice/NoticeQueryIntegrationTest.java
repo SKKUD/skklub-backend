@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -199,6 +200,7 @@ public class NoticeQueryIntegrationTest {
         Assertions.assertThat(response.getNumber()).isEqualTo(notices.getNumber());
         Assertions.assertThat(response.getNumberOfElements()).isEqualTo(notices.getNumberOfElements());
         Assertions.assertThat(response.getSize()).isEqualTo(notices.getSize());
+        Assertions.assertThat(response.getSort()).isEqualTo(Sort.by("createdAt").ascending());
         for (NoticePrevWithThumbnailResponse r : response) {
             Assertions.assertThat(notices.stream().map(Notice::getId)).contains(r.getNoticeId());
             Assertions.assertThat(notices.stream().map(Notice::getContent)).contains(r.getContent());
@@ -243,6 +245,7 @@ public class NoticeQueryIntegrationTest {
         Assertions.assertThat(response.getNumber()).isEqualTo(notices.getNumber());
         Assertions.assertThat(response.getNumberOfElements()).isEqualTo(notices.getNumberOfElements());
         Assertions.assertThat(response.getSize()).isEqualTo(notices.getSize());
+        Assertions.assertThat(response.getSort()).isEqualTo(Sort.by("createdAt").ascending());
         for (NoticePrevResponse r : response) {
             Assertions.assertThat(notices.stream().map(Notice::getId)).contains(r.getNoticeId());
             Assertions.assertThat(notices.stream().map(Notice::getTitle)).contains(r.getTitle());
@@ -272,6 +275,7 @@ public class NoticeQueryIntegrationTest {
         Assertions.assertThat(response.getNumber()).isEqualTo(notices.getNumber());
         Assertions.assertThat(response.getNumberOfElements()).isEqualTo(notices.getNumberOfElements());
         Assertions.assertThat(response.getSize()).isEqualTo(notices.getSize());
+        Assertions.assertThat(response.getSort()).isEqualTo(Sort.by("createdAt").ascending());
         for (NoticePrevResponse r : response) {
             Assertions.assertThat(notices.stream().map(Notice::getId)).contains(r.getNoticeId());
             Assertions.assertThat(notices.stream().map(Notice::getTitle)).contains(r.getTitle());
@@ -330,5 +334,6 @@ public class NoticeQueryIntegrationTest {
         Assertions.assertThat(response.getTotalElements()).isEqualTo(notices.size());
         Assertions.assertThat(response.getNumber()).isEqualTo(request.getPageNumber());
         Assertions.assertThat(response.getNumberOfElements()).isEqualTo(request.getPageSize());
+        Assertions.assertThat(response.getSort()).isEqualTo(Sort.by("createdAt").ascending());
     }
 }

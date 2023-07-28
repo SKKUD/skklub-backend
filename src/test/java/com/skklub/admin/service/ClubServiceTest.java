@@ -159,8 +159,8 @@ class ClubServiceTest {
         String belongs = "취미교양";
         PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
 
-        lenient().when(clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, request)).thenThrow(IllegalArgumentException.class);
-        lenient().when(clubRepository.findClubByCampusOrderByName(campus, request)).thenThrow(IllegalArgumentException.class);
+        lenient().when(clubRepository.findClubByCampusAndClubType(campus, clubType, request)).thenThrow(IllegalArgumentException.class);
+        lenient().when(clubRepository.findClubByCampus(campus, request)).thenThrow(IllegalArgumentException.class);
 
         //when
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getClubPrevsByCategories(campus, clubType, belongs, request));
@@ -175,8 +175,8 @@ class ClubServiceTest {
         String belongs = "전체";
         PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
 
-        lenient().when(clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, request)).thenThrow(AssertionError.class);
-        lenient().when(clubRepository.findClubByCampusOrderByName(campus, request)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubByCampusAndClubTypeAndBelongs(campus, clubType, belongs, request)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubByCampus(campus, request)).thenThrow(AssertionError.class);
 
         //when
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getClubPrevsByCategories(campus, clubType, belongs, request));
@@ -193,8 +193,8 @@ class ClubServiceTest {
         String belongs = "전체";
         PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
 
-        lenient().when(clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, request)).thenThrow(AssertionError.class);
-        lenient().when(clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, request)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubByCampusAndClubTypeAndBelongs(campus, clubType, belongs, request)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubByCampusAndClubType(campus, clubType, request)).thenThrow(AssertionError.class);
 
         //when
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getClubPrevsByCategories(campus, clubType, belongs, request));
@@ -203,9 +203,8 @@ class ClubServiceTest {
 
     }
 
-
     @Test
-    public void getClubPrevsByKeyword_belongsNot전체_3Param() throws Exception {
+    public void getRandomClubsByCategories_belongsNot전체_3Param() throws Exception {
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.준중앙동아리;
@@ -220,7 +219,7 @@ class ClubServiceTest {
     }
 
     @Test
-    public void getClubPrevsByKeyword_clubTypeNot전체AndbelongsIs전체_2Param() throws Exception {
+    public void getRandomClubsByCategories_clubTypeNot전체AndbelongsIs전체_2Param() throws Exception {
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.준중앙동아리;
@@ -237,7 +236,7 @@ class ClubServiceTest {
     }
 
     @Test
-    public void getClubPrevsByKeyword_Both전체_1Param() throws Exception {
+    public void getRandomClubsByCategories_Both전체_1Param() throws Exception {
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.전체;
