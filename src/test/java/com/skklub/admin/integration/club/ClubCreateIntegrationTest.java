@@ -1,6 +1,7 @@
 package com.skklub.admin.integration.club;
 
 import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
@@ -8,6 +9,7 @@ import com.skklub.admin.controller.dto.ClubNameAndIdDTO;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.repository.ActivityImageRepository;
@@ -45,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 @Import(TestDataRepository.class)
-@ActiveProfiles("local")
+@WithMockCustomUser(username = "testMasterID",role = Role.ROLE_MASTER)
 public class ClubCreateIntegrationTest {
     @Autowired
     private ClubController clubController;

@@ -45,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Slf4j
 @SpringBootTest
 @Transactional
+@WithMockCustomUser(username = "testMasterID",role = Role.ROLE_MASTER)
 public class NoticeCommandIntegrationTest {
     @Autowired
     private NoticeController noticeController;

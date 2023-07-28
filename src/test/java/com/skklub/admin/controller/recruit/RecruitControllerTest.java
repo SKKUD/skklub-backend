@@ -12,6 +12,7 @@ import com.skklub.admin.error.exception.*;
 import com.skklub.admin.service.RecruitService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,8 @@ import java.lang.reflect.Field;
 import java.util.Optional;
 
 import static com.skklub.admin.controller.RestDocsUtils.example;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -61,6 +62,15 @@ class RecruitControllerTest {
     private AuthValidator authValidator;
     @InjectMocks
     private TestDataRepository testDataRepository;
+
+    @BeforeEach
+    public void beforeEach() {
+        doNothing().when(authValidator).validateUpdatingClub(anyLong());
+        doNothing().when(authValidator).validateUpdatingNotice(anyLong());
+        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
+        doNothing().when(authValidator).validateUpdatingUser(anyLong());
+        doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
+    }
 
 
     @Test

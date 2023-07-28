@@ -36,6 +36,7 @@ import java.util.Optional;
 @Slf4j
 @Transactional
 @SpringBootTest
+@WithMockCustomUser(username = "testMasterID",role = Role.ROLE_MASTER)
 public class PendingClubIntegrationTest {
     @Autowired
     private PendingClubController pendingClubController;
@@ -209,6 +210,7 @@ public class PendingClubIntegrationTest {
     }
 
     @Test
+    @WithMockCustomUser(username = "testAdminID0", role = Role.ROLE_ADMIN_SEOUL_CENTRAL)
     public void acceptPending_GivenPendingClub_SaveClubWithDefaultLogoAndUserWellAndDeletePendingClub() throws Exception {
         //given
         PendingClub pendingClub = em.createQuery("select p from PendingClub p", PendingClub.class)
@@ -263,6 +265,7 @@ public class PendingClubIntegrationTest {
     }
 
     @Test
+    @WithMockCustomUser(username = "testAdminID0", role = Role.ROLE_ADMIN_SEOUL_CENTRAL)
     public void denyPending_GivenPendingClub_DeletePendingClub() throws Exception {
         //given
         PendingClub pendingClub = em.createQuery("select p from PendingClub p", PendingClub.class)
@@ -286,7 +289,7 @@ public class PendingClubIntegrationTest {
 
         Assertions.assertThat(response.getPendingClubId()).isEqualTo(pendingClub.getId());
         Assertions.assertThat(response.getRequestTo()).isEqualTo(pendingClub.getRequestTo());
-        Assertions.assertThat(response.getRequestedAt()).isEqualTo(pendingClub.getCreatedAt().truncatedTo(ChronoUnit.MINUTES));
+        Assertions.assertThat(response.getRequestedAt()).isEqualTo(pendingClub.getCreatedAt());
         Assertions.assertThat(response.getClubName()).isEqualTo(pendingClub.getClubName());
         Assertions.assertThat(response.getBriefActivityDescription()).isEqualTo(pendingClub.getBriefActivityDescription());
         Assertions.assertThat(response.getActivityDescription()).isEqualTo(pendingClub.getActivityDescription());

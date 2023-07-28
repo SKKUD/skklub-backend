@@ -2,6 +2,7 @@ package com.skklub.admin.controller.user;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.UserController;
 import com.skklub.admin.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,8 @@ public class UserControllerLogoutTest {
     private MockMvc mockMvc;
     @MockBean
     private UserService userService;
-
+    @MockBean
+    private AuthValidator authValidator;
     @Autowired
     private ObjectMapper objectMapper;
 

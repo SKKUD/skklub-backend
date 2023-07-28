@@ -1,6 +1,7 @@
 package com.skklub.admin.controller.pendingClub;
 
 import akka.protobuf.WireFormat;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.PendingClubController;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.dto.PendingClubRequest;
@@ -19,6 +20,7 @@ import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.service.PendingClubService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -48,10 +50,11 @@ import java.util.stream.Collectors;
 
 import static com.skklub.admin.controller.RestDocsUtils.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -78,6 +81,17 @@ class PendingClubControllerTest {
     private UserRepository userRepository;
     @MockBean
     private PendingClubRepository pendingClubRepository;
+    @MockBean
+    private AuthValidator authValidator;
+
+    @BeforeEach
+    public void beforeEach() {
+        doNothing().when(authValidator).validateUpdatingClub(anyLong());
+        doNothing().when(authValidator).validateUpdatingNotice(anyLong());
+        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
+        doNothing().when(authValidator).validateUpdatingUser(anyLong());
+        doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
+    }
 
     @Test
     public void createPending_Default_Success() throws Exception{

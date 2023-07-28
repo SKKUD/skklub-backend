@@ -89,6 +89,11 @@ class ClubControllerUpdateTest {
                 ContentType.MULTIPART_FORM_DATA.toString(),
                 new FileInputStream("src/main/resources/2020-12-25 (5).png")
         );
+        doNothing().when(authValidator).validateUpdatingClub(anyLong());
+        doNothing().when(authValidator).validateUpdatingNotice(anyLong());
+        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
+        doNothing().when(authValidator).validateUpdatingUser(anyLong());
+        doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }
 
     @Test

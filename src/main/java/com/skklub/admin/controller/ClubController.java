@@ -203,7 +203,7 @@ public class ClubController {
     //삭제 취소 (복구)
     @DeleteMapping("/club/{clubId}/cancel")
     public ResponseEntity<ClubNameAndIdDTO> cancelClubDeletionById(@PathVariable Long clubId) {
-        authValidator.validateUpdatingClub(clubId);
+        authValidator.validateDeletionAuth(clubId);
         return clubService.reviveClub(clubId)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)

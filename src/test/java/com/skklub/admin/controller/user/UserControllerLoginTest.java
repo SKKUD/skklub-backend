@@ -2,6 +2,7 @@ package com.skklub.admin.controller.user;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.UserController;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.service.UserService;
@@ -52,10 +53,10 @@ public class UserControllerLoginTest {
 
     @Autowired
     MockMvc mockMvc;
-
     @MockBean
     UserService userService;
-
+    @MockBean
+    private AuthValidator authValidator;
     @Autowired
     ObjectMapper objectMapper;
 
@@ -63,13 +64,8 @@ public class UserControllerLoginTest {
     private WebApplicationContext webApplicationContext;
 
     @BeforeEach
-    public void mockMvcSetUp(
-    RestDocumentationContextProvider restDocumentation) {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(this.webApplicationContext)
-                .apply(springSecurity())
-                .apply(documentationConfiguration(restDocumentation))
-                .build();
+    public void mockMvcSetUp(RestDocumentationContextProvider restDocumentation) {
+        mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).apply(springSecurity()).apply(documentationConfiguration(restDocumentation)).build();
     }
 
     @AfterEach
@@ -86,29 +82,14 @@ public class UserControllerLoginTest {
         String username = "user";
         String password = "1234";
         given(userService.loginUser(username, password)).willReturn(new JwtDTO("access-token", "refresh-token"));
-        
+
         //when
-        ResultActions actions = mockMvc.perform(post("/user/login")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                            .queryParam("username", username)
-                            .queryParam("password", password)
-                );
+        ResultActions actions = mockMvc.perform(post("/user/login").with(csrf()).contentType(MediaType.APPLICATION_JSON).queryParam("username", username).queryParam("password", password));
 
         //then
-        actions.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(content().string(username +" logged in"))
-                .andDo(document("User-Login"
-                        ,queryParameters(
-                                parameterWithName("username").description("유저 계정 ID").attributes(example(username)),
-                                parameterWithName("password").description("비밀번호").attributes(example(password))
-                        )
-                        ,responseHeaders(
-                                headerWithName("Authorization").description("기본 인증용 access-token"),
-                                headerWithName("Refresh-Token").description("access-token 재발급용 refresh-token")
-                        )
+        actions.andExpect(MockMvcResultMatchers.status().isOk()).andExpect(content().string(username + " logged in")).andDo(document("User-Login", queryParameters(parameterWithName("username").description("유저 계정 ID").attributes(example(username)), parameterWithName("password").description("비밀번호").attributes(example(password))), responseHeaders(headerWithName("Authorization").description("기본 인증용 access-token"), headerWithName("Refresh-Token").description("access-token 재발급용 refresh-token"))
 
-                ));
+        ));
     }
 
 }
