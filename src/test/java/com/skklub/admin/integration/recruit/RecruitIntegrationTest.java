@@ -4,9 +4,8 @@ import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.RecruitController;
-import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
 import com.skklub.admin.controller.dto.ClubNameAndIdDTO;
-import com.skklub.admin.controller.dto.RecruitDto;
+import com.skklub.admin.controller.dto.RecruitRequest;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.domain.enums.Role;
@@ -51,19 +50,12 @@ public class RecruitIntegrationTest {
                 .setMaxResults(1)
                 .getSingleResult();
 
-        String recruitQuota = "40~50명";
-        String recruitProcessDescription = "test Description";
-        RecruitDto recruitDto = RecruitDto.builder()
-                .recruitStartAt(LocalDateTime.now())
-                .recruitEndAt(LocalDateTime.now())
-                .recruitQuota(recruitQuota)
-                .recruitProcessDescription(recruitProcessDescription)
-                .build();
+        RecruitRequest recruitRequest = readyRecruitReqFullTime();
         em.flush();
         em.clear();
 
         //when
-        ClubNameAndIdDTO response = recruitController.startRecruit(club.getId(), recruitDto).getBody();
+        ClubNameAndIdDTO response = recruitController.startRecruit(club.getId(), recruitRequest).getBody();
         em.flush();
         em.clear();
 
@@ -73,10 +65,10 @@ public class RecruitIntegrationTest {
         Optional<Club> clubAfterRecruit = clubRepository.findById(club.getId());
         Recruit recruit = clubAfterRecruit.get().getRecruit();
         Assertions.assertThat(recruit.getId()).isNotNull();
-        Assertions.assertThat(recruit.getQuota()).isEqualTo(recruitDto.getRecruitQuota());
-        Assertions.assertThat(recruit.getProcessDescription()).isEqualTo(recruitDto.getRecruitProcessDescription());
-        Assertions.assertThat(recruit.getContact()).isNull();
-        Assertions.assertThat(recruit.getWebLink()).isNull();
+        Assertions.assertThat(recruit.getQuota()).isEqualTo(recruitRequest.getRecruitQuota());
+        Assertions.assertThat(recruit.getProcessDescription()).isEqualTo(recruitRequest.getRecruitProcessDescription());
+        Assertions.assertThat(recruit.getContact()).isEqualTo(recruitRequest.getRecruitContact());
+        Assertions.assertThat(recruit.getWebLink()).isEqualTo(recruitRequest.getRecruitWebLink());
     }
 
     @Test
@@ -86,17 +78,12 @@ public class RecruitIntegrationTest {
                 .setMaxResults(1)
                 .getSingleResult();
 
-        String recruitQuota = "40~50명";
-        String recruitProcessDescription = "test Description";
-        RecruitDto recruitDto = RecruitDto.builder()
-                .recruitQuota(recruitQuota)
-                .recruitProcessDescription(recruitProcessDescription)
-                .build();
+        RecruitRequest recruitRequest = readyRecruitReqNoTime();
         em.flush();
         em.clear();
 
         //when
-        ClubNameAndIdDTO response = recruitController.startRecruit(club.getId(), recruitDto).getBody();
+        ClubNameAndIdDTO response = recruitController.startRecruit(club.getId(), recruitRequest).getBody();
         em.flush();
         em.clear();
 
@@ -108,10 +95,10 @@ public class RecruitIntegrationTest {
         Assertions.assertThat(recruit.getId()).isNotNull();
         Assertions.assertThat(recruit.getStartAt()).isNull();
         Assertions.assertThat(recruit.getEndAt()).isNull();
-        Assertions.assertThat(recruit.getQuota()).isEqualTo(recruitDto.getRecruitQuota());
-        Assertions.assertThat(recruit.getProcessDescription()).isEqualTo(recruitDto.getRecruitProcessDescription());
-        Assertions.assertThat(recruit.getContact()).isNull();
-        Assertions.assertThat(recruit.getWebLink()).isNull();
+        Assertions.assertThat(recruit.getQuota()).isEqualTo(recruitRequest.getRecruitQuota());
+        Assertions.assertThat(recruit.getProcessDescription()).isEqualTo(recruitRequest.getRecruitProcessDescription());
+        Assertions.assertThat(recruit.getContact()).isEqualTo(recruitRequest.getRecruitContact());
+        Assertions.assertThat(recruit.getWebLink()).isEqualTo(recruitRequest.getRecruitWebLink());
     }
     
     @Test
@@ -122,17 +109,10 @@ public class RecruitIntegrationTest {
                 .getSingleResult();
         em.clear();
 
-        String updateRecruitQuota = "40~50명";
-        String updateRecruitProcessDescription = "test Description";
-        RecruitDto updateInfo = RecruitDto.builder()
-                .recruitStartAt(LocalDateTime.now())
-                .recruitEndAt(LocalDateTime.now())
-                .recruitQuota(updateRecruitQuota)
-                .recruitProcessDescription(updateRecruitProcessDescription)
-                .build();
-        
+        RecruitRequest recruitRequest = readyRecruitReqFullTime();
+
         //when
-        ResponseEntity<Long> response = recruitController.updateRecruit(club.getId(), updateInfo);
+        ResponseEntity<Long> response = recruitController.updateRecruit(club.getId(), recruitRequest);
         em.flush();
         em.clear();
 
@@ -141,10 +121,10 @@ public class RecruitIntegrationTest {
         Recruit recruitAfterUpdate = em.createQuery("select r from Club c inner join c.recruit r where c.id = :clubId", Recruit.class)
                 .setParameter("clubId", club.getId())
                 .getSingleResult();
-        Assertions.assertThat(recruitAfterUpdate.getContact()).isNull();
-        Assertions.assertThat(recruitAfterUpdate.getWebLink()).isNull();
-        Assertions.assertThat(recruitAfterUpdate.getProcessDescription()).isEqualTo(updateRecruitProcessDescription);
-        Assertions.assertThat(recruitAfterUpdate.getQuota()).isEqualTo(updateRecruitQuota);
+        Assertions.assertThat(recruitAfterUpdate.getContact()).isEqualTo(recruitRequest.getRecruitContact());
+        Assertions.assertThat(recruitAfterUpdate.getWebLink()).isEqualTo(recruitRequest.getRecruitWebLink());
+        Assertions.assertThat(recruitAfterUpdate.getProcessDescription()).isEqualTo(recruitRequest.getRecruitProcessDescription());
+        Assertions.assertThat(recruitAfterUpdate.getQuota()).isEqualTo(recruitRequest.getRecruitQuota());
     }
 
     @Test
@@ -167,5 +147,25 @@ public class RecruitIntegrationTest {
         Assertions.assertThat(clubAfterRecruitEnd.get().getRecruit()).isNull();
         Optional<Recruit> recruitShouldEmpty = recruitRepository.findById(recruit.getId());
         Assertions.assertThat(recruitShouldEmpty).isEmpty();
+    }
+
+    private RecruitRequest readyRecruitReqFullTime() {
+        return RecruitRequest.builder()
+                .recruitStartAt(LocalDateTime.now())
+                .recruitEndAt(LocalDateTime.now())
+                .recruitQuota("00명 || 최대한 많이 뽑을 예정")
+                .recruitProcessDescription("1. 어쩌구 2. 어쩌구 AnyString")
+                .recruitContact("010 - 1234 - 1234 || 인스타 아이디")
+                .recruitWebLink("www.xxx.com || or any String")
+                .build();
+    }
+
+    private RecruitRequest readyRecruitReqNoTime() {
+        return RecruitRequest.builder()
+                .recruitQuota("00명 || 최대한 많이 뽑을 예정")
+                .recruitProcessDescription("1. 어쩌구 2. 어쩌구 AnyString")
+                .recruitContact("010 - 1234 - 1234 || 인스타 아이디")
+                .recruitWebLink("www.xxx.com || or any String")
+                .build();
     }
 }

@@ -951,7 +951,7 @@ public class NoticeControllerTest {
                         queryParameters(
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
-                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_CLUB))
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_NOTICE))
                         ),
                         responseFields(
                                 pageableResponseFields
@@ -1014,7 +1014,7 @@ public class NoticeControllerTest {
                         queryParameters(
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
-                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_CLUB))
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_NOTICE))
                         ),
                         responseFields(
                                 pageableResponseFields
@@ -1070,7 +1070,7 @@ public class NoticeControllerTest {
                                 parameterWithName("role").optional().description("검색할 유저 - 권한").attributes(example(RestDocsUtils.LINK_ADMIN)),
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
-                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_CLUB))
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_NOTICE))
                         ),
                         responseFields(
                                 pageableResponseFields
@@ -1125,7 +1125,7 @@ public class NoticeControllerTest {
                                 parameterWithName("role").optional().description("검색할 유저 - 권한").attributes(example(RestDocsUtils.LINK_ADMIN)),
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
-                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_CLUB))
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_NOTICE))
                         ),
                         responseFields(
                                 pageableResponseFields
@@ -1264,7 +1264,7 @@ public class NoticeControllerTest {
                                 parameterWithName("title").optional().description("제목 검색 키워드").attributes(example("'test' : 'testabcdef' or 'abctestdef' or 'abcdeftest'")),
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
-                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_CLUB))
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_NOTICE))
                         ),
                         responseFields(
                                 pageableResponseFields
@@ -1324,7 +1324,7 @@ public class NoticeControllerTest {
                                 parameterWithName("title").optional().description("제목 검색 키워드").attributes(example("'test' : 'testabcdef' or 'abctestdef' or 'abcdeftest'")),
                                 parameterWithName("size").optional().description("페이지 정보 - 한 페이지 크기").attributes(example("Default : 20")),
                                 parameterWithName("page").optional().description("페이지 정보 - 요청 페이지 번호(시작 0)").attributes(example("Default : 0")),
-                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_CLUB))
+                                parameterWithName("sort").optional().description("페이지 정보 - 정렬(기본 시간순)").attributes(example(LINK_SORT_NOTICE))
                         ),
                         responseFields(
                                 pageableResponseFields

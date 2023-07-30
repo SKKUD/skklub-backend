@@ -1,9 +1,10 @@
-package com.skklub.admin.controller;
+package com.skklub.admin.integration;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;

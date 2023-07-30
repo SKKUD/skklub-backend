@@ -40,8 +40,4 @@ public class RecruitDto {
         this.recruitContact = recruit.getContact();
         this.recruitWebLink = recruit.getWebLink();
     }
-
-    public Recruit toEntity() {
-        return new Recruit(recruitStartAt, recruitEndAt, recruitQuota, recruitProcessDescription, recruitContact, recruitWebLink);
-    }
 }
