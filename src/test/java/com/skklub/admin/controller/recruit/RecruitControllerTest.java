@@ -427,10 +427,10 @@ class RecruitControllerTest {
     }
 
     @Test
-    public void endRecruit_IllegalRecruitId_RecruitIdMisMatchException() throws Exception {
+    public void endRecruit_IllegalClubId_ClubIdMisMatchException() throws Exception {
         //given
         Long clubId = -1L;
-        doThrow(RecruitIdMisMatchException.class).when(recruitService).endRecruit(clubId);
+        doThrow(ClubIdMisMatchException.class).when(recruitService).endRecruit(clubId);
         doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
@@ -440,7 +440,7 @@ class RecruitControllerTest {
         ).andExpect(status().isBadRequest()).andReturn();
 
         //then
-        Assertions.assertThat(result.getResolvedException()).isExactlyInstanceOf(RecruitIdMisMatchException.class);
+        Assertions.assertThat(result.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);
 
     }
 
