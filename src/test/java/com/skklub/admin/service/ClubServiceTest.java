@@ -1,6 +1,7 @@
 package com.skklub.admin.service;
 
 import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.DeletedClub;
@@ -260,7 +261,7 @@ class ClubServiceTest {
         Club club = testDataRepository.getClubs().get(clubId.intValue());
         Club clubUpdateInfo = testDataRepository.getClubs().get(updateInfoClubId.intValue());
         setIdReflection(clubId, club);
-        ClubDetailInfoDto base = new ClubDetailInfoDto(testDataRepository.getClubs().get(clubId.intValue()));
+        ClubDetailInfoDto base = new ClubDetailInfoDto(club);
         setIdReflection(clubId, base);
         given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
 
@@ -285,7 +286,7 @@ class ClubServiceTest {
         Assertions.assertThat(club.getPresident()).isNotEqualTo(clubUpdateInfo.getPresident());
         Assertions.assertThat(club.getPresident().getName()).isEqualTo(base.getPresidentName());
         Assertions.assertThat(club.getPresident().getContact()).isEqualTo(base.getPresidentContact());
-        Assertions.assertThat(club.getRecruit()).isEqualTo(base.getRecruit().get().toEntity()).isNotEqualTo(clubUpdateInfo.getRecruit());
+        Assertions.assertThat(new RecruitDto(club.getRecruit())).isEqualTo(base.getRecruit().get()).isNotEqualTo(new RecruitDto(clubUpdateInfo.getRecruit()));
     }
 
     @Test
