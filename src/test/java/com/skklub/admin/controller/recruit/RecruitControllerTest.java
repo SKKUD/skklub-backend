@@ -1,11 +1,10 @@
 package com.skklub.admin.controller.recruit;
 
 import akka.protobuf.WireFormat;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.RecruitController;
-import com.skklub.admin.controller.dto.RecruitDto;
+import com.skklub.admin.controller.dto.RecruitRequest;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.error.exception.*;
@@ -22,26 +21,24 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.validation.BindException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -72,15 +69,13 @@ class RecruitControllerTest {
         doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }
 
-
     @Test
     public void startRecruit_Default_Success() throws Exception {
         //given
         Long clubId = 0L;
-        Long recruitId = 0L;
         Club club = testDataRepository.getClubs().get(clubId.intValue());
-        RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
-        Recruit recruit = recruitDto.toEntity();
+        RecruitRequest recruitRequest = readyRecruitReqFullTime();
+        Recruit recruit = recruitRequest.toEntity();
         given(recruitService.startRecruit(clubId, recruit)).willReturn(Optional.of(club.getName()));
         doNothing().when(authValidator).validateUpdatingClub(clubId);
 
@@ -88,12 +83,12 @@ class RecruitControllerTest {
         ResultActions actions = mockMvc.perform(
                 post("/recruit/{clubId}", clubId)
                         .with(csrf())
-                        .queryParam("recruitStartAt", Optional.ofNullable(recruitDto.getRecruitStartAt()).map(Object::toString).orElse(""))
-                        .queryParam("recruitEndAt", Optional.ofNullable(recruitDto.getRecruitEndAt()).map(Object::toString).orElse(""))
-                        .queryParam("recruitQuota", recruitDto.getRecruitQuota())
-                        .queryParam("recruitProcessDescription", recruitDto.getRecruitProcessDescription())
-                        .queryParam("recruitContact", recruitDto.getRecruitContact())
-                        .queryParam("recruitWebLink", recruitDto.getRecruitWebLink())
+                        .queryParam("recruitStartAt", Optional.ofNullable(recruitRequest.getRecruitStartAt()).map(Object::toString).orElse(""))
+                        .queryParam("recruitEndAt", Optional.ofNullable(recruitRequest.getRecruitEndAt()).map(Object::toString).orElse(""))
+                        .queryParam("recruitQuota", recruitRequest.getRecruitQuota())
+                        .queryParam("recruitProcessDescription", recruitRequest.getRecruitProcessDescription())
+                        .queryParam("recruitContact", recruitRequest.getRecruitContact())
+                        .queryParam("recruitWebLink", recruitRequest.getRecruitWebLink())
         );
 
         //then
@@ -127,20 +122,20 @@ class RecruitControllerTest {
         //given
         Long clubId = -1L;
         Long recruitId = 0L;
-        RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
-        Recruit recruit = recruitDto.toEntity();
+        RecruitRequest recruitRequest = readyRecruitReqFullTime();
+        Recruit recruit = recruitRequest.toEntity();
         given(recruitService.startRecruit(clubId, recruit)).willReturn(Optional.empty());
         doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         MvcResult badClubIdResult = mockMvc.perform(
                 post("/recruit/{clubId}", clubId)
-                        .queryParam("recruitStartAt", Optional.ofNullable(recruitDto.getRecruitStartAt()).map(Object::toString).orElse(""))
-                        .queryParam("recruitEndAt", Optional.ofNullable(recruitDto.getRecruitEndAt()).map(Object::toString).orElse(""))
-                        .queryParam("recruitQuota", recruitDto.getRecruitQuota())
-                        .queryParam("recruitProcessDescription", recruitDto.getRecruitProcessDescription())
-                        .queryParam("recruitContact", recruitDto.getRecruitContact())
-                        .queryParam("recruitWebLink", recruitDto.getRecruitWebLink())
+                        .queryParam("recruitStartAt", Optional.ofNullable(recruitRequest.getRecruitStartAt()).map(Object::toString).orElse(""))
+                        .queryParam("recruitEndAt", Optional.ofNullable(recruitRequest.getRecruitEndAt()).map(Object::toString).orElse(""))
+                        .queryParam("recruitQuota", recruitRequest.getRecruitQuota())
+                        .queryParam("recruitProcessDescription", recruitRequest.getRecruitProcessDescription())
+                        .queryParam("recruitContact", recruitRequest.getRecruitContact())
+                        .queryParam("recruitWebLink", recruitRequest.getRecruitWebLink())
                         .with(csrf())
         ).andExpect(status().isBadRequest()).andReturn();
 
@@ -153,20 +148,20 @@ class RecruitControllerTest {
         //given
         Long clubId = 0L;
         Long recruitId = 0L;
-        RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
-        Recruit recruit = recruitDto.toEntity();
+        RecruitRequest recruitRequest = readyRecruitReqFullTime();
+        Recruit recruit = recruitRequest.toEntity();
         given(recruitService.startRecruit(clubId, recruit)).willThrow(AlreadyRecruitingException.class);
         doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         MvcResult doubleRecruitResult = mockMvc.perform(
                         post("/recruit/{clubId}", clubId)
-                                .queryParam("recruitStartAt", Optional.ofNullable(recruitDto.getRecruitStartAt()).map(Object::toString).orElse(""))
-                                .queryParam("recruitEndAt", Optional.ofNullable(recruitDto.getRecruitEndAt()).map(Object::toString).orElse(""))
-                                .queryParam("recruitQuota", recruitDto.getRecruitQuota())
-                                .queryParam("recruitProcessDescription", recruitDto.getRecruitProcessDescription())
-                                .queryParam("recruitContact", recruitDto.getRecruitContact())
-                                .queryParam("recruitWebLink", recruitDto.getRecruitWebLink())
+                                .queryParam("recruitStartAt", Optional.ofNullable(recruitRequest.getRecruitStartAt()).map(Object::toString).orElse(""))
+                                .queryParam("recruitEndAt", Optional.ofNullable(recruitRequest.getRecruitEndAt()).map(Object::toString).orElse(""))
+                                .queryParam("recruitQuota", recruitRequest.getRecruitQuota())
+                                .queryParam("recruitProcessDescription", recruitRequest.getRecruitProcessDescription())
+                                .queryParam("recruitContact", recruitRequest.getRecruitContact())
+                                .queryParam("recruitWebLink", recruitRequest.getRecruitWebLink())
                                 .with(csrf())
                 ).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorDetail.reasonMessage").value("이미 모집 정보가 등록된 club입니다"))
@@ -182,11 +177,8 @@ class RecruitControllerTest {
         //given
         Long clubId = 0L;
         String clubName = "test";
-        Long recruitId = 0L;
-        RecruitDto fullTime = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
-        RecruitDto bothNull = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
-        bothNull.setRecruitStartAt(null);
-        bothNull.setRecruitEndAt(null);
+        RecruitRequest fullTime = readyRecruitReqFullTime();
+        RecruitRequest bothNull = readyRecruitReqNoTime();
         given(recruitService.startRecruit(eq(clubId), any(Recruit.class))).willReturn(Optional.of(clubName));
         doNothing().when(authValidator).validateUpdatingClub(clubId);
 
@@ -220,11 +212,10 @@ class RecruitControllerTest {
         //given
         Long clubId = 0L;
         String clubName = "test";
-        Long recruitId = 0L;
-        RecruitDto endTimeNull = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitRequest endTimeNull = readyRecruitReqFullTime();
         endTimeNull.setRecruitEndAt(null);
 
-        RecruitDto startTimeNull = new RecruitDto(testDataRepository.getRecruits().get(recruitId.intValue()));
+        RecruitRequest startTimeNull = readyRecruitReqFullTime();
         startTimeNull.setRecruitStartAt(null);
         given(recruitService.startRecruit(eq(clubId), any(Recruit.class))).willReturn(Optional.of(clubName));
         doNothing().when(authValidator).validateUpdatingClub(clubId);
@@ -261,20 +252,20 @@ class RecruitControllerTest {
     public void updateRecruit_Default_Success() throws Exception {
         //given
         Long clubId = 0L;
-        RecruitDto recruitDto = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
-        Recruit recruit = recruitDto.toEntity();
+        RecruitRequest recruitRequest = readyRecruitReqFullTime();
+        Recruit recruit = recruitRequest.toEntity();
         given(recruitService.updateRecruit(clubId, recruit)).willReturn(Optional.of(clubId));
         doNothing().when(authValidator).validateUpdatingClub(clubId);
 
         //when
         ResultActions actions = mockMvc.perform(
                 patch("/recruit/{clubId}", clubId)
-                        .queryParam("recruitStartAt", Optional.ofNullable(recruitDto.getRecruitStartAt()).map(Object::toString).orElse(""))
-                        .queryParam("recruitEndAt", Optional.ofNullable(recruitDto.getRecruitEndAt()).map(Object::toString).orElse(""))
-                        .queryParam("recruitQuota", recruitDto.getRecruitQuota())
-                        .queryParam("recruitProcessDescription", recruitDto.getRecruitProcessDescription())
-                        .queryParam("recruitContact", recruitDto.getRecruitContact())
-                        .queryParam("recruitWebLink", recruitDto.getRecruitWebLink())
+                        .queryParam("recruitStartAt", Optional.ofNullable(recruitRequest.getRecruitStartAt()).map(Object::toString).orElse(""))
+                        .queryParam("recruitEndAt", Optional.ofNullable(recruitRequest.getRecruitEndAt()).map(Object::toString).orElse(""))
+                        .queryParam("recruitQuota", recruitRequest.getRecruitQuota())
+                        .queryParam("recruitProcessDescription", recruitRequest.getRecruitProcessDescription())
+                        .queryParam("recruitContact", recruitRequest.getRecruitContact())
+                        .queryParam("recruitWebLink", recruitRequest.getRecruitWebLink())
                         .with(csrf())
         );
 
@@ -303,10 +294,10 @@ class RecruitControllerTest {
     public void updateRecruit_NullAtNotNull_BindException() throws Exception {
         //given
         Long clubId = 0L;
-        RecruitDto nullAtQuota = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
+        RecruitRequest nullAtQuota = readyRecruitReqFullTime();
         nullAtQuota.setRecruitQuota(null);
 
-        RecruitDto blankAtDescription = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
+        RecruitRequest blankAtDescription = readyRecruitReqFullTime();
         blankAtDescription.setRecruitProcessDescription("  ");
         doNothing().when(authValidator).validateUpdatingClub(clubId);
 
@@ -343,10 +334,8 @@ class RecruitControllerTest {
     public void updateRecruit_BothTimeNullOrNotNUll_Success() throws Exception {
         //given
         Long clubId = 0L;
-        RecruitDto fullTime = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
-        RecruitDto bothNull = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
-        bothNull.setRecruitStartAt(null);
-        bothNull.setRecruitEndAt(null);
+        RecruitRequest fullTime = readyRecruitReqFullTime();
+        RecruitRequest bothNull = readyRecruitReqNoTime();
         given(recruitService.updateRecruit(eq(clubId), any(Recruit.class))).willReturn(Optional.of(clubId));
         doNothing().when(authValidator).validateUpdatingClub(clubId);
 
@@ -379,10 +368,10 @@ class RecruitControllerTest {
     public void updateRecruit_OnlyOneTimeNull_AllTimeRecruitTimeFormattingException() throws Exception {
         //given
         Long clubId = 0L;
-        RecruitDto endTimeNull = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
+        RecruitRequest endTimeNull = readyRecruitReqFullTime();
         endTimeNull.setRecruitEndAt(null);
 
-        RecruitDto startTimeNull = new RecruitDto(testDataRepository.getRecruits().get(clubId.intValue()));
+        RecruitRequest startTimeNull = readyRecruitReqFullTime();
         startTimeNull.setRecruitStartAt(null);
         given(recruitService.updateRecruit(eq(clubId), any(Recruit.class))).willReturn(Optional.of(clubId));
         doNothing().when(authValidator).validateUpdatingClub(clubId);
@@ -471,5 +460,25 @@ class RecruitControllerTest {
         //then
         Assertions.assertThat(result.getResolvedException()).isExactlyInstanceOf(NotRecruitingException.class);
 
+    }
+
+    private RecruitRequest readyRecruitReqFullTime() {
+        return RecruitRequest.builder()
+                .recruitStartAt(LocalDateTime.now())
+                .recruitEndAt(LocalDateTime.now())
+                .recruitQuota("00명 || 최대한 많이 뽑을 예정")
+                .recruitProcessDescription("1. 어쩌구 2. 어쩌구 AnyString")
+                .recruitContact("010 - 1234 - 1234 || 인스타 아이디")
+                .recruitWebLink("www.xxx.com || or any String")
+                .build();
+    }
+
+    private RecruitRequest readyRecruitReqNoTime() {
+        return RecruitRequest.builder()
+                .recruitQuota("00명 || 최대한 많이 뽑을 예정")
+                .recruitProcessDescription("1. 어쩌구 2. 어쩌구 AnyString")
+                .recruitContact("010 - 1234 - 1234 || 인스타 아이디")
+                .recruitWebLink("www.xxx.com || or any String")
+                .build();
     }
 }
