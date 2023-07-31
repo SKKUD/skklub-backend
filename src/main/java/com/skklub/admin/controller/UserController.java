@@ -35,8 +35,8 @@ public class UserController {
     private final AuthValidator authValidator;
     private static final Role role = Role.valueOf("ROLE_USER");
 
-    //join
-    @PostMapping(value = "/user/join")
+    //join - DEPRECATED
+//    @PostMapping(value = "/user/join")
     public ResponseEntity<UserProcResultDTO> join(@ModelAttribute UserJoinRequestDTO userJoinRequestDTO) {
         log.info("username : {}, password : {}", userJoinRequestDTO.getUsername(), userJoinRequestDTO.getPassword());
         UserProcResultDTO joined = userService.joinUser(userJoinRequestDTO.getUsername(), userJoinRequestDTO.getPassword(), role, userJoinRequestDTO.getName(), userJoinRequestDTO.getContact());
