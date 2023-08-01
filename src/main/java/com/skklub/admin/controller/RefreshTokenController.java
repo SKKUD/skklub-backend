@@ -1,7 +1,6 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.service.RefreshTokenService;
-import com.skklub.admin.service.dto.RefreshTokenDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,7 @@ public class RefreshTokenController {
 
     @GetMapping("/refresh")
     public ResponseEntity<Void> refresh(HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) {
-        String newAccessToken = refreshTokenService.refreshAccessToken(new RefreshTokenDTO(request,userDetails.getUsername()));
+        String newAccessToken = refreshTokenService.refreshAccessToken(request,userDetails.getUsername());
         return ResponseEntity.noContent()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + newAccessToken)
                 .build();

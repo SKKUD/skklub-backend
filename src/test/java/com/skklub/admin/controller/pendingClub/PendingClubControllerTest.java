@@ -3,7 +3,6 @@ package com.skklub.admin.controller.pendingClub;
 import akka.protobuf.WireFormat;
 import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.PendingClubController;
-import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.dto.PendingClubRequest;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.PendingClub;
@@ -46,11 +45,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.skklub.admin.controller.RestDocsUtils.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
@@ -85,7 +82,6 @@ class PendingClubControllerTest {
     public void beforeEach() {
         doNothing().when(authValidator).validateUpdatingClub(anyLong());
         doNothing().when(authValidator).validateUpdatingNotice(anyLong());
-        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
         doNothing().when(authValidator).validateUpdatingUser(anyLong());
         doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }

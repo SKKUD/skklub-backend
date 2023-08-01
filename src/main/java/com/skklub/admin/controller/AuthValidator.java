@@ -47,7 +47,7 @@ public class AuthValidator {
             if (nowUserAuthority.equals(String.valueOf(Role.ROLE_ADMIN_SEOUL_CENTRAL)) || nowUserAuthority.equals(String.valueOf(Role.ROLE_ADMIN_SUWON_CENTRAL)) ||  nowUserAuthority.equals(String.valueOf(Role.ROLE_MASTER))) {
                 log.info("now updating with authority of administrator({}): {}", nowUserAuthority, getUserDetails().getUsername());
             } else {
-                throw new AuthException(ErrorCode.NO_AUTHORITY, "no authority");
+                throw new AuthException(ErrorCode.INVALID_AUTHORITY, "no authority");
             }
         }
     }
@@ -73,13 +73,6 @@ public class AuthValidator {
         validateUpdatingUser(writer.getId());
     }
 
-    public void validateUpdatingRecruit(Long recruitId) throws AuthException{
-        Long PresidentId = Optional.of(clubRepository.findClubPresidentIdByRecruitId(recruitId).get(0))
-                .orElseThrow(() ->
-                        new AuthException(ErrorCode.USER_NOT_FOUND, "no existing user"));
-        validateUpdatingUser(PresidentId);
-    }
-
     public void validatePendingRequestAuthority(Long pendingClubId) throws PendingClubIdMisMatchException,AuthException{
         Role requestTo = Optional.of(pendingClubRepository.findById(pendingClubId).get().getRequestTo())
                 .orElseThrow(PendingClubIdMisMatchException::new);
@@ -92,15 +85,18 @@ public class AuthValidator {
 
     private UserDetails getUserDetails() throws AuthException{
         if(SecurityContextHolder.getContext().getAuthentication()==null) {
-            throw new AuthException(ErrorCode.NO_AUTHORIZED_USER,"no authorized user");
+            throw new AuthException(ErrorCode.NO_AUTHORIZED_USER,"no userdetails in securityContext");
         }
         return principalDetailsService.loadUserByUsername(
                 SecurityContextHolder.getContext().getAuthentication().getName()
         );
     }
 
-    private String getUserAuthority(UserDetails userDetails){
+    private String getUserAuthority(UserDetails userDetails) throws AuthException{
         List<GrantedAuthority> authList = (List<GrantedAuthority>) userDetails.getAuthorities();
+        if(authList.size()==0){
+            throw new AuthException(ErrorCode.NO_AUTHORITY,"no granted authorities for user");
+        }
         return authList.get(0).getAuthority();
     }
 

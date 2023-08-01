@@ -1,6 +1,5 @@
 package com.skklub.admin.service;
 
-import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.exception.AuthException;
@@ -9,7 +8,6 @@ import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.security.redis.RedisUtil;
-import com.skklub.admin.service.dto.UserProcResultDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,21 +25,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RedisUtil redisUtil;
-    private final AuthValidator authValidator;
-
-    //User Join
-    public UserProcResultDTO joinUser(String username, String password, Role role, String name, String contact){
-        //username 중복 검사
-        validateUsernameDuplication(username);
-        //회원가입 진행
-        String encPwd = bCryptPasswordEncoder.encode(password);
-        User user = new User(username, encPwd, role, name, contact);
-        userRepository.save(user);
-        UserProcResultDTO result = new UserProcResultDTO(user.getId(),user.getUsername(),user.getName(),user.getContact());
-        log.info("new user joined -> userId : {}, username : {}", user.getId(), user.getUsername());
-        log.info("new user joined -> userPW : {}", user.getPassword());
-        return result;
-    }
 
     //User Login
     public JwtDTO loginUser(String username, String password){

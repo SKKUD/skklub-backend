@@ -32,8 +32,6 @@ public class User extends BaseTimeEntity {
         this.password = updateInfo.password;
         this.name = updateInfo.name;
         this.contact = updateInfo.contact;
-
-
     }
 
 }

@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -96,7 +95,6 @@ public class NoticeControllerTest {
     public void beforeEach() {
         doNothing().when(authValidator).validateUpdatingClub(anyLong());
         doNothing().when(authValidator).validateUpdatingNotice(anyLong());
-        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
         doNothing().when(authValidator).validateUpdatingUser(anyLong());
         doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }

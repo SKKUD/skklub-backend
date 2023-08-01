@@ -5,7 +5,6 @@ import com.skklub.admin.exception.InvalidTokenException;
 import com.skklub.admin.security.auth.PrincipalDetailsService;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.redis.RedisUtil;
-import com.skklub.admin.service.dto.RefreshTokenDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +22,9 @@ public class RefreshTokenService {
     private final RedisUtil redisUtil;
 
     //access-token 재발급
-    public String refreshAccessToken(RefreshTokenDTO refreshTokenDTO){
-        validateRefreshToken(refreshTokenDTO.getRequest(), refreshTokenDTO.getUsername());
-        String newAccessToken = TokenProvider.createAccessJwt(refreshTokenDTO.getUsername());
+    public String refreshAccessToken(HttpServletRequest request,String username){
+        validateRefreshToken(request, username);
+        String newAccessToken = TokenProvider.createAccessJwt(username);
         log.info("access-token reissued");
         return newAccessToken;
     }

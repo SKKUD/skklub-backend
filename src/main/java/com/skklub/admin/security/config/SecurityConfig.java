@@ -89,7 +89,6 @@ public class SecurityConfig  {
         return new OrRequestMatcher(
                 //user
                 new AntPathRequestMatcher("/user/login","POST"),
-                new AntPathRequestMatcher("/user/join","POST"),
                 //pending
                 new AntPathRequestMatcher("/pending/**","POST"),
                 //notice
