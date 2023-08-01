@@ -8,5 +8,4 @@ import lombok.Getter;
 public class InvalidTokenException extends RuntimeException{
     private ErrorCode errorCode;
     private String message;
-
 }

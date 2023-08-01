@@ -1,6 +1,5 @@
 package com.skklub.admin.controller;
 
-import com.skklub.admin.controller.dto.UserJoinRequestDTO;
 import com.skklub.admin.controller.dto.UserLoginRequestDto;
 import com.skklub.admin.controller.dto.UserUpdateRequestDTO;
 import com.skklub.admin.controller.dto.UserUpdateResponseDTO;
@@ -9,8 +8,6 @@ import com.skklub.admin.exception.UserUpdateFailedException;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.service.UserService;
-import com.skklub.admin.service.dto.UserJoinDTO;
-import com.skklub.admin.service.dto.UserProcResultDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,11 +34,11 @@ public class UserController {
 
     //join - DEPRECATED
 //    @PostMapping(value = "/user/join")
-    public ResponseEntity<UserProcResultDTO> join(@ModelAttribute UserJoinRequestDTO userJoinRequestDTO) {
-        log.info("username : {}, password : {}", userJoinRequestDTO.getUsername(), userJoinRequestDTO.getPassword());
-        UserProcResultDTO joined = userService.joinUser(userJoinRequestDTO.getUsername(), userJoinRequestDTO.getPassword(), role, userJoinRequestDTO.getName(), userJoinRequestDTO.getContact());
-        return ResponseEntity.ok().body(joined);
-    }
+//    public ResponseEntity<UserProcResultDTO> join(@ModelAttribute UserJoinRequestDTO userJoinRequestDTO) {
+//        log.info("username : {}, password : {}", userJoinRequestDTO.getUsername(), userJoinRequestDTO.getPassword());
+//        UserProcResultDTO joined = userService.joinUser(userJoinRequestDTO.getUsername(), userJoinRequestDTO.getPassword(), role, userJoinRequestDTO.getName(), userJoinRequestDTO.getContact());
+//        return ResponseEntity.ok().body(joined);
+//    }
 
     //login
     @PostMapping(value = "/user/login")

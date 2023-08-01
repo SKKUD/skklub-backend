@@ -14,7 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -98,6 +97,7 @@ public class UserControllerUpdateTest {
         Long changeToId = 1L;
         User user = testDataRepository.getUsers().get(userId.intValue());
         User changeTo = testDataRepository.getUsers().get(changeToId.intValue());
+        System.out.println(changeTo.getUsername());
 
         //given
         given(userService.updateUser(eq(userId),eq(changeTo.getPassword()),eq(changeTo.getRole()),eq(changeTo.getName()),eq(changeTo.getContact()),eq("Bearer (access_token)")))
@@ -116,10 +116,8 @@ public class UserControllerUpdateTest {
 
         //then
         actions.andExpect(MockMvcResultMatchers.status().isOk())
-                //.andExpect(jsonPath("$.id").value(0L))
+                .andExpect(jsonPath("$.id").value(0L))
                 .andExpect(jsonPath("$.username").value(user.getUsername()))
-                .andExpect(jsonPath("$.name").value(changeTo.getName()))
-                .andExpect(jsonPath("$.contact").value(changeTo.getContact()))
                 .andDo(print())
                 .andDo(document("User-Update"
                         ,requestHeaders(headerWithName("Authorization").description("기본 인증용 access-token")
@@ -133,9 +131,7 @@ public class UserControllerUpdateTest {
                                 parameterWithName("contact").description("변경할 연락처").attributes(example(changeTo.getContact())))
                         ,responseFields(
                                 fieldWithPath("id").type(WireFormat.FieldType.INT64).description("유저 ID"),
-                                fieldWithPath("username").type(WireFormat.FieldType.STRING).description("유저 계정 ID"),
-                                fieldWithPath("name").type(WireFormat.FieldType.STRING).description("유저 이름"),
-                                fieldWithPath("contact").type(WireFormat.FieldType.STRING).description("연락처")
+                                fieldWithPath("username").type(WireFormat.FieldType.STRING).description("유저 계정 ID")
                         )
                 ));
     }

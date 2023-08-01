@@ -1,22 +1,22 @@
 package com.skklub.admin.controller.club;
 
 import akka.protobuf.WireFormat;
+import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.ClubController;
-import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.controller.dto.S3DownloadDto;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.error.exception.ClubNameMisMatchException;
-import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.ClubNameMisMatchException;
+import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.repository.ClubRepository;
-import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.ClubService;
+import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -47,8 +47,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.skklub.admin.controller.RestDocsUtils.*;
-import static java.time.LocalTime.now;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -86,7 +84,6 @@ class ClubControllerReadTest {
     public void beforeEach() {
         doNothing().when(authValidator).validateUpdatingClub(anyLong());
         doNothing().when(authValidator).validateUpdatingNotice(anyLong());
-        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
         doNothing().when(authValidator).validateUpdatingUser(anyLong());
         doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }

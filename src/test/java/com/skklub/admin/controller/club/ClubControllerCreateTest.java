@@ -1,18 +1,17 @@
 package com.skklub.admin.controller.club;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.ClubController;
-import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.domain.ActivityImage;
-import com.skklub.admin.domain.Logo;
-import com.skklub.admin.error.exception.InvalidBelongsException;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.FileNames;
@@ -50,12 +49,11 @@ import static akka.protobuf.WireFormat.FieldType;
 import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -104,7 +102,6 @@ class ClubControllerCreateTest {
         }
         doNothing().when(authValidator).validateUpdatingClub(anyLong());
         doNothing().when(authValidator).validateUpdatingNotice(anyLong());
-        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
         doNothing().when(authValidator).validateUpdatingUser(anyLong());
         doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }

@@ -5,9 +5,8 @@ import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.error.exception.ActivityImageMisMatchException;
-import com.skklub.admin.error.exception.MissingDeletedClubException;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.MissingAliveClubException;
+import com.skklub.admin.error.exception.MissingDeletedClubException;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +61,6 @@ class ClubControllerDeleteTest {
     public void beforeEach() {
         doNothing().when(authValidator).validateUpdatingClub(anyLong());
         doNothing().when(authValidator).validateUpdatingNotice(anyLong());
-        doNothing().when(authValidator).validateUpdatingRecruit(anyLong());
         doNothing().when(authValidator).validateUpdatingUser(anyLong());
         doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }

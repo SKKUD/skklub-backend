@@ -24,6 +24,7 @@ public class PendingClubService {
     private final PendingClubRepository pendingClubRepository;
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     public PendingClub requestCreation(PendingClub pendingClub) {
         pendingClubRepository.save(pendingClub);
@@ -35,6 +36,7 @@ public class PendingClubService {
                 .map(
                         pendingClub -> {
                             User user = pendingClub.toUser();
+                            userService.validateUsernameDuplication(user.getUsername());
                             userRepository.save(user);
                             Club club = pendingClub.toClubWithDefaultLogo(campus, clubType, belongs, user);
                             clubRepository.save(club);
