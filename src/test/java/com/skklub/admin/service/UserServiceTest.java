@@ -1,5 +1,6 @@
 package com.skklub.admin.service;
 
+import com.skklub.admin.TestUserJoin;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.repository.UserRepository;
@@ -21,14 +22,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 public class UserServiceTest {
     private final UserService userService;
+    private final TestUserJoin testUserJoin;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private final RedisUtil redisUtil;
 
     @Autowired
-    public UserServiceTest(UserService userService, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PrincipalDetailsService principalDetailsService,RedisUtil redisUtil){
+    public UserServiceTest(UserService userService, TestUserJoin testUserJoin, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PrincipalDetailsService principalDetailsService, RedisUtil redisUtil){
         this.userService = userService;
+        this.testUserJoin = testUserJoin;
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.redisUtil = redisUtil;
@@ -44,7 +47,7 @@ public class UserServiceTest {
         String contact = "010-1234-5678";
 
         //when
-        userService.joinUser(username, password, role, name, contact);
+        testUserJoin.joinUser(username, password, role, name, contact);
         //then
         User user = userRepository.findByUsername(username);
 
@@ -64,7 +67,7 @@ public class UserServiceTest {
         String name = "명륜이";
         String contact = "010-1234-5678";
 
-        userService.joinUser(username, password, role, name, contact);
+        testUserJoin.joinUser(username, password, role, name, contact);
 
         //when
         JwtDTO jwtDTO = userService.loginUser(username,password);
@@ -90,7 +93,7 @@ public class UserServiceTest {
         String name2 = "율전이";
         String contact2 = "010-8765-4321";
 
-        userService.joinUser(username, password1, role1, name1, contact1);
+        testUserJoin.joinUser(username, password1, role1, name1, contact1);
 
         JwtDTO jwtDTO = userService.loginUser(username,password1);
         String accessToken = "Bearer "+jwtDTO.getAccessToken();
@@ -121,7 +124,7 @@ public class UserServiceTest {
         String name = "명륜이";
         String contact = "010-1234-5678";
 
-        userService.joinUser(username, password, role, name, contact);
+        testUserJoin.joinUser(username, password, role, name, contact);
 
         JwtDTO jwtDTO = userService.loginUser(username,password);
         String accessToken = jwtDTO.getAccessToken();

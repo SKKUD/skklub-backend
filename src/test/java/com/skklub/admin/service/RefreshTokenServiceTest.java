@@ -1,9 +1,9 @@
 package com.skklub.admin.service;
 
+import com.skklub.admin.TestUserJoin;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.security.redis.RedisUtil;
-import com.skklub.admin.service.dto.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -29,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RefreshTokenServiceTest {
     private final UserService userService;
 
+    private final TestUserJoin testUserJoin;
+
     private final RefreshTokenService refreshTokenService;
 
     private final RedisUtil redisUtil;
@@ -38,11 +40,12 @@ public class RefreshTokenServiceTest {
 
     @Autowired
     public RefreshTokenServiceTest(UserService userService,
-                                   RedisUtil redisUtil,
+                                   TestUserJoin testUserJoin, RedisUtil redisUtil,
                                    RefreshTokenService refreshTokenService,
                                    @Value("${jwt.secret}") String secret
     ){
         this.userService = userService;
+        this.testUserJoin = testUserJoin;
         this.redisUtil = redisUtil;
         this.refreshTokenService = refreshTokenService;
         this.secret = secret;
@@ -73,7 +76,7 @@ public class RefreshTokenServiceTest {
         String name = "명륜이";
         String contact = "010-1234-5678";
 
-        userService.joinUser(username, password, role, name, contact);
+        testUserJoin.joinUser(username, password, role, name, contact);
 
         JwtDTO jwtDTO = userService.loginUser(username,password);
 
@@ -81,7 +84,7 @@ public class RefreshTokenServiceTest {
         request.addHeader("refresh-token","Bearer "+jwtDTO.getRefreshToken());
         //when
 
-        String newAccessToken = refreshTokenService.refreshAccessToken(new RefreshTokenDTO(request,username));
+        String newAccessToken = refreshTokenService.refreshAccessToken(request,username);
 
         //then
         assertTrue(validateToken(newAccessToken,secretKey));

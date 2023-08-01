@@ -13,7 +13,11 @@ public enum ErrorCode  {
     TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED,""),
     NO_AUTHORIZED_USER(HttpStatus.UNAUTHORIZED,""),
     //requestTo 겸증
-    WRONG_REQUEST(HttpStatus.BAD_REQUEST,""),;
+    WRONG_REQUEST(HttpStatus.BAD_REQUEST,""),
+
+    //
+    INVALID_AUTHORITY(HttpStatus.BAD_REQUEST,"");
+
 
     private HttpStatus httpStatus;
     private String message;
