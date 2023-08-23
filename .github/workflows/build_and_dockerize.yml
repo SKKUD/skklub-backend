@@ -51,7 +51,12 @@ jobs:
           mkdir -p ./src/main/resources
           cd ./src/main/resources
           touch ./application.yml
-          echo "${{ secrets.PROPERTIES }}" > ./application.yml
+          if [ "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" == "master" ]; then
+            echo "${{ secrets.PROPERTIES_PROD }}" > ./application.yml
+          else
+            echo "${{ secrets.PROPERTIES }}" > ./application.yml
+          fi
+          
 
       - name: Build with Gradle
         run: ./gradlew build -x test
