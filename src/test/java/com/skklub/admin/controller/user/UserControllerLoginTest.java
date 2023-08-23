@@ -2,10 +2,10 @@ package com.skklub.admin.controller.user;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.UserController;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.service.UserService;
-import com.skklub.admin.service.dto.UserLoginDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,11 +29,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static com.skklub.admin.controller.RestDocsUtils.LINK_CAMPUS_TYPE;
 import static com.skklub.admin.controller.RestDocsUtils.example;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -41,7 +40,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.queryPar
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 
@@ -55,10 +53,10 @@ public class UserControllerLoginTest {
 
     @Autowired
     MockMvc mockMvc;
-
     @MockBean
     UserService userService;
-
+    @MockBean
+    private AuthValidator authValidator;
     @Autowired
     ObjectMapper objectMapper;
 
@@ -66,13 +64,8 @@ public class UserControllerLoginTest {
     private WebApplicationContext webApplicationContext;
 
     @BeforeEach
-    public void mockMvcSetUp(
-    RestDocumentationContextProvider restDocumentation) {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(this.webApplicationContext)
-                .apply(springSecurity())
-                .apply(documentationConfiguration(restDocumentation))
-                .build();
+    public void mockMvcSetUp(RestDocumentationContextProvider restDocumentation) {
+        mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).apply(springSecurity()).apply(documentationConfiguration(restDocumentation)).build();
     }
 
     @AfterEach
@@ -88,30 +81,15 @@ public class UserControllerLoginTest {
         //given
         String username = "user";
         String password = "1234";
-        given(userService.userLogin(new UserLoginDTO(username, password))).willReturn(new JwtDTO("access-token", "refresh-token"));
-        
+        given(userService.loginUser(username, password)).willReturn(new JwtDTO("access-token", "refresh-token"));
+
         //when
-        ResultActions actions = mockMvc.perform(post("/user/login")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                            .queryParam("username", username)
-                            .queryParam("password", password)
-                );
+        ResultActions actions = mockMvc.perform(post("/user/login").with(csrf()).contentType(MediaType.APPLICATION_JSON).queryParam("username", username).queryParam("password", password));
 
         //then
-        actions.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(content().string(username +" logged in"))
-                .andDo(document("User-Login"
-                        ,queryParameters(
-                                parameterWithName("username").description("유저 계정 ID").attributes(example(username)),
-                                parameterWithName("password").description("비밀번호").attributes(example(password))
-                        )
-                        ,responseHeaders(
-                                headerWithName("Authorization").description("기본 인증용 access-token"),
-                                headerWithName("Refresh-Token").description("access-token 재발급용 refresh-token")
-                        )
+        actions.andExpect(MockMvcResultMatchers.status().isOk()).andExpect(content().string(username + " logged in")).andDo(document("User-Login", queryParameters(parameterWithName("username").description("유저 계정 ID").attributes(example(username)), parameterWithName("password").description("비밀번호").attributes(example(password))), responseHeaders(headerWithName("Authorization").description("기본 인증용 access-token"), headerWithName("Refresh-Token").description("access-token 재발급용 refresh-token"))
 
-                ));
+        ));
     }
 
 }

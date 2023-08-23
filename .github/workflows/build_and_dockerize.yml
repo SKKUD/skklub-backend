@@ -20,48 +20,58 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-      
+
+    env:
+      MASTER_BRANCH: "real"
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    
-    - name: Gradle Caching
-      uses: actions/cache@v3
-      with:
-        path: |
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
             ${{ runner.os }}-gradle-
-            
-    - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew
-      shell: bash
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+        shell: bash
+
+      - name: Create application.yml
+        shell: bash
+        run: |
+          mkdir -p ./src/main/resources
+          cd ./src/main/resources
+          touch ./application.yml
+          echo "${{ secrets.PROPERTIES }}" > ./application.yml
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+
+      - name: Extract branch name
+        shell: bash
+        run: |
+            if [ "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" == "master" ]; then
+              echo "BRANCH_NAME=${{ env.MASTER_BRANCH }}" >> $GITHUB_OUTPUT
+            else
+              echo "BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+            fi
+        id: extract_branch
+
+      - name: Docker build & push
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker buildx create --name multi-arch-builder --driver docker-container --use 
+          docker buildx build --platform=linux/arm64/v8,linux/amd64/v3 -f Dockerfile -t ${{ secrets.DOCKER_TEST_REPO }}:${{ steps.extract_branch.outputs.BRANCH_NAME }}-latest --push .
       
-    - name: Create application.yml
-      run: |
-        mkdir -p ./src/main/resources
-        cd ./src/main/resources
-        touch ./application.yml
-        echo "${{ secrets.PROPERTIES }}" > ./application.yml
-      shell: bash
-    
-    - name: Build with Gradle
-      run: ./gradlew build -x test
-      
-#     - name: Publish Test Results
-#       uses: EnricoMi/publish-unit-test-result-action@v2
-#       if: always()
-#       with:
-#         files: |
-#           **/build/test-results/test/TEST-*.xml
-    - name: Docker build & push
-      run: |
-        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-        docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }} .
-        docker push ${{ secrets.DOCKER_REPO }}
+      - name: Jenkins post
+        run: |
+          curl -X POST https://${{ secrets.JENKINS_USERNAME }}:${{ secrets.JENKINS_TOKEN }}@deploy.skku.dev/job/%28DEV%29skklub-backend/build

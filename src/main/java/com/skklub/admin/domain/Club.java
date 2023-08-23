@@ -14,15 +14,13 @@ import java.util.Optional;
 
 @Entity
 @Getter
-@EqualsAndHashCode(exclude = {"logo", "recruit", "president", "activityImages"})
+@EqualsAndHashCode(exclude = {"logo", "recruit", "president", "activityImages"}, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Club extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "club_id")
     private Long id;
-
-    private Boolean alive; //Y N OX// Dead Alive
 
     //분류
     @Enumerated(EnumType.STRING)
@@ -48,8 +46,8 @@ public class Club extends BaseEntity {
     private String activityDescription;
 
     //Files
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "logo")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "logo_id")
     private Logo logo;
     @OneToMany(mappedBy = "club", orphanRemoval = true)
     private List<ActivityImage> activityImages = new ArrayList<>();
@@ -96,15 +94,37 @@ public class Club extends BaseEntity {
         this.roomLocation = roomLocation;
         this.webLink1 = webLink1;
         this.webLink2 = webLink2;
-        alive = true;
+    }
+
+    public Club(String clubName, String activityDescription, String belongs, ClubType clubType, String briefActivityDescription, Campus campus, String clubDescription, User user) {
+        this.name = clubName;
+        this.activityDescription = activityDescription;
+        this.belongs = belongs;
+        this.clubType = clubType;
+        this.briefActivityDescription = briefActivityDescription;
+        this.campus = campus;
+        this.clubDescription = clubDescription;
+        this.president = user;
+    }
+
+    public Club(String clubName, String activityDescription, String briefActivityDescription, String clubDescription, Integer establishDate, String headLine, String mandatoryActivatePeriod, Integer memberAmount, String regularMeetingTime, String roomLocation, String webLink1, String webLink2) {
+        this.name = clubName;
+        this.activityDescription = activityDescription;
+        this.briefActivityDescription = briefActivityDescription;
+        this.clubDescription = clubDescription;
+        this.establishAt = establishDate;
+        this.headLine = headLine;
+        this.mandatoryActivatePeriod = mandatoryActivatePeriod;
+        this.memberAmount = memberAmount;
+        this.regularMeetingTime = regularMeetingTime;
+        this.roomLocation = roomLocation;
+        this.webLink1 = webLink1;
+        this.webLink2 = webLink2;
     }
 
     public void update(Club updateInfo
     ) {
         this.name = updateInfo.name;
-        this.campus = updateInfo.campus;
-        this.clubType = updateInfo.clubType;
-        this.belongs = updateInfo.belongs;
         this.activityDescription = updateInfo.activityDescription;
         this.briefActivityDescription = updateInfo.briefActivityDescription;
         this.clubDescription = updateInfo.clubDescription;
@@ -124,7 +144,6 @@ public class Club extends BaseEntity {
         return oldSavedName;
     }
 
-
     public void appendActivityImages(List<ActivityImage> activityImages) {
         for (ActivityImage activityImage : activityImages) {
             this.activityImages.add(activityImage);
@@ -136,14 +155,6 @@ public class Club extends BaseEntity {
         this.recruit = recruit;
     }
 
-    public boolean remove() {
-        if(alive) {
-            alive = false;
-            return true;
-        }
-        return false;
-    }
-
     //Must be Removed
     public void setUser(User user) {
         this.president = user;
@@ -153,11 +164,19 @@ public class Club extends BaseEntity {
         return recruit != null;
     }
 
-    public boolean isAlive() {
-        return alive;
-    }
-
     public void endRecruit() {
         this.recruit = null;
+    }
+
+    public boolean downGrade() {
+        if(!this.getClubType().equals(ClubType.중앙동아리)) return false;
+        this.clubType = ClubType.준중앙동아리;
+        return true;
+    }
+
+    public boolean upGrade() {
+        if(!this.getClubType().equals(ClubType.준중앙동아리)) return false;
+        this.clubType = ClubType.중앙동아리;
+        return true;
     }
 }

@@ -21,24 +21,25 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
     Optional<Club> findDetailClubByName(String name);
 
     @EntityGraph(attributePaths = {"logo"})
-    Page<Club> findClubByCampusAndClubTypeAndBelongsOrderByName(Campus campus, ClubType clubType, String belongs, Pageable pageable);
+    Page<Club> findClubByCampusAndClubTypeAndBelongs(Campus campus, ClubType clubType, String belongs, Pageable pageable);
 
     @EntityGraph(attributePaths = {"logo"})
-    Page<Club> findClubByCampusAndClubTypeOrderByName(Campus campus, ClubType clubType, Pageable pageable);
+    Page<Club> findClubByCampusAndClubType(Campus campus, ClubType clubType, Pageable pageable);
 
     @EntityGraph(attributePaths = {"logo"})
-    Page<Club> findClubByCampusOrderByName(Campus campus, Pageable pageable);
+    Page<Club> findClubByCampus(Campus campus, Pageable pageable);
 
     @EntityGraph(attributePaths = {"logo"})
-    Page<Club> findClubByNameContainingOrderByName(String name, Pageable pageable);
+    Page<Club> findClubByNameContaining(String name, Pageable pageable);
 
-    @Query(value = "Select * from club where campus = :campus and club_type = :clubType and belongs = :belongs order by rand() limit 3", nativeQuery = true)
+    @Query(value = "select * from club where campus = :campus and club_type = :clubType and belongs = :belongs order by rand() limit 3", nativeQuery = true)
     List<Club> findClubRandomByCategories(@Param("campus") String campus, @Param("clubType") String clubType, @Param("belongs") String belongs);
 
-    @Query(value = "Select * from club where campus = :campus and clubType = :clubType order by rand() limit 3", nativeQuery = true)
+    @Query(value = "select * from club where campus = :campus and club_type = :clubType order by rand() limit 3", nativeQuery = true)
     List<Club> findClubRandomByCategories(@Param("campus") String campus, @Param("clubType") String clubType);
 
-    @Query(value = "Select * from club where campus = :campus order by rand() limit 3", nativeQuery = true)
+    @Query(value = "select * from club where campus = :campus order by rand() limit 3", nativeQuery = true)
     List<Club> findClubRandomByCategories(@Param("campus") String campus);
 
 }
+

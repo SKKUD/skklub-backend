@@ -1,6 +1,8 @@
 package com.skklub.admin.error.handler;
 
 import com.skklub.admin.controller.dto.RecruitDto;
+import com.skklub.admin.controller.dto.RecruitRequest;
+import com.skklub.admin.domain.Club;
 import com.skklub.admin.error.exception.AllTimeRecruitTimeFormattingException;
 import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.domain.enums.BelongsSeoulCentral;
@@ -33,7 +35,7 @@ public interface ClubValidator {
         }
     }
 
-    static void validateRecruitTimeFormat(RecruitDto recruit) throws AllTimeRecruitTimeFormattingException {
+    static void validateRecruitTimeFormat(RecruitRequest recruit) throws AllTimeRecruitTimeFormattingException {
         if (recruit.getRecruitEndAt() == null ^ recruit.getRecruitStartAt() == null)
             throw new AllTimeRecruitTimeFormattingException();
     }

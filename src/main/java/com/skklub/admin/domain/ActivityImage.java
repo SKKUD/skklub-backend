@@ -10,9 +10,9 @@ import java.util.Map;
 
 @Entity
 @Getter
-@EqualsAndHashCode(exclude = "club")
+@EqualsAndHashCode(exclude = "club", callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ActivityImage {
+public class ActivityImage extends BaseTimeEntity{
     @Id @Column(name = "activity_image_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

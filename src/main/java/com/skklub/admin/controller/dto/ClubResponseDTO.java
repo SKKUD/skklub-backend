@@ -1,6 +1,7 @@
 package com.skklub.admin.controller.dto;
 
 import com.skklub.admin.domain.enums.Campus;
+import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +20,7 @@ public class ClubResponseDTO {
     //============CLUB==============//
     //분류
     private Campus campus;
-    private String clubType;
+    private ClubType clubType;
     private String belongs;
     private String briefActivityDescription;
 

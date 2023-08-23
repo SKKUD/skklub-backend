@@ -38,4 +38,8 @@ out/
 
 ### properties ###
 /src/main/resources/application.yml
-/src/main/resources/data.sql
+/src/main/resources/application.yaml
+/src/test/resources/application.yml
+/src/test/resources/application.yaml
+
+/src/docs/

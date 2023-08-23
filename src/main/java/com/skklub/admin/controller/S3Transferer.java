@@ -1,23 +1,28 @@
 package com.skklub.admin.controller;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
+import static com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
+
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class S3Transferer {
 
     private final AmazonS3 amazonS3;
@@ -36,8 +41,8 @@ public class S3Transferer {
 
     private FileNames upload(MultipartFile multipartFile) {
         //이름 중복 확인
-        String ext = multipartFile.getOriginalFilename();
-        String fileName = multipartFile.getOriginalFilename() + ext;
+        String ext = "." + multipartFile.getOriginalFilename().split("\\.(?=[^\\.]+$)")[1];
+        String fileName = multipartFile.getOriginalFilename();
         String savedName = UUID.randomUUID() + ext;
 
 
@@ -77,5 +82,13 @@ public class S3Transferer {
 
     public void deleteOne(String key) {
         amazonS3.deleteObject(bucket, key);
+    }
+
+    public void deleteAll(List<String> keys) {
+        if(keys.isEmpty()) return;
+        DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucket)
+                .withKeys(keys.stream().map(KeyVersion::new).collect(Collectors.toList()))
+                .withQuiet(false);
+        amazonS3.deleteObjects(multiObjectDeleteRequest);
     }
 }

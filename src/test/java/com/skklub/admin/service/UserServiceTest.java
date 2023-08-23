@@ -1,5 +1,6 @@
 package com.skklub.admin.service;
 
+import com.skklub.admin.TestUserJoin;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.repository.UserRepository;
@@ -7,42 +8,32 @@ import com.skklub.admin.security.auth.PrincipalDetailsService;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.security.redis.RedisUtil;
-import com.skklub.admin.service.dto.UserJoinDTO;
-import com.skklub.admin.service.dto.UserLoginDTO;
-import com.skklub.admin.service.dto.UserLogoutDTO;
-import com.skklub.admin.service.dto.UserUpdateDTO;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.net.http.HttpRequest;
-import java.util.concurrent.TimeUnit;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest
 @Transactional
 public class UserServiceTest {
     private final UserService userService;
+    private final TestUserJoin testUserJoin;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    private final PrincipalDetailsService principalDetailsService;
 
     private final RedisUtil redisUtil;
 
     @Autowired
-    public UserServiceTest(UserService userService, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PrincipalDetailsService principalDetailsService,RedisUtil redisUtil){
+    public UserServiceTest(UserService userService, TestUserJoin testUserJoin, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PrincipalDetailsService principalDetailsService, RedisUtil redisUtil){
         this.userService = userService;
+        this.testUserJoin = testUserJoin;
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.principalDetailsService = principalDetailsService;
         this.redisUtil = redisUtil;
     }
 
@@ -55,9 +46,8 @@ public class UserServiceTest {
         String name = "명륜이";
         String contact = "010-1234-5678";
 
-        UserJoinDTO userJoinDTO = new UserJoinDTO(username, password, role, name, contact);
         //when
-        userService.userJoin(userJoinDTO);
+        testUserJoin.joinUser(username, password, role, name, contact);
         //then
         User user = userRepository.findByUsername(username);
 
@@ -77,12 +67,10 @@ public class UserServiceTest {
         String name = "명륜이";
         String contact = "010-1234-5678";
 
-        UserJoinDTO userJoinDTO = new UserJoinDTO(username, password, role, name, contact);
-        userService.userJoin(userJoinDTO);
+        testUserJoin.joinUser(username, password, role, name, contact);
 
-        UserLoginDTO userLoginDTO = new UserLoginDTO(username,password);
         //when
-        JwtDTO jwtDTO = userService.userLogin(userLoginDTO);
+        JwtDTO jwtDTO = userService.loginUser(username,password);
 
         //then
         assertTrue(TokenProvider.getUsername(jwtDTO.getAccessToken()).equals(username));
@@ -105,17 +93,17 @@ public class UserServiceTest {
         String name2 = "율전이";
         String contact2 = "010-8765-4321";
 
-        UserJoinDTO userJoinDTO = new UserJoinDTO(username, password1, role1, name1, contact1);
-        userService.userJoin(userJoinDTO);
+        testUserJoin.joinUser(username, password1, role1, name1, contact1);
+
+        JwtDTO jwtDTO = userService.loginUser(username,password1);
+        String accessToken = "Bearer "+jwtDTO.getAccessToken();
 
         //when
-        UserDetails userDetails = principalDetailsService.loadUserByUsername(username);
         User originalUser = userRepository.findByUsername(username);
 
         Long id = originalUser.getId();
 
-        UserUpdateDTO userUpdateDTO = new UserUpdateDTO(id, password2, role2, name2, contact2, userDetails);
-        userService.userUpdate(userUpdateDTO);
+        userService.updateUser(id, password2, role2, name2, contact2,accessToken);
 
         //then
         User updatedUser = userRepository.findById(id).get();
@@ -136,14 +124,13 @@ public class UserServiceTest {
         String name = "명륜이";
         String contact = "010-1234-5678";
 
-        UserJoinDTO userJoinDTO = new UserJoinDTO(username, password, role, name, contact);
-        userService.userJoin(userJoinDTO);
+        testUserJoin.joinUser(username, password, role, name, contact);
 
-        JwtDTO jwtDTO = userService.userLogin(new UserLoginDTO(username,password));
+        JwtDTO jwtDTO = userService.loginUser(username,password);
         String accessToken = jwtDTO.getAccessToken();
 
         //when
-        String loggedOutUser = userService.userLogout(new UserLogoutDTO("Bearer "+accessToken, username));
+        String loggedOutUser = userService.logoutUser(username,"Bearer "+accessToken);
 
         //then
         assertEquals(loggedOutUser, username);

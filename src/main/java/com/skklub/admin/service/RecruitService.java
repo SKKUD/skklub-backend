@@ -10,11 +10,13 @@ import com.skklub.admin.repository.RecruitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class RecruitService {
 
@@ -32,11 +34,11 @@ public class RecruitService {
     }
 
 
-    public Optional<Long> updateRecruit(Long recruitId, Recruit updateInfo) {
-        return recruitRepository.findById(recruitId)
+    public Optional<Long> updateRecruit(Long clubId, Recruit updateInfo) {
+        return recruitRepository.findByClubId(clubId)
                 .map(recruitBase -> {
                     recruitBase.update(updateInfo);
-                    return recruitBase.getId();
+                    return clubId;
                 });
     }
 

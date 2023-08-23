@@ -36,6 +36,7 @@ public class ClubCreateRequestDTO {
     private Integer establishDate;
     private String headLine;
     private String mandatoryActivatePeriod;
+    @DecimalMin(value = "0")
     private Integer memberAmount;
     private String regularMeetingTime;
     private String roomLocation;

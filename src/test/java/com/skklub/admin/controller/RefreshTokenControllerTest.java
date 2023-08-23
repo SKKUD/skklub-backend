@@ -2,7 +2,6 @@ package com.skklub.admin.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.service.RefreshTokenService;
-import com.skklub.admin.service.RefreshTokenServiceTest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,11 +32,9 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @Slf4j
@@ -83,7 +80,7 @@ public class RefreshTokenControllerTest {
         String accessToken =  "access_token";
         String refreshToken = "refresh_token";
 
-        given(refreshTokenService.refreshAccessToken(any())).willReturn(accessToken);
+        given(refreshTokenService.refreshAccessToken(any(),any())).willReturn(accessToken);
 
         //when
         ResultActions actions = mockMvc.perform(get("/refresh").with(csrf())

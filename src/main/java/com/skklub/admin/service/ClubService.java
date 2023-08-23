@@ -5,8 +5,10 @@ import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
-import com.skklub.admin.error.exception.AlreadyAliveClubException;
-import com.skklub.admin.error.exception.DoubleClubDeletionException;
+import com.skklub.admin.error.exception.CannotUpGradeClubException;
+import com.skklub.admin.error.exception.CannotDownGradeClubException;
+import com.skklub.admin.error.exception.MissingDeletedClubException;
+import com.skklub.admin.error.exception.MissingAliveClubException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.DeletedClubRepository;
@@ -51,10 +53,10 @@ public class ClubService {
 
     public Page<Club> getClubPrevsByCategories(Campus campus, ClubType clubType, String belongs, Pageable pageable) {
         if (!belongs.equals("전체"))
-            return clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, pageable);
+            return clubRepository.findClubByCampusAndClubTypeAndBelongs(campus, clubType, belongs, pageable);
         if (!clubType.equals(ClubType.전체))
-            return clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, pageable);
-        return clubRepository.findClubByCampusOrderByName(campus, pageable);
+            return clubRepository.findClubByCampusAndClubType(campus, clubType, pageable);
+        return clubRepository.findClubByCampus(campus, pageable);
     }
 
     public List<Club> getRandomClubsByCategories(Campus campus, ClubType clubType, String belongs) {
@@ -82,19 +84,19 @@ public class ClubService {
                 });
     }
 
-    public Optional<String> deleteClub(Long clubId) throws DoubleClubDeletionException {
+    public Optional<String> deleteClub(Long clubId) throws MissingAliveClubException {
         return clubRepository.findById(clubId)
                 .map(club -> {
-                    if (club.remove()) return club.getName();
-                    throw new DoubleClubDeletionException();
+                    clubRepository.delete(club);
+                    return club.getName();
                 });
     }
 
-    public Optional<String> reviveClub(Long clubId) throws AlreadyAliveClubException {
+    public Optional<String> reviveClub(Long clubId) throws MissingDeletedClubException {
         return deletedClubRepository.findById(clubId)
                 .map(club -> {
-                    if (club.revive()) return club.getName();
-                    throw new AlreadyAliveClubException();
+                    deletedClubRepository.delete(club);
+                    return club.getName();
                 });
     }
 
@@ -106,4 +108,23 @@ public class ClubService {
                 });
     }
 
+    public Optional<Club> downGrade(Long clubId) {
+        return clubRepository.findById(clubId)
+                .map(
+                        club -> {
+                            if(!club.downGrade()) throw new CannotDownGradeClubException();
+                            return club;
+                        }
+                );
+    }
+
+    public Optional<Club> upGrade(Long clubId) {
+        return clubRepository.findById(clubId)
+                .map(
+                        club -> {
+                            if (!club.upGrade()) throw new CannotUpGradeClubException();
+                            return club;
+                        }
+                );
+    }
 }

@@ -1,16 +1,12 @@
 package com.skklub.admin.security.jwt;
 
-import com.skklub.admin.exception.AuthException;
-import com.skklub.admin.exception.ErrorCode;
-import com.skklub.admin.exception.InvalidTokenException;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.Objects;
 
 @Slf4j
 @Component
@@ -71,7 +66,7 @@ public class TokenProvider {
     }
 
     public static String resolveToken(String token){
-        return token.split(" ")[ 1];
+        return token.split(" ")[1];
     }
 
     public static Long getExpiration(String token) {

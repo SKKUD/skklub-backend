@@ -1,17 +1,17 @@
 package com.skklub.admin.controller.club;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.controller.AuthValidator;
+import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.domain.ActivityImage;
-import com.skklub.admin.domain.Logo;
-import com.skklub.admin.error.exception.InvalidBelongsException;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.FileNames;
@@ -49,11 +49,11 @@ import static akka.protobuf.WireFormat.FieldType;
 import static com.skklub.admin.controller.RestDocsUtils.example;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -77,8 +77,8 @@ class ClubControllerCreateTest {
     private S3Transferer s3Transferer;
     @InjectMocks
     private TestDataRepository testDataRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
+    @MockBean
+    private AuthValidator authValidator;
 
     private MockMultipartFile mockLogo;
     private List<MockMultipartFile> mockActivityImages = new ArrayList<>();
@@ -100,6 +100,10 @@ class ClubControllerCreateTest {
                     new FileInputStream("src/main/resources/2020-12-25 (5).png")
             ));
         }
+        doNothing().when(authValidator).validateUpdatingClub(anyLong());
+        doNothing().when(authValidator).validateUpdatingNotice(anyLong());
+        doNothing().when(authValidator).validateUpdatingUser(anyLong());
+        doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }
 
     @Test
@@ -210,7 +214,7 @@ class ClubControllerCreateTest {
     }
 
      @Test
-     public void clubCreation_EnumMisMatch_MethodArgumentNotValidException() throws Exception{
+     public void clubCreation_EnumMisMatch_BindException() throws Exception{
          //given
          String wrongCampus = "안암";
          String wrongClubType = "중준중동아리";
@@ -228,7 +232,7 @@ class ClubControllerCreateTest {
                          .queryParam("briefActivityDescription", "E-SPORTS")
                          .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
                          .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
-         ).andReturn();
+         ).andExpect(status().isBadRequest()).andReturn();
          MvcResult wrongCampusResult = mockMvc.perform(
                  multipart("/club")
                          .file(mockLogo)
@@ -241,11 +245,11 @@ class ClubControllerCreateTest {
                          .queryParam("briefActivityDescription", "E-SPORTS")
                          .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
                          .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
-         ).andReturn();
+         ).andExpect(status().isBadRequest()).andReturn();
 
          //then
-         Assertions.assertThat(wrongCampusResult.getResolvedException()).isInstanceOf(BindException.class);
-         Assertions.assertThat(wrongClubTypeResult.getResolvedException()).isInstanceOf(BindException.class);
+         Assertions.assertThat(wrongCampusResult.getResolvedException()).isExactlyInstanceOf(BindException.class);
+         Assertions.assertThat(wrongClubTypeResult.getResolvedException()).isExactlyInstanceOf(BindException.class);
 
       }
 
@@ -297,7 +301,7 @@ class ClubControllerCreateTest {
                         .queryParam("briefActivityDescription", "E-SPORTS")
                         .queryParam("activityDescription", "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다.")
                         .queryParam("clubDescription", "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^")
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(wrongBelongsResult.getResolvedException()).isInstanceOf(InvalidBelongsException.class);
@@ -307,11 +311,10 @@ class ClubControllerCreateTest {
     @Test
     public void uploadActivityImages_MultiImages_Success() throws Exception {
         //given
-        List<MultipartFile> multipartFiles = new ArrayList<>();
-        List<FileNames> activityImageDtos = new ArrayList<>();
-        List<ActivityImage> activityImages = activityImageDtos.stream()
-                .map(FileNames::toActivityImageEntity)
+        List<MultipartFile> multipartFiles = mockActivityImages.stream()
                 .collect(Collectors.toList());
+        List<FileNames> activityImageDtos = new ArrayList<>();
+        List<ActivityImage> activityImages = new ArrayList<>();
         given(s3Transferer.uploadAll(multipartFiles)).willReturn(activityImageDtos);
         given(clubService.appendActivityImages(0L, activityImages)).willReturn(Optional.of("ClubName"));
 
@@ -396,7 +399,7 @@ class ClubControllerCreateTest {
                         .file(mockActivityImages.get(9))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(csrf())
-        ).andReturn();
+        ).andExpect(status().isBadRequest()).andReturn();
 
         //then
         Assertions.assertThat(badIdResult.getResolvedException()).isExactlyInstanceOf(ClubIdMisMatchException.class);

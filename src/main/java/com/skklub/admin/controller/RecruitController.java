@@ -2,6 +2,7 @@ package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.ClubNameAndIdDTO;
 import com.skklub.admin.controller.dto.RecruitDto;
+import com.skklub.admin.controller.dto.RecruitRequest;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.RecruitIdMisMatchException;
 import com.skklub.admin.error.handler.ClubValidator;
@@ -19,12 +20,14 @@ import org.springframework.web.bind.annotation.*;
 public class RecruitController {
 
     private final RecruitService recruitService;
+    private final AuthValidator authValidator;
 
     //모집 등록
     @PostMapping("/recruit/{clubId}")
-    public ResponseEntity<ClubNameAndIdDTO> startRecruit(@PathVariable Long clubId, @RequestBody @Valid RecruitDto recruitDto) {
-        ClubValidator.validateRecruitTimeFormat(recruitDto);
-        Recruit recruit = recruitDto.toEntity();
+    public ResponseEntity<ClubNameAndIdDTO> startRecruit(@PathVariable Long clubId, @ModelAttribute @Valid RecruitRequest recruitRequest) {
+        authValidator.validateUpdatingClub(clubId);
+        ClubValidator.validateRecruitTimeFormat(recruitRequest);
+        Recruit recruit = recruitRequest.toEntity();
         return recruitService.startRecruit(clubId, recruit)
                 .map(name -> new ClubNameAndIdDTO(clubId, name))
                 .map(ResponseEntity::ok)
@@ -32,18 +35,20 @@ public class RecruitController {
     }
 
     //모집 수정
-    @PatchMapping("/recruit/{recruitId}")
-    public ResponseEntity<Long> updateRecruit(@PathVariable Long recruitId, @RequestBody @Valid RecruitDto recruitDto) {
-        ClubValidator.validateRecruitTimeFormat(recruitDto);
-        Recruit recruit = recruitDto.toEntity();
-        return recruitService.updateRecruit(recruitId, recruit)
+    @PatchMapping("/recruit/{clubId}")
+    public ResponseEntity<Long> updateRecruit(@PathVariable Long clubId, @ModelAttribute @Valid RecruitRequest recruitRequest) {
+        authValidator.validateUpdatingClub(clubId);
+        ClubValidator.validateRecruitTimeFormat(recruitRequest);
+        Recruit recruit = recruitRequest.toEntity();
+        return recruitService.updateRecruit(clubId, recruit)
                 .map(ResponseEntity::ok)
-                .orElseThrow(RecruitIdMisMatchException::new);
+                .orElseThrow(ClubIdMisMatchException::new);
     }
 
     //모집 종료
     @DeleteMapping("/recruit/{clubId}")
     public Long endRecruit(@PathVariable Long clubId) {
+        authValidator.validateUpdatingClub(clubId);
         recruitService.endRecruit(clubId);
         return clubId;
     }

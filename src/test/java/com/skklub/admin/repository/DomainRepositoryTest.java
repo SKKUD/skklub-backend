@@ -2,6 +2,9 @@ package com.skklub.admin.repository;
 
 import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.domain.*;
+import com.skklub.admin.domain.enums.Campus;
+import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.domain.enums.Role;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -226,7 +230,7 @@ public class DomainRepositoryTest {
         //given
         Club club = testDataRepository.getCleanClub(0);
         Recruit recruit = testDataRepository.getRecruits().get(0);
-        //4 Insert
+        //2 Insert
         club.startRecruit(recruit);
         recruitRepository.save(recruit);
         clubRepository.save(club);
@@ -291,14 +295,22 @@ public class DomainRepositoryTest {
     public void clubRemove_GivenClub_movedFromClubTableToDeletedClubTable() throws Exception{
         //given
         Club club = testDataRepository.getCleanClub(0);
+        Logo logo = testDataRepository.getLogos().get(0);
+        Recruit recruit = testDataRepository.getRecruits().get(0);
+        User user = testDataRepository.getUsers().get(0);
+        club.setUser(user);
+        em.persist(user);
+        club.startRecruit(recruit);
+        em.persist(recruit);
+        club.changeLogo(logo);
         clubRepository.save(club);
         em.flush();
         em.clear();
 
         //when
         Optional<Club> findedClub = clubRepository.findById(club.getId());
-        findedClub.ifPresent(Club::remove);
-        //1 Update
+        findedClub.ifPresent(clubRepository::delete);
+        //1 deleted, (1 insert)
         em.flush();
         em.clear();
 
@@ -306,24 +318,50 @@ public class DomainRepositoryTest {
         Optional<Club> afterDeletion = clubRepository.findById(club.getId());
         Assertions.assertThat(afterDeletion).isEmpty();
         Optional<DeletedClub> findedDeletedClub = deletedClubRepository.findById(club.getId());
-        Assertions.assertThat(findedDeletedClub).isEqualTo(club);
+        Assertions.assertThat(findedDeletedClub.get().getId()).isEqualTo(club.getId());
+        Assertions.assertThat(findedDeletedClub.get().getCampus()).isEqualTo(club.getCampus());
+        Assertions.assertThat(findedDeletedClub.get().getClubType()).isEqualTo(club.getClubType());
+        Assertions.assertThat(findedDeletedClub.get().getBelongs()).isEqualTo(club.getBelongs());
+        Assertions.assertThat(findedDeletedClub.get().getBriefActivityDescription()).isEqualTo(club.getBriefActivityDescription());
+        Assertions.assertThat(findedDeletedClub.get().getName()).isEqualTo(club.getName());
+        Assertions.assertThat(findedDeletedClub.get().getHeadLine()).isEqualTo(club.getHeadLine());
+        Assertions.assertThat(findedDeletedClub.get().getEstablishAt()).isEqualTo(club.getEstablishAt());
+        Assertions.assertThat(findedDeletedClub.get().getRoomLocation()).isEqualTo(club.getRoomLocation());
+        Assertions.assertThat(findedDeletedClub.get().getMemberAmount()).isEqualTo(club.getMemberAmount());
+        Assertions.assertThat(findedDeletedClub.get().getRegularMeetingTime()).isEqualTo(club.getRegularMeetingTime());
+        Assertions.assertThat(findedDeletedClub.get().getMandatoryActivatePeriod()).isEqualTo(club.getMandatoryActivatePeriod());
+        Assertions.assertThat(findedDeletedClub.get().getClubDescription()).isEqualTo(club.getClubDescription());
+        Assertions.assertThat(findedDeletedClub.get().getActivityDescription()).isEqualTo(club.getActivityDescription());
+        Assertions.assertThat(findedDeletedClub.get().getLogoId()).isEqualTo(club.getLogo().getId());
+        Assertions.assertThat(findedDeletedClub.get().getWebLink1()).isEqualTo(club.getWebLink1());
+        Assertions.assertThat(findedDeletedClub.get().getWebLink2()).isEqualTo(club.getWebLink2());
+        Assertions.assertThat(findedDeletedClub.get().getUserId()).isEqualTo(club.getPresident().getId());
+        Assertions.assertThat(findedDeletedClub.get().getRecruitId()).isNull();
     }
 
     @Test
     public void clubRevive_GivenDeletedClub_movedFromDeletedClubTableToClubTable() throws Exception{
         //given
         Club club = testDataRepository.getCleanClub(0);
+        Logo logo = testDataRepository.getLogos().get(0);
+        Recruit recruit = testDataRepository.getRecruits().get(0);
+        User user = testDataRepository.getUsers().get(0);
+        club.setUser(user);
+        em.persist(user);
+        club.startRecruit(recruit);
+        em.persist(recruit);
+        club.changeLogo(logo);
         clubRepository.save(club);
         em.flush();
         em.clear();
         Optional<Club> findedClub = clubRepository.findById(club.getId());
-        findedClub.ifPresent(Club::remove);
+        findedClub.ifPresent(clubRepository::delete);
         em.flush();
         em.clear();
 
         //when
         Optional<DeletedClub> findedDeletedClub = deletedClubRepository.findById(club.getId());
-        findedDeletedClub.ifPresent(DeletedClub::revive);
+        findedDeletedClub.ifPresent(deletedClubRepository::delete);
         //1 update
         em.flush();
         em.clear();
@@ -335,10 +373,110 @@ public class DomainRepositoryTest {
         Assertions.assertThat(afterReviveClub).isNotEmpty();
         afterReviveClub.ifPresent(
                 c -> {
+                    Assertions.assertThat(c.getId()).isEqualTo(club.getId());
+                    Assertions.assertThat(c.getCampus()).isEqualTo(club.getCampus());
+                    Assertions.assertThat(c.getClubType()).isEqualTo(club.getClubType());
+                    Assertions.assertThat(c.getBelongs()).isEqualTo(club.getBelongs());
+                    Assertions.assertThat(c.getBriefActivityDescription()).isEqualTo(club.getBriefActivityDescription());
+                    Assertions.assertThat(c.getName()).isEqualTo(club.getName());
+                    Assertions.assertThat(c.getHeadLine()).isEqualTo(club.getHeadLine());
+                    Assertions.assertThat(c.getEstablishAt()).isEqualTo(club.getEstablishAt());
+                    Assertions.assertThat(c.getRoomLocation()).isEqualTo(club.getRoomLocation());
+                    Assertions.assertThat(c.getMemberAmount()).isEqualTo(club.getMemberAmount());
+                    Assertions.assertThat(c.getRegularMeetingTime()).isEqualTo(club.getRegularMeetingTime());
+                    Assertions.assertThat(c.getMandatoryActivatePeriod()).isEqualTo(club.getMandatoryActivatePeriod());
+                    Assertions.assertThat(c.getClubDescription()).isEqualTo(club.getClubDescription());
+                    Assertions.assertThat(c.getActivityDescription()).isEqualTo(club.getActivityDescription());
+                    Assertions.assertThat(c.getLogo()).isEqualTo(club.getLogo());
+                    Assertions.assertThat(c.getWebLink1()).isEqualTo(club.getWebLink1());
+                    Assertions.assertThat(c.getWebLink2()).isEqualTo(club.getWebLink2());
+                    Assertions.assertThat(c.getPresident().getContact()).isEqualTo(club.getPresident().getContact());
+                    Assertions.assertThat(c.getPresident().getId()).isEqualTo(club.getPresident().getId());
+                    Assertions.assertThat(c.getPresident().getName()).isEqualTo(club.getPresident().getName());
+                    Assertions.assertThat(c.getPresident().getUsername()).isEqualTo(club.getPresident().getUsername());
                     Assertions.assertThat(c.getRecruit()).isNull();
-                    Assertions.assertThat(c).isEqualTo(club);
                 }
         );
+    }
 
+    @Test
+    public void PendingClubToUser_WithHashedPw_SamePw() throws Exception{
+        //given
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        String encodedPw = bCryptPasswordEncoder.encode("testPw");
+        String username = "testUserId";
+        String name = "testUser";
+        String contact = "testContact";
+        PendingClub pendingClub = new PendingClub(
+                "testPendingName",
+                "testBriefDescription",
+                "testActivityDescription",
+                "testClubDescription",
+                username,
+                encodedPw,
+                name,
+                contact,
+                Role.ROLE_ADMIN_SEOUL_CENTRAL
+        );
+
+        //when
+        User user = pendingClub.toUser();
+
+        //then
+        Assertions.assertThat(user.getUsername()).isEqualTo(username);
+        Assertions.assertThat(user.getName()).isEqualTo(name);
+        Assertions.assertThat(user.getPassword()).isEqualTo(encodedPw);
+        Assertions.assertThat(user.getContact()).isEqualTo(contact);
+    }
+
+    @Test
+    public void PendingClubToClub_GivenUser_NullAtSomeFieldsWithDefaultLogo() throws Exception{
+        //given
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        String encodedPw = bCryptPasswordEncoder.encode("testPw");
+        String username = "testUserId";
+        String name = "testUser";
+        String contact = "testContact";
+        PendingClub pendingClub = new PendingClub(
+                "testPendingName",
+                "testBriefDescription",
+                "testActivityDescription",
+                "testClubDescription",
+                username,
+                encodedPw,
+                name,
+                contact,
+                Role.ROLE_ADMIN_SEOUL_CENTRAL
+        );
+        User user = pendingClub.toUser();
+
+        //when
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.중앙동아리;
+        String belongs = "종교";
+        Club club = pendingClub.toClubWithDefaultLogo(campus, clubType, belongs, user);
+
+        //then
+        Logo logo = club.getLogo();
+        Assertions.assertThat(logo.getOriginalName()).isEqualTo("alt.jpg");
+        Assertions.assertThat(logo.getUploadedName()).isEqualTo("alt.jpg");
+        Assertions.assertThat(club.getName()).isEqualTo(pendingClub.getClubName());
+        Assertions.assertThat(club.getBriefActivityDescription()).isEqualTo(pendingClub.getBriefActivityDescription());
+        Assertions.assertThat(club.getActivityDescription()).isEqualTo(pendingClub.getActivityDescription());
+        Assertions.assertThat(club.getClubDescription()).isEqualTo(pendingClub.getClubDescription());
+        Assertions.assertThat(club.getCampus()).isEqualTo(campus);
+        Assertions.assertThat(club.getClubType()).isEqualTo(clubType);
+        Assertions.assertThat(club.getBelongs()).isEqualTo(belongs);
+        Assertions.assertThat(club.getHeadLine()).isNull();
+        Assertions.assertThat(club.getEstablishAt()).isNull();
+        Assertions.assertThat(club.getRoomLocation()).isNull();
+        Assertions.assertThat(club.getMemberAmount()).isNull();
+        Assertions.assertThat(club.getRegularMeetingTime()).isNull();
+        Assertions.assertThat(club.getMandatoryActivatePeriod()).isNull();
+        Assertions.assertThat(club.getWebLink1()).isNull();
+        Assertions.assertThat(club.getWebLink2()).isNull();
+        Assertions.assertThat(club.getRecruit()).isNull();
+        Assertions.assertThat(club.getActivityImages()).isEmpty();
+        Assertions.assertThat(club.getPresident()).isEqualTo(user);
     }
 }

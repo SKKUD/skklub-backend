@@ -1,14 +1,15 @@
 package com.skklub.admin.service;
 
 import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.DeletedClub;
 import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
-import com.skklub.admin.error.exception.AlreadyAliveClubException;
-import com.skklub.admin.error.exception.DoubleClubDeletionException;
+import com.skklub.admin.error.exception.CannotDownGradeClubException;
+import com.skklub.admin.error.exception.CannotUpGradeClubException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.DeletedClubRepository;
@@ -27,14 +28,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.skklub.admin.TestUtils.setIdReflection;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.*;
 
 
 @Slf4j
@@ -158,8 +160,8 @@ class ClubServiceTest {
         String belongs = "취미교양";
         PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
 
-        lenient().when(clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, request)).thenThrow(IllegalArgumentException.class);
-        lenient().when(clubRepository.findClubByCampusOrderByName(campus, request)).thenThrow(IllegalArgumentException.class);
+        lenient().when(clubRepository.findClubByCampusAndClubType(campus, clubType, request)).thenThrow(IllegalArgumentException.class);
+        lenient().when(clubRepository.findClubByCampus(campus, request)).thenThrow(IllegalArgumentException.class);
 
         //when
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getClubPrevsByCategories(campus, clubType, belongs, request));
@@ -174,8 +176,8 @@ class ClubServiceTest {
         String belongs = "전체";
         PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
 
-        lenient().when(clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, request)).thenThrow(AssertionError.class);
-        lenient().when(clubRepository.findClubByCampusOrderByName(campus, request)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubByCampusAndClubTypeAndBelongs(campus, clubType, belongs, request)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubByCampus(campus, request)).thenThrow(AssertionError.class);
 
         //when
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getClubPrevsByCategories(campus, clubType, belongs, request));
@@ -192,8 +194,8 @@ class ClubServiceTest {
         String belongs = "전체";
         PageRequest request = PageRequest.of(0, 5, Sort.Direction.ASC, "name");
 
-        lenient().when(clubRepository.findClubByCampusAndClubTypeAndBelongsOrderByName(campus, clubType, belongs, request)).thenThrow(AssertionError.class);
-        lenient().when(clubRepository.findClubByCampusAndClubTypeOrderByName(campus, clubType, request)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubByCampusAndClubTypeAndBelongs(campus, clubType, belongs, request)).thenThrow(AssertionError.class);
+        lenient().when(clubRepository.findClubByCampusAndClubType(campus, clubType, request)).thenThrow(AssertionError.class);
 
         //when
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> clubService.getClubPrevsByCategories(campus, clubType, belongs, request));
@@ -202,9 +204,8 @@ class ClubServiceTest {
 
     }
 
-
     @Test
-    public void getClubPrevsByKeyword_belongsNot전체_3Param() throws Exception {
+    public void getRandomClubsByCategories_belongsNot전체_3Param() throws Exception {
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.준중앙동아리;
@@ -219,7 +220,7 @@ class ClubServiceTest {
     }
 
     @Test
-    public void getClubPrevsByKeyword_clubTypeNot전체AndbelongsIs전체_2Param() throws Exception {
+    public void getRandomClubsByCategories_clubTypeNot전체AndbelongsIs전체_2Param() throws Exception {
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.준중앙동아리;
@@ -236,7 +237,7 @@ class ClubServiceTest {
     }
 
     @Test
-    public void getClubPrevsByKeyword_Both전체_1Param() throws Exception {
+    public void getRandomClubsByCategories_Both전체_1Param() throws Exception {
         //given
         Campus campus = Campus.명륜;
         ClubType clubType = ClubType.전체;
@@ -260,7 +261,7 @@ class ClubServiceTest {
         Club club = testDataRepository.getClubs().get(clubId.intValue());
         Club clubUpdateInfo = testDataRepository.getClubs().get(updateInfoClubId.intValue());
         setIdReflection(clubId, club);
-        ClubDetailInfoDto base = new ClubDetailInfoDto(testDataRepository.getClubs().get(clubId.intValue()));
+        ClubDetailInfoDto base = new ClubDetailInfoDto(club);
         setIdReflection(clubId, base);
         given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
 
@@ -270,10 +271,10 @@ class ClubServiceTest {
         //then
         Assertions.assertThat(club.getName()).isEqualTo(updatedName.get()).isEqualTo(clubUpdateInfo.getName());
         Assertions.assertThat(club.getActivityDescription()).isEqualTo(clubUpdateInfo.getActivityDescription());
-        Assertions.assertThat(club.getBelongs()).isEqualTo(clubUpdateInfo.getBelongs());
-        Assertions.assertThat(club.getClubType()).isEqualTo(clubUpdateInfo.getClubType());
+        Assertions.assertThat(club.getCampus()).isEqualTo(club.getCampus());
+        Assertions.assertThat(club.getClubType()).isEqualTo(club.getClubType());
+        Assertions.assertThat(club.getBelongs()).isEqualTo(club.getBelongs());
         Assertions.assertThat(club.getBriefActivityDescription()).isEqualTo(clubUpdateInfo.getBriefActivityDescription());
-        Assertions.assertThat(club.getCampus()).isEqualTo(clubUpdateInfo.getCampus());
         Assertions.assertThat(club.getClubDescription()).isEqualTo(clubUpdateInfo.getClubDescription());
         Assertions.assertThat(club.getEstablishAt()).isEqualTo(clubUpdateInfo.getEstablishAt());
         Assertions.assertThat(club.getHeadLine()).isEqualTo(clubUpdateInfo.getHeadLine());
@@ -285,7 +286,7 @@ class ClubServiceTest {
         Assertions.assertThat(club.getPresident()).isNotEqualTo(clubUpdateInfo.getPresident());
         Assertions.assertThat(club.getPresident().getName()).isEqualTo(base.getPresidentName());
         Assertions.assertThat(club.getPresident().getContact()).isEqualTo(base.getPresidentContact());
-        Assertions.assertThat(club.getRecruit()).isEqualTo(base.getRecruit().get().toEntity()).isNotEqualTo(clubUpdateInfo.getRecruit());
+        Assertions.assertThat(new RecruitDto(club.getRecruit())).isEqualTo(base.getRecruit().get()).isNotEqualTo(new RecruitDto(clubUpdateInfo.getRecruit()));
     }
 
     @Test
@@ -341,7 +342,7 @@ class ClubServiceTest {
     }
 
     @Test
-    public void deleteClub_Default_AlivenessToFalse() throws Exception {
+    public void deleteClub_Default_ReturnName() throws Exception {
         //given
         Long clubId = 0L;
         Club club = testDataRepository.getClubs().get(clubId.intValue());
@@ -353,75 +354,54 @@ class ClubServiceTest {
         //then
         Assertions.assertThat(deletedClubName).isNotEmpty();
         Assertions.assertThat(deletedClubName.get()).isEqualTo(club.getName());
-        Assertions.assertThat(club.isAlive()).isFalse();
     }
 
     @Test
-    public void deleteClub_BadClubId_ReturnOptionalEmtpy() throws Exception {
+    public void deleteClub_AlreadyRemoved_ReturnEmpty() throws Exception {
         //given
         Long clubId = 0L;
         given(clubRepository.findById(clubId)).willReturn(Optional.empty());
 
         //when
-        Optional<String> nameShouldEmpty = clubService.deleteClub(clubId);
+        Optional<String> shouldBeEmpty = clubService.deleteClub(clubId);
 
         //then
-        Assertions.assertThat(nameShouldEmpty).isEmpty();
+        Assertions.assertThat(shouldBeEmpty).isEmpty();
     }
 
     @Test
-    public void deleteClub_AlreadyRemoved_DoubleClubDeletionException() throws Exception {
+    public void reviveClub_Default_ReturnName() throws Exception {
         //given
         Long clubId = 0L;
-        Club club = testDataRepository.getClubs().get(clubId.intValue());
-        club.remove();
-        given(clubRepository.findById(clubId)).willReturn(Optional.ofNullable(club));
+        Constructor<DeletedClub> constructor = DeletedClub.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        DeletedClub deletedClub = constructor.newInstance();
 
-        //when
-        org.junit.jupiter.api.Assertions.assertThrows(DoubleClubDeletionException.class, () -> clubService.deleteClub(clubId));
-    }
-
-    @Test
-    public void reviveClub_Default_AlivenessToTrue() throws Exception {
-        //given
-        Long clubId = 0L;
-        Club club = testDataRepository.getClubs().get(clubId.intValue());
-        club.remove();
-        DeletedClub deletedClub = new DeletedClub(club);
+        Field declaredField = deletedClub.getClass().getDeclaredField("name");
+        declaredField.setAccessible(true);
+        declaredField.set(deletedClub, "testName");
         given(deletedClubRepository.findById(clubId)).willReturn(Optional.of(deletedClub));
+        doNothing().when(deletedClubRepository).delete(deletedClub);
 
         //when
         Optional<String> reviveClubName = clubService.reviveClub(clubId);
 
         //then
         Assertions.assertThat(reviveClubName).isNotEmpty();
-        Assertions.assertThat(reviveClubName.get()).isEqualTo(club.getName());
-        Assertions.assertThat(deletedClub.isAlive()).isTrue();
+        Assertions.assertThat(reviveClubName.get()).isEqualTo("testName");
     }
 
     @Test
     public void reviveClub_BadClubId_ReturnOptionalEmtpy() throws Exception {
         //given
         Long clubId = 0L;
-        lenient().when(clubRepository.findById(clubId)).thenReturn(Optional.empty());
+        lenient().when(deletedClubRepository.findById(clubId)).thenReturn(Optional.empty());
 
         //when
         Optional<String> nameShouldEmpty = clubService.reviveClub(clubId);
 
         //then
         Assertions.assertThat(nameShouldEmpty).isEmpty();
-    }
-
-    @Test
-    public void reviveClub_AlreadyAlive_AlreadyAliveClubException() throws Exception {
-        //given
-        Long clubId = 0L;
-        Club club = testDataRepository.getClubs().get(clubId.intValue());
-        DeletedClub deletedClub = new DeletedClub(club);
-        given(deletedClubRepository.findById(clubId)).willReturn(Optional.ofNullable(deletedClub));
-
-        //when
-        org.junit.jupiter.api.Assertions.assertThrows(AlreadyAliveClubException.class, () -> clubService.reviveClub(clubId));
     }
 
     @Test
@@ -463,4 +443,109 @@ class ClubServiceTest {
         Assertions.assertThat(nameShouldEmpty).isEmpty();
     }
 
+    @Test
+    public void downGrade_Given중앙동아리_ChangeTo준중앙동아리() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.중앙동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        Optional<Club> clubAfterDownGrade = clubService.downGrade(clubId);
+
+        //then
+        Assertions.assertThat(clubAfterDownGrade).isNotEmpty();
+        Assertions.assertThat(clubAfterDownGrade.get().getClubType()).isEqualTo(ClubType.준중앙동아리);
+    }
+
+    @Test
+    public void downGrade_Given준중앙동아리_CannotDownGradeClubException() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.준중앙동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        org.junit.jupiter.api.Assertions.assertThrows(
+                CannotDownGradeClubException.class,
+                () -> clubService.downGrade(clubId)
+        );
+
+        //then
+    }
+
+    @Test
+    public void downGrade_Given기타동아리_CannotDownGradeClubException() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.기타동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        org.junit.jupiter.api.Assertions.assertThrows(
+                CannotDownGradeClubException.class,
+                () -> clubService.downGrade(clubId)
+        );
+
+    }
+
+    @Test
+    public void upGrade_Given준중앙동아리_ChangeTo중앙동아리() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.준중앙동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        Optional<Club> clubAfterDownGrade = clubService.upGrade(clubId);
+
+        //then
+        Assertions.assertThat(clubAfterDownGrade).isNotEmpty();
+        Assertions.assertThat(clubAfterDownGrade.get().getClubType()).isEqualTo(ClubType.중앙동아리);
+    }
+
+    @Test
+    public void upGrade_Given중앙동아리_CannotUpGradeClubException() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.중앙동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        org.junit.jupiter.api.Assertions.assertThrows(
+                CannotUpGradeClubException.class,
+                () -> clubService.upGrade(clubId)
+        );
+
+        //then
+
+    }
+
+    @Test
+    public void upGrade_Given기타동아리_CannotUpGradeClubException() throws Exception{
+        //given
+        Long clubId = 31L;
+        Club club = testDataRepository.getCleanClub(0);
+        changeClubType(club, ClubType.기타동아리);
+        given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+
+        //when
+        org.junit.jupiter.api.Assertions.assertThrows(
+                CannotUpGradeClubException.class,
+                () -> clubService.upGrade(clubId)
+        );
+        //then
+
+    }
+
+    private void changeClubType(Club club, ClubType clubType) throws NoSuchFieldException, IllegalAccessException {
+        Field clubTypeField = club.getClass().getDeclaredField("clubType");
+        clubTypeField.setAccessible(true);
+        clubTypeField.set(club, clubType);
+    }
 }

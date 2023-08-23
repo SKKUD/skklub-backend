@@ -21,4 +21,5 @@ public class ExceptionManager {
     public ResponseEntity<?> invalidTokenExceptionHandler(InvalidTokenException e){
         return ResponseEntity.status(e.getErrorCode().getHttpStatus()).body(e.getErrorCode().name()+" : "+e.getMessage());
     }
+
 }

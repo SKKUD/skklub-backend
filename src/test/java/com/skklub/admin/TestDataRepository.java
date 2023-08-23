@@ -1,16 +1,16 @@
 package com.skklub.admin;
 
-import com.skklub.admin.controller.dto.ClubResponseDTO;
+import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
 import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
-import com.skklub.admin.service.dto.ClubPrevDTO;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.Getter;
 import org.springframework.boot.test.context.TestComponent;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -33,12 +33,114 @@ public class TestDataRepository {
     private final List<Recruit> recruits = new ArrayList<>();
     private final List<User> users = new ArrayList<>();
 
+
     public TestDataRepository() {
         readyUser();
         readyRecruit();
         readyLogo();
         readyActivityImages();
         readyClub();
+    }
+
+    public ClubCreateRequestDTO getClubCreateRequestDTO() {
+        String clubName = "testClubName";
+        String activityDescription = "testActivityDescription";
+        String briefActivityDescription = "testBriefActivityDescription";
+        String clubDescription = "testClubDescription";
+        String belongs = "평면예술";
+        Campus campus = Campus.명륜;
+        ClubType clubType = ClubType.중앙동아리;
+        Integer establishDate = 1398;
+        String headLine = "testHeadLine";
+        String mandatoryActivatePeriod = "testMandatoryActivatePeriod";
+        Integer memberAmount = 60;
+        String regularMeetingTime = "testRegularMeetingTime";
+        String roomLocation = "testRoomLocation";
+        String webLink1 = "testWebLink1";
+        String webLink2 = "testWebLink2";
+
+        ClubCreateRequestDTO clubCreateRequestDTO = ClubCreateRequestDTO.builder()
+                .clubName(clubName)
+                .activityDescription(activityDescription)
+                .briefActivityDescription(briefActivityDescription)
+                .clubDescription(clubDescription)
+                .belongs(belongs)
+                .campus(campus)
+                .clubType(clubType)
+                .establishDate(establishDate)
+                .headLine(headLine)
+                .mandatoryActivatePeriod(mandatoryActivatePeriod)
+                .memberAmount(memberAmount)
+                .regularMeetingTime(regularMeetingTime)
+                .roomLocation(roomLocation)
+                .webLink1(webLink1)
+                .webLink2(webLink2)
+                .build();
+        return clubCreateRequestDTO;
+    }
+    public ClubCreateRequestDTO getClubCreateRequestDTO(int index) {
+        String clubName = "testClubName" + index;
+        String activityDescription = "testActivityDescription" + index;
+        String briefActivityDescription = "testBriefActivityDescription" + index;
+        String clubDescription = "testClubDescription" + index;
+        Integer establishDate = 1398 + index;
+        String headLine = "testHeadLine" + index;
+        String mandatoryActivatePeriod = "testMandatoryActivatePeriod" + index;
+        Integer memberAmount = 60 + index;
+        String regularMeetingTime = "testRegularMeetingTime" + index;
+        String roomLocation = "testRoomLocation" + index;
+        String webLink1 = "testWebLink1_" + index;
+        String webLink2 = "testWebLink2_" + index;
+
+        ClubCreateRequestDTO.ClubCreateRequestDTOBuilder clubCreateRequestDTOBuilder = ClubCreateRequestDTO.builder()
+                .clubName(clubName)
+                .activityDescription(activityDescription)
+                .briefActivityDescription(briefActivityDescription)
+                .clubDescription(clubDescription)
+                .establishDate(establishDate)
+                .headLine(headLine)
+                .mandatoryActivatePeriod(mandatoryActivatePeriod)
+                .memberAmount(memberAmount)
+                .regularMeetingTime(regularMeetingTime)
+                .roomLocation(roomLocation)
+                .webLink1(webLink1)
+                .webLink2(webLink2);
+
+        switch (index % 8) {
+            case 7 -> clubCreateRequestDTOBuilder
+                    .campus(Campus.명륜)
+                    .clubType(ClubType.중앙동아리)
+                    .belongs("취미교양");
+            case 6 -> clubCreateRequestDTOBuilder
+                    .campus(Campus.명륜)
+                    .clubType(ClubType.중앙동아리)
+                    .belongs("봉사");
+            case 5 -> clubCreateRequestDTOBuilder
+                    .campus(Campus.명륜)
+                    .clubType(ClubType.준중앙동아리)
+                    .belongs("취미교양");
+            case 4 -> clubCreateRequestDTOBuilder
+                    .campus(Campus.명륜)
+                    .clubType(ClubType.준중앙동아리)
+                    .belongs("봉사");
+            case 3 -> clubCreateRequestDTOBuilder
+                    .campus(Campus.율전)
+                    .clubType(ClubType.중앙동아리)
+                    .belongs("과학기술");
+            case 2 -> clubCreateRequestDTOBuilder
+                    .campus(Campus.율전)
+                    .clubType(ClubType.중앙동아리)
+                    .belongs("건강체육");
+            case 1 -> clubCreateRequestDTOBuilder
+                    .campus(Campus.율전)
+                    .clubType(ClubType.준중앙동아리)
+                    .belongs("과학기술");
+            default -> clubCreateRequestDTOBuilder
+                    .campus(Campus.율전)
+                    .clubType(ClubType.준중앙동아리)
+                    .belongs("건강체육");
+        }
+        return clubCreateRequestDTOBuilder.build();
     }
 
     public List<ActivityImage> getActivityImages(int clubIndex){
@@ -72,7 +174,7 @@ public class TestDataRepository {
         List<ActivityImage> images = clubs.get(clubIndex).getActivityImages();
         List<S3DownloadDto> s3DownloadDtos = new ArrayList<>();
         for (int i = 0; i < activityImgPerClub; i++) {
-            s3DownloadDtos.add(new S3DownloadDto((long) i, images.get(i).getOriginalName(), "activityImgBytes" + i));
+            s3DownloadDtos.add(new S3DownloadDto((long) i, images.get(i).getOriginalName(), ("activityImgBytes" + i).getBytes()));
         }
         return s3DownloadDtos;
     }
@@ -81,7 +183,7 @@ public class TestDataRepository {
         return new S3DownloadDto(
                 (long) clubIndex,
                 clubs.get(clubIndex).getLogo().getOriginalName(),
-                "logoBytes"
+                "logoBytes".getBytes()
         );
     }
 
@@ -102,12 +204,12 @@ public class TestDataRepository {
         for (int i = 0; i < clubCnt; i++) {
             Club club = new Club(
                     "정상적인 클럽 SKKULOL" + i
-                    , "1. 열심히 참여하면 됩니다 2. 그냥 게임만 잘 하면 됩니다." + i
+                    , "example activity description " + i
                     , "취미교양"
                     , ClubType.중앙동아리
                     , "E-SPORTS" + i
                     , Campus.명륜
-                    , "여기가 어떤 동아리냐면요, 페이커가 될 수 있게 해주는 동아리입니다^^" + i
+                    , "sample About Club Description" + i
                     , 2023 + i
                     , "명륜 게임 동아리입니다" + i
                     , "4학기" + i
@@ -144,13 +246,14 @@ public class TestDataRepository {
         for (int i = 0; i < recruitCnt; i++) {
             recruits.add(new Recruit(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), i + "명", "Test Recruit Process" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4), "Test Recruit web" + i));
         }
-            for (int i = recruitCnt; i < clubCnt; i++) {
-                recruits.add(null);
-            }
+        for (int i = recruitCnt; i < clubCnt; i++) {
+            recruits.add(null);
+        }
     }
 
     private void readyUser() {
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
         for(int i = 0; i < clubCnt; i++)
-            users.add(new User("userId" + i, "userPw" + i, Role.ROLE_USER, "userName" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4)));
+            users.add(new User("userId" + i, bCryptPasswordEncoder.encode("userPw" + i), Role.ROLE_USER, "userName" + i, "010-" + String.valueOf(i).repeat(4) + "-" + String.valueOf(i).repeat(4)));
     }
 }

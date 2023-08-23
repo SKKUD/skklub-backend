@@ -2,15 +2,18 @@ package com.skklub.admin.controller.user;
 
 import akka.protobuf.WireFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.UserController;
+import com.skklub.admin.domain.User;
 import com.skklub.admin.service.UserService;
-import com.skklub.admin.service.dto.UserProcResultDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,19 +32,20 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Optional;
+
 import static com.skklub.admin.controller.RestDocsUtils.example;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -58,12 +62,16 @@ public class UserControllerUpdateTest {
     MockMvc mockMvc;
     @MockBean
     UserService userService;
-
+    @MockBean
+    private AuthValidator authValidator;
     @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @InjectMocks
+    private TestDataRepository testDataRepository;
 
     @BeforeEach
     public void mockMvcSetUp(
@@ -85,41 +93,45 @@ public class UserControllerUpdateTest {
     @WithMockUser
     public void update_success() throws Exception {
 
+        Long userId = 0L;
+        Long changeToId = 1L;
+        User user = testDataRepository.getUsers().get(userId.intValue());
+        User changeTo = testDataRepository.getUsers().get(changeToId.intValue());
+        System.out.println(changeTo.getUsername());
+
         //given
-        given(userService.userUpdate(any())).willReturn(new UserProcResultDTO(1L,"user","이율전","010-8765-4321"));
+        given(userService.updateUser(eq(userId),eq(changeTo.getPassword()),eq(changeTo.getRole()),eq(changeTo.getName()),eq(changeTo.getContact()),eq("Bearer (access_token)")))
+                .willReturn(Optional.of(new User(user.getUsername(),changeTo.getPassword(),changeTo.getRole(),changeTo.getName(),changeTo.getContact())));
+
 
         //when
-        ResultActions actions = mockMvc.perform(RestDocumentationRequestBuilders.post("/user/{userId}",1L)
+        ResultActions actions = mockMvc.perform(RestDocumentationRequestBuilders.post("/user/{userId}",userId)
                         .header("Authorization", "Bearer (access_token)")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                        .queryParam("password", "12345")
-                        .queryParam("name", "이율전")
-                        .queryParam("contact", "010-8765-4321")
+                        .queryParam("password", changeTo.getPassword())
+                        .queryParam("name", changeTo.getName())
+                        .queryParam("contact", changeTo.getContact())
                 );
 
         //then
         actions.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.username").value("user"))
-                .andExpect(jsonPath("$.name").value("이율전"))
-                .andExpect(jsonPath("$.contact").value("010-8765-4321"))
+                .andExpect(jsonPath("$.id").value(0L))
+                .andExpect(jsonPath("$.username").value(user.getUsername()))
                 .andDo(print())
                 .andDo(document("User-Update"
                         ,requestHeaders(headerWithName("Authorization").description("기본 인증용 access-token")
                         )
                         ,pathParameters(
-                                parameterWithName("userId").description("유저 ID").attributes(example(String.valueOf(1L)))
+                                parameterWithName("userId").description("유저 ID").attributes(example(String.valueOf(0L)))
                         )
                         ,queryParameters(
-                                parameterWithName("password").description("변경할 비밀번호").attributes(example("12345")),
-                                parameterWithName("name").description("변경할 유저 이름").attributes(example("율전이")),
-                                parameterWithName("contact").description("변경할 연락처").attributes(example("010-8765-4321")))
+                                parameterWithName("password").description("변경할 비밀번호").attributes(example(changeTo.getPassword())),
+                                parameterWithName("name").description("변경할 유저 이름").attributes(example(changeTo.getName())),
+                                parameterWithName("contact").description("변경할 연락처").attributes(example(changeTo.getContact())))
                         ,responseFields(
                                 fieldWithPath("id").type(WireFormat.FieldType.INT64).description("유저 ID"),
-                                fieldWithPath("username").type(WireFormat.FieldType.STRING).description("유저 계정 ID"),
-                                fieldWithPath("name").type(WireFormat.FieldType.STRING).description("유저 이름"),
-                                fieldWithPath("contact").type(WireFormat.FieldType.STRING).description("연락처")
+                                fieldWithPath("username").type(WireFormat.FieldType.STRING).description("유저 계정 ID")
                         )
                 ));
     }

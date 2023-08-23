@@ -11,4 +11,5 @@ public class UserUpdateRequestDTO {
     private String password;
     private String name;
     private String contact;
+
 }
