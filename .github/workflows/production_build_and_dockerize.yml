@@ -79,4 +79,8 @@ jobs:
       
       - name: Jenkins post
         run: |
-          curl -X POST https://${{ secrets.JENKINS_USERNAME }}:${{ secrets.JENKINS_TOKEN }}@deploy.skku.dev/job/%28DEV%29skklub-backend/build
+          if [ "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" == "master" ]; then
+            curl -X POST https://${{ secrets.JENKINS_USERNAME }}:${{ secrets.JENKINS_TOKEN }}@deploy.skku.dev/job/%28REAL%29skklub-backend/build
+          else
+            curl -X POST https://${{ secrets.JENKINS_USERNAME }}:${{ secrets.JENKINS_TOKEN }}@deploy.skku.dev/job/%28DEV%29skklub-backend/build
+          fi
