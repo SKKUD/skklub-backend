@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -108,12 +109,15 @@ public class ClubController {
     }
 
     private Page<ClubPrevResponseDTO> convertClubsLogoToFile(Page<Club> clubs) {
-        Page<ClubPrevResponseDTO> response = clubs.map(club -> {
-            FileNames logo = new FileNames(club.getLogo());
-            S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(logo);
-            return new ClubPrevResponseDTO(club, s3DownloadDto);
-        });
+        Page<ClubPrevResponseDTO> response = clubs.map(club -> getClubPrevResponseDTO(club));
         return response;
+    }
+
+    @Async
+    public ClubPrevResponseDTO getClubPrevResponseDTO(Club club) {
+        FileNames logo = new FileNames(club.getLogo());
+        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(logo);
+        return new ClubPrevResponseDTO(club, s3DownloadDto);
     }
 
     private ClubResponseDTO convertClubImagesToFile(ClubDetailInfoDto dto) {
