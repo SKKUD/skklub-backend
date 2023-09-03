@@ -36,6 +36,8 @@ class PendingClubServiceTest {
     private ClubRepository clubRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private UserService userService;
 
     @Test
     public void acceptRequest_Default_ReturnClubWithUser() throws Exception{

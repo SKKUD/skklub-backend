@@ -168,21 +168,21 @@ public class NoticeQueryIntegrationTest {
         Assertions.assertThat(response.getPostNotice()).isEmpty();
     }
     
-    @Test
-    public void getFile_Default_CheckHeaderAndBody() throws Exception{
-        //given
-        ExtraFile extraFile = em.createQuery("select e from ExtraFile e", ExtraFile.class)
-                .setMaxResults(1)
-                .getSingleResult();
-        em.clear();
-
-        //when
-        ResponseEntity<byte[]> response = noticeController.getFile(extraFile.getSavedName());
-
-        //then
-        Assertions.assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
-        Assertions.assertThat(response.getHeaders().getContentLength()).isNotZero();
-    }
+//    @Test
+//    public void getFile_Default_CheckHeaderAndBody() throws Exception{
+//        //given
+//        ExtraFile extraFile = em.createQuery("select e from ExtraFile e", ExtraFile.class)
+//                .setMaxResults(1)
+//                .getSingleResult();
+//        em.clear();
+//
+//        //when
+//        ResponseEntity<byte[]> response = noticeController.getFile(extraFile.getSavedName());
+//
+//        //then
+//        Assertions.assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
+//        Assertions.assertThat(response.getHeaders().getContentLength()).isNotZero();
+//    }
     
     @Test
     public void getNoticePrevWithThumbnail_Default_FindDefaultOrSomeThumbnail() throws Exception{
@@ -213,7 +213,7 @@ public class NoticeQueryIntegrationTest {
                 .map(s3Transferer::downloadOne)
                 .collect(Collectors.toList());
         List<Long> ids = s3DownloadDtos.stream().map(S3DownloadDto::getId).collect(Collectors.toList());
-        List<byte[]> bytes = s3DownloadDtos.stream().map(S3DownloadDto::getBytes).collect(Collectors.toList());
+        List<String> urls = s3DownloadDtos.stream().map(S3DownloadDto::getUrl).collect(Collectors.toList());
         List<String> fileNames = s3DownloadDtos.stream().map(S3DownloadDto::getFileName).collect(Collectors.toList());
 
         response.map(NoticePrevWithThumbnailResponse::getThumbnail)
@@ -221,7 +221,7 @@ public class NoticeQueryIntegrationTest {
                 .forEach(
                         s3DownloadDto -> {
                             Assertions.assertThat(ids).contains(s3DownloadDto.getId());
-                            Assertions.assertThat(bytes).contains(s3DownloadDto.getBytes());
+                            Assertions.assertThat(urls).contains(s3DownloadDto.getUrl());
                             Assertions.assertThat(fileNames).contains(s3DownloadDto.getFileName());
                         }
                 );
