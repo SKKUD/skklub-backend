@@ -1,6 +1,7 @@
 package com.skklub.admin.controller;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
@@ -30,6 +31,8 @@ public class S3Transferer {
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+    @Value("${cloud.aws.region.static}")
+    private String area;
 
     public List<FileNames> uploadAll(List<MultipartFile> multipartFiles) {
         return multipartFiles.stream()
@@ -59,10 +62,9 @@ public class S3Transferer {
     }
 
     public S3DownloadDto downloadOne(FileNames fileName) {
-        S3DownloadDto download = download(fileName.getSavedName());
-        download.setFileName(fileName.getOriginalName());
-        download.setId(fileName.getId());
-        return download;
+        if(!amazonS3.doesObjectExist(bucket, fileName.getSavedName())) throw new AmazonS3Exception("해당 이름의 객체가 버킷에 존재하지 않습니다.");
+        String url = "https://s3." + area + ".amazonaws.com/" + bucket + "/" + fileName.getSavedName();
+        return new S3DownloadDto(fileName.getId(), fileName.getOriginalName(), url);
     }
 
     public List<S3DownloadDto> downloadAll(List<FileNames> fileNames) {
@@ -72,14 +74,7 @@ public class S3Transferer {
     }
 
     private S3DownloadDto download(String key) {
-        S3Object s3Object = amazonS3.getObject(bucket, key);
-        byte[] bytes = new byte[0];
-        try {
-            bytes = s3Object.getObjectContent().readAllBytes();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new S3DownloadDto(bytes);
+        return new S3DownloadDto();
     }
 
     public void deleteOne(String key) {
