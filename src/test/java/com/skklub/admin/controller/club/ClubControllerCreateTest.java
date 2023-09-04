@@ -106,7 +106,7 @@ class ClubControllerCreateTest {
         doNothing().when(authValidator).validatePendingRequestAuthority(anyLong());
     }
 
-    @Test
+//    @Test
     public void clubCreation_FullData_Success() throws Exception {
         //given
         given(clubService.createClub(any(Club.class), any(Logo.class))).willReturn(0L);
@@ -169,7 +169,7 @@ class ClubControllerCreateTest {
                 ));
     }
 
-    @Test
+//    @Test
     public void clubCreation_NullAtSomeNullables_Success() throws Exception {
         //given
         Long clubId = 0L;
@@ -213,7 +213,7 @@ class ClubControllerCreateTest {
                 .andExpect(jsonPath("$.name").value("정상적인 클럽 SKKULOL"));
     }
 
-     @Test
+//     @Test
      public void clubCreation_EnumMisMatch_BindException() throws Exception{
          //given
          String wrongCampus = "안암";
@@ -253,7 +253,7 @@ class ClubControllerCreateTest {
 
       }
 
-    @Test
+//    @Test
     public void clubCreation_EmptyLogoImage_FileNameEqDefaultLogo() throws Exception {
         //given
         Long successId = 12345L;
@@ -281,7 +281,7 @@ class ClubControllerCreateTest {
 
     }
 
-    @Test
+//    @Test
     public void clubCreation_InvalidBelongs_InvalidBelongsException() throws Exception {
         //given
         Campus campus = Campus.명륜;

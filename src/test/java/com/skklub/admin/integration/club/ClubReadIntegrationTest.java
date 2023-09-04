@@ -75,7 +75,7 @@ public class ClubReadIntegrationTest {
         Assertions.assertThat(response.getWebLink1()).isEqualTo(clubCreateRequestDTO.getWebLink1());
         Assertions.assertThat(response.getWebLink2()).isEqualTo(clubCreateRequestDTO.getWebLink2());
         Assertions.assertThat(response.getLogo().getFileName()).isEqualTo("alt.jpg");
-        Assertions.assertThat(response.getLogo().getBytes()).isNotNull();
+        Assertions.assertThat(response.getLogo().getUrl()).isNotNull();
         Assertions.assertThat(response.getLogo().getId()).isNotNull();
     }
 
@@ -105,7 +105,7 @@ public class ClubReadIntegrationTest {
         Assertions.assertThat(response.getWebLink1()).isEqualTo(clubCreateRequestDTO.getWebLink1());
         Assertions.assertThat(response.getWebLink2()).isEqualTo(clubCreateRequestDTO.getWebLink2());
         Assertions.assertThat(response.getLogo().getFileName()).isNotEqualTo("alt.jpg");
-        Assertions.assertThat(response.getLogo().getBytes()).isNotNull();
+        Assertions.assertThat(response.getLogo().getUrl()).isNotNull();
         Assertions.assertThat(response.getLogo().getId()).isNotNull();
     }
 
@@ -248,7 +248,7 @@ public class ClubReadIntegrationTest {
                 .forEach(
                         s3DownloadDto -> {
                             Assertions.assertThat(s3DownloadDto.getId()).isNotNull();
-                            Assertions.assertThat(s3DownloadDto.getBytes()).isNotNull();
+                            Assertions.assertThat(s3DownloadDto.getUrl()).isNotNull();
                             Assertions.assertThat(s3DownloadDto.getFileName()).matches("[0-6].jpg");
                         }
                 );
@@ -285,7 +285,7 @@ public class ClubReadIntegrationTest {
                 .forEach(
                         s3DownloadDto -> {
                             Assertions.assertThat(s3DownloadDto.getId()).isNotNull();
-                            Assertions.assertThat(s3DownloadDto.getBytes()).isNotNull();
+                            Assertions.assertThat(s3DownloadDto.getUrl()).isNotNull();
                             Assertions.assertThat(s3DownloadDto.getFileName()).matches("[0-6].jpg");
                         }
                 );
@@ -345,7 +345,7 @@ public class ClubReadIntegrationTest {
         Assertions.assertThat(response.getWebLink1()).isEqualTo(clubCreateRequestDTO.getWebLink1());
         Assertions.assertThat(response.getWebLink2()).isEqualTo(clubCreateRequestDTO.getWebLink2());
         Assertions.assertThat(response.getLogo().getFileName()).isEqualTo("alt.jpg");
-        Assertions.assertThat(response.getLogo().getBytes()).isNotNull();
+        Assertions.assertThat(response.getLogo().getUrl()).isNotNull();
         Assertions.assertThat(response.getLogo().getId()).isNotNull();
     }
 
@@ -375,7 +375,7 @@ public class ClubReadIntegrationTest {
         Assertions.assertThat(response.getWebLink1()).isEqualTo(clubCreateRequestDTO.getWebLink1());
         Assertions.assertThat(response.getWebLink2()).isEqualTo(clubCreateRequestDTO.getWebLink2());
         Assertions.assertThat(response.getLogo().getFileName()).isNotEqualTo("alt.jpg");
-        Assertions.assertThat(response.getLogo().getBytes()).isNotNull();
+        Assertions.assertThat(response.getLogo().getUrl()).isNotNull();
         Assertions.assertThat(response.getLogo().getId()).isNotNull();
     }
 
@@ -518,7 +518,7 @@ public class ClubReadIntegrationTest {
                 .forEach(
                         s3DownloadDto -> {
                             Assertions.assertThat(s3DownloadDto.getId()).isNotNull();
-                            Assertions.assertThat(s3DownloadDto.getBytes()).isNotNull();
+                            Assertions.assertThat(s3DownloadDto.getUrl()).isNotNull();
                             Assertions.assertThat(s3DownloadDto.getFileName()).matches("[0-6].jpg");
                         }
                 );
@@ -555,7 +555,7 @@ public class ClubReadIntegrationTest {
                 .forEach(
                         s3DownloadDto -> {
                             Assertions.assertThat(s3DownloadDto.getId()).isNotNull();
-                            Assertions.assertThat(s3DownloadDto.getBytes()).isNotNull();
+                            Assertions.assertThat(s3DownloadDto.getUrl()).isNotNull();
                             Assertions.assertThat(s3DownloadDto.getFileName()).matches("[0-6].jpg");
                         }
                 );
@@ -632,7 +632,7 @@ public class ClubReadIntegrationTest {
                             Assertions.assertThat(dto.getClubType()).isEqualTo(clubType);
                             Assertions.assertThat(dto.getBelongs()).isEqualTo(belongs);
                             Assertions.assertThat(dto.getLogo()).isNotNull();
-                            Assertions.assertThat(dto.getLogo().getBytes()).isNotNull();
+                            Assertions.assertThat(dto.getLogo().getUrl()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getFileName()).isEqualTo("3.jpg");
                         }
                 );
@@ -664,7 +664,7 @@ public class ClubReadIntegrationTest {
                             Assertions.assertThat(dto.getCampus()).isEqualTo(campus);
                             Assertions.assertThat(dto.getClubType()).isEqualTo(clubType);
                             Assertions.assertThat(dto.getLogo()).isNotNull();
-                            Assertions.assertThat(dto.getLogo().getBytes()).isNotNull();
+                            Assertions.assertThat(dto.getLogo().getUrl()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getFileName()).contains(".jpg");
                         }
                 );
@@ -696,7 +696,7 @@ public class ClubReadIntegrationTest {
                         dto -> {
                             Assertions.assertThat(dto.getCampus()).isEqualTo(campus);
                             Assertions.assertThat(dto.getLogo()).isNotNull();
-                            Assertions.assertThat(dto.getLogo().getBytes()).isNotNull();
+                            Assertions.assertThat(dto.getLogo().getUrl()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getFileName()).contains(".jpg");
                         }
                 );
@@ -727,7 +727,7 @@ public class ClubReadIntegrationTest {
                             Assertions.assertThat(dto.getClubType()).isNotNull();
                             Assertions.assertThat(dto.getBelongs()).isNotNull();
                             Assertions.assertThat(dto.getLogo()).isNotNull();
-                            Assertions.assertThat(dto.getLogo().getBytes()).isNotNull();
+                            Assertions.assertThat(dto.getLogo().getUrl()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getFileName()).contains(".jpg");
                         }
                 );
@@ -758,7 +758,7 @@ public class ClubReadIntegrationTest {
                             Assertions.assertThat(dto.getClubType()).isNotNull();
                             Assertions.assertThat(dto.getBelongs()).isNotNull();
                             Assertions.assertThat(dto.getLogo()).isNotNull();
-                            Assertions.assertThat(dto.getLogo().getBytes()).isNotNull();
+                            Assertions.assertThat(dto.getLogo().getUrl()).isNotNull();
                             Assertions.assertThat(dto.getLogo().getFileName()).contains(".jpg");
                         }
                 );

@@ -79,20 +79,23 @@ public class NoticeController {
     @GetMapping("/notice/{noticeId}")
     public NoticeDetailResponse getDetailNotice(@PathVariable Long noticeId) {
         Notice notice = noticeRepository.findDetailById(noticeId).orElseThrow(NoticeIdMisMatchException::new);
+        List<FileNames> fileNames = notice.getExtraFiles().stream().map(FileNames::new).collect(Collectors.toList());
+        List<S3DownloadDto> s3DownloadDtos = s3Transferer.downloadAll(fileNames);
+        log.info("s3DownloadDtos.size() : {}", s3DownloadDtos.size());
         Optional<Notice> preNotice = noticeService.findPreNotice(notice);
         Optional<Notice> postNotice = noticeService.findPostNotice(notice);
-        return new NoticeDetailResponse(notice, preNotice, postNotice);
+        return new NoticeDetailResponse(notice, s3DownloadDtos, preNotice, postNotice);
     }
 
     //파일 조회
-    @GetMapping("/notice/file")
-    public ResponseEntity<byte[]> getFile(@RequestParam String fileSavedName) {
-        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(null, fileSavedName));
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpHeaders.setContentLength(s3DownloadDto.getBytes().length);
-        return new ResponseEntity<>(s3DownloadDto.getBytes(), httpHeaders, HttpStatus.OK);
-    }
+//    @GetMapping("/notice/file")
+//    public ResponseEntity<byte[]> getFile(@RequestParam String fileSavedName) {
+//        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(null, fileSavedName));
+//        HttpHeaders httpHeaders = new HttpHeaders();
+//        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+//        httpHeaders.setContentLength(s3DownloadDto.getBytes().length);
+//        return new ResponseEntity<>(s3DownloadDto.getBytes(), httpHeaders, HttpStatus.OK);
+//    }
 
     //목록 조회(with 썸네일)
     @GetMapping("/notice/prev/thumbnail")
