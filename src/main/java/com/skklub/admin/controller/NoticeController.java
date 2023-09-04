@@ -79,9 +79,12 @@ public class NoticeController {
     @GetMapping("/notice/{noticeId}")
     public NoticeDetailResponse getDetailNotice(@PathVariable Long noticeId) {
         Notice notice = noticeRepository.findDetailById(noticeId).orElseThrow(NoticeIdMisMatchException::new);
+        List<FileNames> fileNames = notice.getExtraFiles().stream().map(FileNames::new).collect(Collectors.toList());
+        List<S3DownloadDto> s3DownloadDtos = s3Transferer.downloadAll(fileNames);
+        log.info("s3DownloadDtos.size() : {}", s3DownloadDtos.size());
         Optional<Notice> preNotice = noticeService.findPreNotice(notice);
         Optional<Notice> postNotice = noticeService.findPostNotice(notice);
-        return new NoticeDetailResponse(notice, preNotice, postNotice);
+        return new NoticeDetailResponse(notice, s3DownloadDtos, preNotice, postNotice);
     }
 
     //파일 조회

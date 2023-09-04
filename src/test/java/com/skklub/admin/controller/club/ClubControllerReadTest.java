@@ -359,7 +359,7 @@ class ClubControllerReadTest {
         pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명").attributes(example(clubs.get(0).getBriefActivityDescription())));
         pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디").attributes(example(testDataRepository.getLogoS3DownloadDto(clubs.get(0).getId().intValue()).getId().toString())));
         pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명").attributes(example(testDataRepository.getLogoS3DownloadDto(clubs.get(0).getId().intValue()).getFileName())));
-        pageableResponseFields.add(fieldWithPath("content[].logo.url").type(WireFormat.FieldType.BYTES).description("로고 리소스 주소").attributes(example("https://s3.ap-northeast-2.amazonaws.com/skklub.test/024f3d7b-0ae0-4011-8f3f-23637d10f3d4.jpg")));
+        pageableResponseFields.add(fieldWithPath("content[].logo.url").type(WireFormat.FieldType.STRING).description("로고 리소스 주소").attributes(example("https://s3.ap-northeast-2.amazonaws.com/skklub.test/024f3d7b-0ae0-4011-8f3f-23637d10f3d4.jpg")));
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(
@@ -593,7 +593,7 @@ class ClubControllerReadTest {
         pageableResponseFields.add(fieldWithPath("content[].briefActivityDescription").type(WireFormat.FieldType.STRING).description("분류 - 활동 설명").attributes(example(clubs.get(0).getBriefActivityDescription())));
         pageableResponseFields.add(fieldWithPath("content[].logo.id").type(WireFormat.FieldType.INT64).description("로고 아이디").attributes(example(testDataRepository.getLogoS3DownloadDto(clubs.get(0).getId().intValue()).getId().toString())));
         pageableResponseFields.add(fieldWithPath("content[].logo.fileName").type(WireFormat.FieldType.STRING).description("로고 원본 파일명").attributes(example(testDataRepository.getLogoS3DownloadDto(clubs.get(0).getId().intValue()).getFileName())));
-        pageableResponseFields.add(fieldWithPath("content[].logo.url").type(WireFormat.FieldType.BYTES).description("로고 리소스 주소").attributes(example("https://s3.ap-northeast-2.amazonaws.com/skklub.test/024f3d7b-0ae0-4011-8f3f-23637d10f3d4.jpg")));
+        pageableResponseFields.add(fieldWithPath("content[].logo.url").type(WireFormat.FieldType.STRING).description("로고 리소스 주소").attributes(example("https://s3.ap-northeast-2.amazonaws.com/skklub.test/024f3d7b-0ae0-4011-8f3f-23637d10f3d4.jpg")));
         addPageableResponseFields(pageableResponseFields);
 
         actions.andDo(
