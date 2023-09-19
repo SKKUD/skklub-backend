@@ -8,6 +8,7 @@ import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.security.redis.RedisUtil;
+import com.skklub.admin.service.dto.UserLoginDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +28,14 @@ public class UserService {
     private final RedisUtil redisUtil;
 
     //User Login
-    public JwtDTO loginUser(String username, String password){
+    public UserLoginDTO loginUser(String username, String password){
         //기본 username, password 인증
         //1. 일치하는 username 없음
-        User selectedUser = Optional.ofNullable(userRepository.findByUsername(username))
+        User user = Optional.ofNullable(userRepository.findByUsername(username))
                 .orElseThrow(()->
                     new AuthException(ErrorCode.USER_NOT_FOUND, "invalid user account"));
         //2. password 불일치
-        if(!bCryptPasswordEncoder.matches(password,selectedUser.getPassword())){
+        if(!bCryptPasswordEncoder.matches(password,user.getPassword())){
             throw new AuthException(ErrorCode.USER_NOT_FOUND, "invalid user account");
         }
         //토큰 발급
@@ -46,7 +47,7 @@ public class UserService {
             redisUtil.deleteRefreshToken(key);
         }redisUtil.setRefreshToken(key, refreshToken, TokenProvider.getExpiration(refreshToken), TimeUnit.MILLISECONDS);
         //정상 로그인 완료 -> JWT 반환
-        return tokens;
+        return new UserLoginDTO(user.getId(), user.getUsername(), user.getRole(), tokens.getAccessToken(), tokens.getRefreshToken());
     }
 
     //User Update
