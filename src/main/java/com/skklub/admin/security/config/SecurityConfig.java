@@ -92,7 +92,9 @@ public class SecurityConfig  {
                 new AntPathRequestMatcher("/pending/**","POST"),
                 //notice
                 new AntPathRequestMatcher("/notice/**","GET"),
-                new AntPathRequestMatcher("/notice/**/**","GET"),
+                new AntPathRequestMatcher("/notice/prev","GET"),
+                new AntPathRequestMatcher("/notice/prev/thumbnail","GET"),
+                new AntPathRequestMatcher("/notice/prev/search/title","GET"),
                 //club
                 new AntPathRequestMatcher("/club/**}","GET"),
                 new AntPathRequestMatcher("/club/prev","GET"),
@@ -105,7 +107,7 @@ public class SecurityConfig  {
     private RequestMatcher userEndpoints() {
         return new OrRequestMatcher(
                 //user
-                new AntPathRequestMatcher("/user/**","POST"), //update
+               new AntPathRequestMatcher("/user/**","POST"), //update
                 new AntPathRequestMatcher("/user/logout","POST"),
                 //refresh
                 new AntPathRequestMatcher("/refresh","POST"),
