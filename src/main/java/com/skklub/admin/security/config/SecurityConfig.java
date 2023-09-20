@@ -92,6 +92,7 @@ public class SecurityConfig  {
                 new AntPathRequestMatcher("/pending/**","POST"),
                 //notice
                 new AntPathRequestMatcher("/notice/**","GET"),
+                new AntPathRequestMatcher("/notice/**/**","GET"),
                 //club
                 new AntPathRequestMatcher("/club/**}","GET"),
                 new AntPathRequestMatcher("/club/prev","GET"),
