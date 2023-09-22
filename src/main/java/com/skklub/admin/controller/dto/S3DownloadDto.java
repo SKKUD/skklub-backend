@@ -14,9 +14,10 @@ import java.util.Base64;
 public class S3DownloadDto {
     private Long id;
     private String fileName;
-    private byte[] bytes;
+    private String url;
 
-    public S3DownloadDto(byte[] bytes) {
-        this.bytes = bytes;
+    public S3DownloadDto(String fileName, String url) {
+        this.fileName = fileName;
+        this.url = url;
     }
 }

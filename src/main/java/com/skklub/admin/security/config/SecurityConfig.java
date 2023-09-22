@@ -36,13 +36,12 @@ public class SecurityConfig  {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
         config.setAllowCredentials(true);
         config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://skklub.com/", "https://www.skklub.com/"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));
+        config.setExposedHeaders(Arrays.asList("Authorization", "Refresh-Token"));
         config.setMaxAge(3600L);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
@@ -93,6 +92,9 @@ public class SecurityConfig  {
                 new AntPathRequestMatcher("/pending/**","POST"),
                 //notice
                 new AntPathRequestMatcher("/notice/**","GET"),
+                new AntPathRequestMatcher("/notice/prev","GET"),
+                new AntPathRequestMatcher("/notice/prev/thumbnail","GET"),
+                new AntPathRequestMatcher("/notice/prev/search/title","GET"),
                 //club
                 new AntPathRequestMatcher("/club/**}","GET"),
                 new AntPathRequestMatcher("/club/prev","GET"),
@@ -105,7 +107,7 @@ public class SecurityConfig  {
     private RequestMatcher userEndpoints() {
         return new OrRequestMatcher(
                 //user
-                new AntPathRequestMatcher("/user/**","POST"), //update
+               new AntPathRequestMatcher("/user/**","POST"), //update
                 new AntPathRequestMatcher("/user/logout","POST"),
                 //refresh
                 new AntPathRequestMatcher("/refresh","POST"),

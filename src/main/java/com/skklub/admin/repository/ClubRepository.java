@@ -40,6 +40,5 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
 
     @Query(value = "select * from club where campus = :campus order by rand() limit 3", nativeQuery = true)
     List<Club> findClubRandomByCategories(@Param("campus") String campus);
-
 }
 

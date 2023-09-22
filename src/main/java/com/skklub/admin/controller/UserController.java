@@ -1,13 +1,14 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.UserLoginRequestDto;
+import com.skklub.admin.controller.dto.UserLoginResponseDTO;
 import com.skklub.admin.controller.dto.UserUpdateRequestDTO;
 import com.skklub.admin.controller.dto.UserUpdateResponseDTO;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.exception.UserUpdateFailedException;
 import com.skklub.admin.security.jwt.TokenProvider;
-import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.service.UserService;
+import com.skklub.admin.service.dto.UserLoginDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,18 +43,16 @@ public class UserController {
 
     //login
     @PostMapping(value = "/user/login")
-    public ResponseEntity<String> login(@ModelAttribute UserLoginRequestDto userLoginRequestDto) {
+    public ResponseEntity<UserLoginResponseDTO> login(@ModelAttribute UserLoginRequestDto userLoginRequestDto) {
         log.info("username : {}, password : {}", userLoginRequestDto.getUsername(), userLoginRequestDto.getPassword());
-        JwtDTO tokens = userService.loginUser(userLoginRequestDto.getUsername(), userLoginRequestDto.getPassword());
-
+        UserLoginDTO userLoginDTO = userService.loginUser(userLoginRequestDto.getUsername(), userLoginRequestDto.getPassword());
         HttpHeaders headers = new HttpHeaders();
-        headers.set(AUTHORIZATION,"Bearer " + tokens.getAccessToken());
-        headers.set("Refresh-Token","Bearer " + tokens.getRefreshToken());
-        String msg = userLoginRequestDto.getUsername() + " logged in";
-        log.info(msg);
-
-        return new ResponseEntity<>(msg, headers, HttpStatus.valueOf(200));
+        headers.set(AUTHORIZATION,"Bearer " + userLoginDTO.getAccessToken());
+        headers.set("Refresh-Token","Bearer " + userLoginDTO.getRefreshToken());
+        return new ResponseEntity<>(
+                new UserLoginResponseDTO(userLoginDTO.getId(), userLoginDTO.getUsername(), userLoginDTO.getRole()), headers, HttpStatus.valueOf(200));
     }
+
 
     //update
     @PostMapping(value = "/user/{userId}")
