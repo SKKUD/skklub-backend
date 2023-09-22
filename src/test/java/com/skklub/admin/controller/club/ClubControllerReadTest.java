@@ -102,7 +102,6 @@ class ClubControllerReadTest {
         given(clubRepository.findDetailClubById(clubId)).willReturn(Optional.of(club));
         given(s3Transferer.downloadOne(clubDetailInfoDto.getLogo())).willReturn(logoS3DownloadDto);
         given(s3Transferer.downloadAll(clubDetailInfoDto.getActivityImages())).willReturn(activityImgS3DownloadDtos);
-
         //when
         ResultActions actions = mockMvc.perform(
                 get("/club/{clubId}", clubId)
