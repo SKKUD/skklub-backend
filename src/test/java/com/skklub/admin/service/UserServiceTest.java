@@ -70,10 +70,10 @@ public class UserServiceTest {
         testUserJoin.joinUser(username, password, role, name, contact);
 
         //when
-        UserLoginDTO jwtDTO = userService.loginUser(username,password);
+        UserLoginDTO userLoginDTO = userService.loginUser(username,password);
 
         //then
-        assertTrue(TokenProvider.getUsername(jwtDTO.getAccessToken()).equals(username));
+        assertTrue(TokenProvider.getUsername(userLoginDTO.getAccessToken()).equals(username));
         assertTrue(redisUtil.hasKeyRefreshToken("RT:" + username));
     }
 
