@@ -236,5 +236,13 @@ public class ControllerExceptionHandler {
                 .build();
         return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
     }
-
+    @ExceptionHandler(AdminCannotHaveClubException.class)
+    public ResponseEntity<ErrorResponse> adminCannotHaveClubException(AdminCannotHaveClubException e, HttpServletRequest request) {
+        ErrorDetail errorDetail = ErrorDetail.builder()
+                .field("User Role")
+                .given("NON NOMAL USER")
+                .reasonMessage("상위 유저는 자신의 동아리를 가질 수 없습니다")
+                .build();
+        return ResponseEntity.badRequest().body(ErrorResponse.fromException(e, request, errorDetail));
+    }
 }
