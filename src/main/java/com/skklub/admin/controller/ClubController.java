@@ -3,24 +3,31 @@ package com.skklub.admin.controller;
 import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.User;
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.error.exception.*;
 import com.skklub.admin.error.handler.ClubValidator;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.repository.ClubRepository;
+import com.skklub.admin.repository.UserRepository;
+import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +43,7 @@ public class ClubController {
 
     private final ClubService clubService;
     private final ClubRepository clubRepository;
+    private final UserRepository userRepository;
     private final S3Transferer s3Transferer;
     private final AuthValidator authValidator;
     private final static String DEFAULT_LOGO_NAME = "alt.jpg";
@@ -64,6 +72,27 @@ public class ClubController {
                 .map(this::convertClubImagesToFile)
                 .map(ResponseEntity::ok)
                 .orElseThrow(ClubIdMisMatchException::new);
+    }
+    @GetMapping("/club/my")
+    public ResponseEntity<ClubResponseDTO> getMyClubByLoginUser(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = TokenProvider.getAuthentication(userDetails).getName();
+        User user = userRepository.findByUsername(username);
+        if(!user.getRole().equals(Role.ROLE_USER)) throw new AdminCannotHaveClubException();
+        try {
+            Optional<Club> club = clubRepository.findDetailClubByPresident(user);
+            return club.map(ClubDetailInfoDto::new)
+                    .map(this::convertClubImagesToFile)
+                    .map(ResponseEntity::ok)
+                    .orElseThrow(UserWithNoClubException::new);
+        } catch (IncorrectResultSizeDataAccessException e) {
+            log.info("e : {}", e);
+            e.printStackTrace();
+            log.error("user : {}, 한 명의 유저에 여러개의 클럽이 매핑 돼 있습니다", user.getUsername());
+            return ResponseEntity.internalServerError().build();
+        } catch (UserWithNoClubException e) {
+            log.error("user : {}, 이 유저는 동아리와 매핑되지 않은 유저 입니다", user.getUsername());
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     //간소화(Preview) 조회
