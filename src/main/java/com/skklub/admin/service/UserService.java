@@ -39,7 +39,7 @@ public class UserService {
             throw new AuthException(ErrorCode.USER_NOT_FOUND, "invalid user account");
         }
         //토큰 발급
-        JwtDTO tokens = TokenProvider.createTokens(username);
+        JwtDTO tokens = TokenProvider.createTokens(user.getId(),username,user.getRole());
         String refreshToken = tokens.getRefreshToken();
         String key = "RT:" + username;
         //Redis 저장된 refreshToken 확인 -> 업데이트
