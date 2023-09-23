@@ -2,8 +2,8 @@ package com.skklub.admin.service;
 
 import com.skklub.admin.TestUserJoin;
 import com.skklub.admin.domain.enums.Role;
-import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.security.redis.RedisUtil;
+import com.skklub.admin.service.dto.UserLoginDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -21,7 +21,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.security.Key;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @SpringBootTest
@@ -76,15 +76,15 @@ public class RefreshTokenServiceTest {
         String name = "명륜이";
         String contact = "010-1234-5678";
 
-        testUserJoin.joinUser(username, password, role, name, contact);
+        Long userId = testUserJoin.joinUser(username, password, role, name, contact);
 
-        JwtDTO jwtDTO = userService.loginUser(username,password);
+        UserLoginDTO jwtDTO = userService.loginUser(username,password);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("refresh-token","Bearer "+jwtDTO.getRefreshToken());
         //when
 
-        String newAccessToken = refreshTokenService.refreshAccessToken(request,username);
+        String newAccessToken = refreshTokenService.refreshAccessToken(request,userId,username,role);
 
         //then
         assertTrue(validateToken(newAccessToken,secretKey));

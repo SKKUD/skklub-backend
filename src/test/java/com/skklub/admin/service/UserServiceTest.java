@@ -6,8 +6,8 @@ import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.security.auth.PrincipalDetailsService;
 import com.skklub.admin.security.jwt.TokenProvider;
-import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.security.redis.RedisUtil;
+import com.skklub.admin.service.dto.UserLoginDTO;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -70,7 +70,7 @@ public class UserServiceTest {
         testUserJoin.joinUser(username, password, role, name, contact);
 
         //when
-        JwtDTO jwtDTO = userService.loginUser(username,password);
+        UserLoginDTO jwtDTO = userService.loginUser(username,password);
 
         //then
         assertTrue(TokenProvider.getUsername(jwtDTO.getAccessToken()).equals(username));
@@ -95,7 +95,7 @@ public class UserServiceTest {
 
         testUserJoin.joinUser(username, password1, role1, name1, contact1);
 
-        JwtDTO jwtDTO = userService.loginUser(username,password1);
+        UserLoginDTO jwtDTO = userService.loginUser(username,password1);
         String accessToken = "Bearer "+jwtDTO.getAccessToken();
 
         //when
@@ -126,7 +126,7 @@ public class UserServiceTest {
 
         testUserJoin.joinUser(username, password, role, name, contact);
 
-        JwtDTO jwtDTO = userService.loginUser(username,password);
+        UserLoginDTO jwtDTO = userService.loginUser(username,password);
         String accessToken = jwtDTO.getAccessToken();
 
         //when

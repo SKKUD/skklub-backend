@@ -4,8 +4,8 @@ package com.skklub.admin.controller.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.UserController;
-import com.skklub.admin.security.jwt.dto.JwtDTO;
 import com.skklub.admin.service.UserService;
+import com.skklub.admin.service.dto.UserLoginDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,7 +81,7 @@ public class UserControllerLoginTest {
         //given
         String username = "user";
         String password = "1234";
-        given(userService.loginUser(username, password)).willReturn(new JwtDTO("access-token", "refresh-token"));
+        given(userService.loginUser(username, password)).willReturn(new UserLoginDTO());
 
         //when
         ResultActions actions = mockMvc.perform(post("/user/login").with(csrf()).contentType(MediaType.APPLICATION_JSON).queryParam("username", username).queryParam("password", password));

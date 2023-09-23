@@ -1,5 +1,6 @@
 package com.skklub.admin.service;
 
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.exception.ErrorCode;
 import com.skklub.admin.exception.InvalidTokenException;
 import com.skklub.admin.security.auth.PrincipalDetailsService;
@@ -22,9 +23,9 @@ public class RefreshTokenService {
     private final RedisUtil redisUtil;
 
     //access-token 재발급
-    public String refreshAccessToken(HttpServletRequest request,String username){
+    public String refreshAccessToken(HttpServletRequest request, Long userId, String username, Role role){
         validateRefreshToken(request, username);
-        String newAccessToken = TokenProvider.createAccessJwt(username);
+        String newAccessToken = TokenProvider.createAccessJwt(userId,username,role);
         log.info("access-token reissued");
         return newAccessToken;
     }
