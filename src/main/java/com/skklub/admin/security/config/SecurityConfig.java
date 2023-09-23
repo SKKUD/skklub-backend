@@ -92,9 +92,10 @@ public class SecurityConfig  {
                 new AntPathRequestMatcher("/pending/**","POST"),
                 //notice
                 new AntPathRequestMatcher("/notice/**","GET"),
-                new AntPathRequestMatcher("/notice/prev","GET"),
-                new AntPathRequestMatcher("/notice/prev/thumbnail","GET"),
-                new AntPathRequestMatcher("/notice/prev/search/title","GET"),
+                new AntPathRequestMatcher("/notice/**/**","GET"),
+//                new AntPathRequestMatcher("/notice/prev","GET"),
+//                new AntPathRequestMatcher("/notice/prev/thumbnail","GET"),
+//                new AntPathRequestMatcher("/notice/prev/search/title","GET"),
                 //club
                 new AntPathRequestMatcher("/club/**}","GET"),
                 new AntPathRequestMatcher("/club/prev","GET"),

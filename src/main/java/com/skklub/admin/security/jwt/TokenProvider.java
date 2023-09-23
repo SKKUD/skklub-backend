@@ -1,5 +1,6 @@
 package com.skklub.admin.security.jwt;
 
+import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -31,18 +32,21 @@ public class TokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public static JwtDTO createTokens(String username) {
+    public static JwtDTO createTokens(Long userId, String username,Role role) {
         //access-token 발급
-        String accessToken = createAccessJwt(username);
+        String accessToken = createAccessJwt(userId,username,role);
         //refresh-token 발급
         String refreshToken = createRefreshJwt();
 
         return new JwtDTO(accessToken,refreshToken);
     }
 
-    public static String createAccessJwt(String username){
+    public static String createAccessJwt(Long userId, String username, Role role){
         Claims claims = Jwts.claims();
+        claims.put("userId",String.valueOf(userId));
         claims.put("username",username);
+        claims.put("role",role);
+
 
         return Jwts.builder()
                 .setSubject("access-token")

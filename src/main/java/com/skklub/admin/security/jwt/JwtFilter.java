@@ -19,7 +19,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -75,7 +74,6 @@ public class JwtFilter extends OncePerRequestFilter {
             );
             //최종 인증 완료
             SecurityContextHolder.getContext().setAuthentication(AuthenticationToken);
-
             filterChain.doFilter(request, response);
 
         } catch (SignatureException | MalformedJwtException e) {
