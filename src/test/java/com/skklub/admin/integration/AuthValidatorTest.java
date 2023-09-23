@@ -1,10 +1,12 @@
 package com.skklub.admin.integration;
 
 import com.skklub.admin.TestDataRepository;
+import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +30,9 @@ public class AuthValidatorTest {
 
     }
 //
-//    @Test
-//    @WithMockCustomUser(username = "userId0", password = "userPw0")
-//    public void validateUser_Default_Failed() throws Exception {
+    @Test
+    @WithMockCustomUser(username = "userId0", password = "userPw0")
+    public void validateUser_Default_Failed() throws Exception {
 //        //given
 //        System.out.println(SecurityContextHolder.getContext().getAuthentication().getName());
 //        System.out.println(userRepository.findByUsername("userId0").getUsername());
@@ -41,7 +43,7 @@ public class AuthValidatorTest {
 //            authValidator.validateUpdatingUser(wrongUser.getId());
 //        });
 //        Assertions.assertThat(exception.getMessage()).isEqualTo("no authority");
-//    }
+   }
 
 
 }
