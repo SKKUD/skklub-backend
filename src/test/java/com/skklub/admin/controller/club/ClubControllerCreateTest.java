@@ -13,6 +13,7 @@ import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.error.exception.InvalidBelongsException;
 import com.skklub.admin.repository.ClubRepository;
+import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.annotation.PostConstruct;
@@ -73,6 +74,8 @@ class ClubControllerCreateTest {
     private ClubService clubService;
     @MockBean
     private ClubRepository clubRepository;
+    @MockBean
+    private UserRepository userRepository;
     @MockBean
     private S3Transferer s3Transferer;
     @InjectMocks

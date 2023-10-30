@@ -22,15 +22,15 @@ public class PrincipalDetails implements UserDetails {
         collect.add((GrantedAuthority) () -> String.valueOf(user.getRole()));
         return collect;
     }
+    public Long getUserId(){return user.getId();}
+    @Override
+    public String getUsername() {
+        return user.getUsername();
+    }
 
     @Override
     public String getPassword() {
         return user.getPassword();
-    }
-
-    @Override
-    public String getUsername() {
-        return user.getUsername();
     }
 
     //추후 작성 예정(필요한?가?도 잘 모르겠음)

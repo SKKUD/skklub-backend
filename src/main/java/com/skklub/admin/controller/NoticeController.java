@@ -108,6 +108,14 @@ public class NoticeController {
         });
     }
 
+    @GetMapping("/notice/prev/{noticeId}")
+    public NoticePrevWithThumbnailResponse getNoticeThumbnailByNoticeId(@PathVariable Long noticeId) {
+        Notice notice = noticeRepository.findWithThumbnailById(noticeId).orElseThrow(NoticeIdMisMatchException::new);
+        S3DownloadDto s3DownloadDto = s3Transferer.downloadOne(new FileNames(notice.getThumbnail()));
+        return new NoticePrevWithThumbnailResponse(notice, s3DownloadDto);
+    }
+
+
     //목록 조회(전체(작성자 선택), 시간순)
     @GetMapping("/notice/prev")
     public Page<NoticePrevResponse> getNoticePrev(@RequestParam(required = false) Optional<Role> role, Pageable pageable) {

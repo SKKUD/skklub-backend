@@ -14,6 +14,7 @@ import com.skklub.admin.error.exception.CannotDownGradeClubException;
 import com.skklub.admin.error.exception.CannotUpGradeClubException;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
 import com.skklub.admin.repository.ClubRepository;
+import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +73,8 @@ class ClubControllerUpdateTest {
     private S3Transferer s3Transferer;
     @MockBean
     private ClubRepository clubRepository;
+    @MockBean
+    private UserRepository userRepository;
     @MockBean
     private AuthValidator authValidator;
     @InjectMocks

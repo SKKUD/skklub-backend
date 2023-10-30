@@ -80,7 +80,7 @@ public class RefreshTokenControllerTest {
         String accessToken =  "access_token";
         String refreshToken = "refresh_token";
 
-        given(refreshTokenService.refreshAccessToken(any(),any())).willReturn(accessToken);
+        given(refreshTokenService.refreshAccessToken(any(),any(),any(),any())).willReturn(accessToken);
 
         //when
         ResultActions actions = mockMvc.perform(get("/refresh").with(csrf())

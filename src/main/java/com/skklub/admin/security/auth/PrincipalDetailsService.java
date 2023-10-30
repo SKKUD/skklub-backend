@@ -15,12 +15,10 @@ import org.springframework.stereotype.Service;
 public class PrincipalDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
-    //시큐리티 session(Authentication(UserDetails))
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
         if(user!=null){
-
             return new PrincipalDetails(user);
         }
         throw new UsernameNotFoundException("User "+username+" Not Found");
