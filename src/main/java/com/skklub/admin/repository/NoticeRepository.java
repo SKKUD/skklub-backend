@@ -36,4 +36,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @EntityGraph(attributePaths = {"writer"})
     Page<Notice> findAllByUserRole(@Param("role") Role role, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"writer", "thumbnail"})
+    Optional<Notice> findWithThumbnailById(Long noticeId);
+
 }

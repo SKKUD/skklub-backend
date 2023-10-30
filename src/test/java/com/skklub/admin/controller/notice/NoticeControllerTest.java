@@ -1059,6 +1059,51 @@ public class NoticeControllerTest {
 
     }
 
+
+
+    @Test
+    public void getNoticeThumbnailByNoticeId_Default_Success() throws Exception{
+        //given
+        Long noticeId = 0L;
+        List<Notice> notices = readyNoticeWithUserAndThumbnail(1);
+        setNoticeIds(notices);
+        setNoticeCreatedAt(notices);
+        Notice notice = notices.get(0);
+        given(noticeRepository.findWithThumbnailById(noticeId)).willReturn(Optional.of(notice));
+        given(s3Transferer.downloadOne(new FileNames(notice.getThumbnail())))
+                .willReturn(new S3DownloadDto(null, notice.getThumbnail().getOriginalName(), convertToURL(notice.getThumbnail().getUploadedName())));
+
+        //when
+        ResultActions actions = mockMvc.perform(
+                get("/notice/prev/{noticeId}", noticeId)
+        );
+
+        // then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.noticeId").value(noticeId))
+                .andExpect(jsonPath("$.title").value(notice.getTitle()))
+                .andExpect(jsonPath("$.content").value(notice.getContent()))
+                .andExpect(jsonPath("$.createdAt").value(notice.getCreatedAt().truncatedTo(ChronoUnit.MINUTES).toString()))
+                .andExpect(jsonPath("$.thumbnail.fileName").value(notice.getThumbnail().getOriginalName()))
+                .andExpect(jsonPath("$.thumbnail.url").value(convertToURL(notice.getThumbnail().getUploadedName())))
+                .andDo(
+                        document("notice/read/prevs/thumbnail/byId",
+                                pathParameters(
+                                        parameterWithName("noticeId").description("공지 Id").attributes(example(noticeId.toString()))
+                                ),
+                                responseFields(
+                                        fieldWithPath("noticeId").type(WireFormat.FieldType.INT64).description("공지 아이디").attributes(example(notice.getId().toString())),
+                                        fieldWithPath("title").type(WireFormat.FieldType.STRING).description("공지 제목").attributes(example(notice.getTitle())),
+                                        fieldWithPath("content").type(WireFormat.FieldType.STRING).description("공지 내용").attributes(example(notice.getContent())),
+                                        fieldWithPath("createdAt").type(WireFormat.FieldType.STRING).description("작성일자").attributes(example("yyyy-MM-dd'T'HH:mm")),
+                                        fieldWithPath("thumbnail.id").type(WireFormat.FieldType.INT64).description("썸네일 아이디").attributes(example("1")),
+                                        fieldWithPath("thumbnail.fileName").type(WireFormat.FieldType.STRING).description("썸네일 원본 파일명").attributes(example(notice.getThumbnail().getOriginalName())),
+                                        fieldWithPath("thumbnail.url").type(WireFormat.FieldType.STRING).description("썸네일 리소스 주소").attributes(example("https://s3.ap-northeast-2.amazonaws.com/skklub.test/024f3d7b-0ae0-4011-8f3f-23637d10f3d4.jpg"))
+                                )
+                        )
+                );
+    }
+
     @Test
     public void getNoticePrev_NoRole_전체조회() throws Exception {
         //given
