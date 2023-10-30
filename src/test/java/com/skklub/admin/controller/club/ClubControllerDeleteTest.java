@@ -8,6 +8,7 @@ import com.skklub.admin.error.exception.ActivityImageMisMatchException;
 import com.skklub.admin.error.exception.MissingAliveClubException;
 import com.skklub.admin.error.exception.MissingDeletedClubException;
 import com.skklub.admin.repository.ClubRepository;
+import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.service.ClubService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -50,6 +51,8 @@ class ClubControllerDeleteTest {
     private ClubService clubService;
     @MockBean
     private ClubRepository clubRepository;
+    @MockBean
+    private UserRepository userRepository;
     @MockBean
     private S3Transferer s3Transferer;
     @MockBean
