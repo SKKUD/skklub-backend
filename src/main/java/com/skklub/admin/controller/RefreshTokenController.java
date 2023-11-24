@@ -21,7 +21,7 @@ public class RefreshTokenController {
 
     @GetMapping("/refresh")
     public ResponseEntity<Void> refresh(HttpServletRequest request, @AuthenticationPrincipal PrincipalDetails userDetails) {
-        String newAccessToken = refreshTokenService.refreshAccessToken(request,userDetails.getUserId(),userDetails.getUsername(), (Role) userDetails.getAuthorities().toArray()[0]);
+        String newAccessToken = refreshTokenService.refreshAccessToken(request,userDetails.getUserId(),userDetails.getUsername(), Role.valueOf(userDetails.getAuthorities().get(0).getAuthority()));
         return ResponseEntity.noContent()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + newAccessToken)
                 .build();
