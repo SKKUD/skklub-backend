@@ -1,10 +1,10 @@
 package com.skklub.admin.security.auth;
+
 import com.skklub.admin.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 public class PrincipalDetails implements UserDetails {
 
@@ -17,8 +17,8 @@ public class PrincipalDetails implements UserDetails {
 
     //해당 유저 권한 리턴
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collect = new ArrayList<>();
+    public ArrayList<? extends GrantedAuthority> getAuthorities() {
+        ArrayList<GrantedAuthority> collect = new ArrayList<>();
         collect.add((GrantedAuthority) () -> String.valueOf(user.getRole()));
         return collect;
     }
