@@ -1,8 +1,8 @@
 package com.skklub.admin.service;
 
-import com.skklub.admin.domain.ExtraFile;
+import com.skklub.admin.domain.imagefile.ExtraFile;
 import com.skklub.admin.domain.Notice;
-import com.skklub.admin.domain.Thumbnail;
+import com.skklub.admin.domain.imagefile.Thumbnail;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.ExtraFileRepository;

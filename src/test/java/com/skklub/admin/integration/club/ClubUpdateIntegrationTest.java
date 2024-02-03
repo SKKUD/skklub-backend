@@ -7,8 +7,7 @@ import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.*;
 import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Logo;
-import com.skklub.admin.domain.enums.Campus;
+import com.skklub.admin.domain.imagefile.Logo;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.repository.ClubRepository;
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

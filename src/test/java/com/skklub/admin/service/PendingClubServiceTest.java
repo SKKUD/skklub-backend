@@ -1,7 +1,7 @@
 package com.skklub.admin.service;
 
 import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.imagefile.Logo;
 import com.skklub.admin.domain.PendingClub;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Campus;

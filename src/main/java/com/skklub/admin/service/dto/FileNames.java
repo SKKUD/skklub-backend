@@ -1,9 +1,9 @@
 package com.skklub.admin.service.dto;
 
-import com.skklub.admin.domain.ActivityImage;
-import com.skklub.admin.domain.ExtraFile;
-import com.skklub.admin.domain.Logo;
-import com.skklub.admin.domain.Thumbnail;
+import com.skklub.admin.domain.imagefile.ActivityImage;
+import com.skklub.admin.domain.imagefile.ExtraFile;
+import com.skklub.admin.domain.imagefile.Logo;
+import com.skklub.admin.domain.imagefile.Thumbnail;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

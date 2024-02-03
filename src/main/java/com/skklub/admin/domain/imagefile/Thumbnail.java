@@ -1,5 +1,6 @@
-package com.skklub.admin.domain;
+package com.skklub.admin.domain.imagefile;
 
+import com.skklub.admin.domain.FileName;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -10,22 +11,17 @@ import lombok.NoArgsConstructor;
 @Getter
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Thumbnail extends BaseEntity{
+public class Thumbnail extends FileName {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "thumbnail_id")
     private Long id;
 
-    private String originalName;
-    private String uploadedName;
-
     public Thumbnail(String originalName, String uploadedName) {
-        this.originalName = originalName;
-        this.uploadedName = uploadedName;
+        super(originalName, uploadedName);
     }
 
     public void update(Thumbnail logo) {
-        this.originalName = logo.getOriginalName();
-        this.uploadedName = logo.getUploadedName();
+        super.update(logo);
     }
 }

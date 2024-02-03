@@ -1,15 +1,16 @@
 package com.skklub.admin;
 
-import ch.qos.logback.core.pattern.color.BoldCyanCompositeConverter;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Role;
+import com.skklub.admin.domain.imagefile.ActivityImage;
+import com.skklub.admin.domain.imagefile.ExtraFile;
+import com.skklub.admin.domain.imagefile.Logo;
+import com.skklub.admin.domain.imagefile.Thumbnail;
 import com.skklub.admin.service.dto.FileNames;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.amazonaws.auth.policy.actions.S3Actions.DeleteObject;
 import static java.lang.Thread.sleep;
 
 @Slf4j

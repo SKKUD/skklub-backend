@@ -1,6 +1,6 @@
 package com.skklub.admin.controller.dto;
 
-import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.imagefile.Logo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

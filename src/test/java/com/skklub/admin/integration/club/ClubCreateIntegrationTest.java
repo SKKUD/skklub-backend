@@ -7,7 +7,7 @@ import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.ClubCreateRequestDTO;
 import com.skklub.admin.controller.dto.ClubNameAndIdDTO;
 import com.skklub.admin.controller.dto.S3DownloadDto;
-import com.skklub.admin.domain.ActivityImage;
+import com.skklub.admin.domain.imagefile.ActivityImage;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.error.exception.ClubIdMisMatchException;
@@ -25,7 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 

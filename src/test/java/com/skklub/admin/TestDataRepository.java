@@ -6,6 +6,8 @@ import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.domain.enums.Role;
+import com.skklub.admin.domain.imagefile.ActivityImage;
+import com.skklub.admin.domain.imagefile.Logo;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.Getter;

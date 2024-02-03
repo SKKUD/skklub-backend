@@ -1,9 +1,9 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
-import com.skklub.admin.domain.ExtraFile;
+import com.skklub.admin.domain.imagefile.ExtraFile;
 import com.skklub.admin.domain.Notice;
-import com.skklub.admin.domain.Thumbnail;
+import com.skklub.admin.domain.imagefile.Thumbnail;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.error.exception.CannotCategorizeByMasterException;
 import com.skklub.admin.error.exception.CannotCategorizeByUserException;
@@ -20,10 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;

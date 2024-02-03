@@ -1,15 +1,14 @@
 package com.skklub.admin.repository;
 
-import com.skklub.admin.domain.ExtraFile;
+import com.skklub.admin.domain.imagefile.ExtraFile;
 import com.skklub.admin.domain.Notice;
-import com.skklub.admin.domain.Thumbnail;
+import com.skklub.admin.domain.imagefile.Thumbnail;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.service.dto.FileNames;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.hibernate.LazyInitializationException;
 import org.hibernate.proxy.HibernateProxy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;

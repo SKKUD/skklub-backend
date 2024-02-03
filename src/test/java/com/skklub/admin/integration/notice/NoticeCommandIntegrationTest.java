@@ -1,13 +1,12 @@
 package com.skklub.admin.integration.notice;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.skklub.admin.InitDatabase;
 import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.dto.*;
-import com.skklub.admin.domain.ExtraFile;
+import com.skklub.admin.domain.imagefile.ExtraFile;
 import com.skklub.admin.domain.Notice;
-import com.skklub.admin.domain.Thumbnail;
+import com.skklub.admin.domain.imagefile.Thumbnail;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.error.exception.ExtraFileNameMisMatchException;
@@ -19,7 +18,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.hibernate.proxy.HibernateProxy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

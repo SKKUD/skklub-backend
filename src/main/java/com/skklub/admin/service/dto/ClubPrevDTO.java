@@ -1,7 +1,6 @@
 package com.skklub.admin.service.dto;
 
 import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Logo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

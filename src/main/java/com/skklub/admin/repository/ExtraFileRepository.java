@@ -1,6 +1,6 @@
 package com.skklub.admin.repository;
 
-import com.skklub.admin.domain.ExtraFile;
+import com.skklub.admin.domain.imagefile.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import org.springframework.data.jpa.repository.JpaRepository;
 

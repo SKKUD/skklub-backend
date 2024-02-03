@@ -2,7 +2,7 @@ package com.skklub.admin.repository;
 
 import com.skklub.admin.TestDataRepository;
 import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.imagefile.Logo;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -14,8 +14,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @DataJpaTest

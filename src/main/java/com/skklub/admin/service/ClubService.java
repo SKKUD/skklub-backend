@@ -1,8 +1,8 @@
 package com.skklub.admin.service;
 
-import com.skklub.admin.domain.ActivityImage;
+import com.skklub.admin.domain.imagefile.ActivityImage;
 import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.imagefile.Logo;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.error.exception.CannotUpGradeClubException;

@@ -4,7 +4,7 @@ import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.controller.dto.*;
-import com.skklub.admin.domain.ExtraFile;
+import com.skklub.admin.domain.imagefile.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;

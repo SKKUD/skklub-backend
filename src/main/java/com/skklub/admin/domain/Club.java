@@ -2,6 +2,8 @@ package com.skklub.admin.domain;
 
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.domain.imagefile.ActivityImage;
+import com.skklub.admin.domain.imagefile.Logo;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -147,7 +149,7 @@ public class Club extends BaseEntity {
     public void appendActivityImages(List<ActivityImage> activityImages) {
         for (ActivityImage activityImage : activityImages) {
             this.activityImages.add(activityImage);
-            activityImage.setClub(this);
+            activityImage.matchToClub(this);
         }
     }
 

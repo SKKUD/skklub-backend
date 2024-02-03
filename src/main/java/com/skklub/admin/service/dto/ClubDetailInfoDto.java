@@ -4,6 +4,8 @@ import com.skklub.admin.controller.dto.RecruitDto;
 import com.skklub.admin.domain.*;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
+import com.skklub.admin.domain.imagefile.ActivityImage;
+import com.skklub.admin.domain.imagefile.Logo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

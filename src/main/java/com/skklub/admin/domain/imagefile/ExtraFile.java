@@ -1,31 +1,29 @@
-package com.skklub.admin.domain;
+package com.skklub.admin.domain.imagefile;
 
+import com.skklub.admin.domain.FileName;
+import com.skklub.admin.domain.Notice;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.aspectj.weaver.ast.Not;
 
 @Entity
 @Getter
 @EqualsAndHashCode(exclude = {"id", "notice"}, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ExtraFile extends BaseTimeEntity{
-    @Id @Column(name = "extra_file_id")
+public class ExtraFile extends FileName {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "extra_file_id")
     private Long id;
-
-    private String originalName;
-    private String savedName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "notice_id")
     private Notice notice;
 
-    public ExtraFile(String originalName, String savedName) {
-        this.originalName = originalName;
-        this.savedName = savedName;
+    public ExtraFile(String originalName, String uploadedName) {
+        super(originalName, uploadedName);
     }
 
     public void matchToNotice(Notice notice) {

@@ -1,8 +1,8 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
-import com.skklub.admin.domain.ActivityImage;
-import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.imagefile.ActivityImage;
+import com.skklub.admin.domain.imagefile.Logo;
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
 import com.skklub.admin.error.exception.*;

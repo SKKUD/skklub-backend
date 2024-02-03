@@ -8,7 +8,7 @@ import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.RestDocsUtils;
 import com.skklub.admin.controller.S3Transferer;
 import com.skklub.admin.domain.Club;
-import com.skklub.admin.domain.Logo;
+import com.skklub.admin.domain.imagefile.Logo;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.error.exception.CannotDownGradeClubException;
 import com.skklub.admin.error.exception.CannotUpGradeClubException;

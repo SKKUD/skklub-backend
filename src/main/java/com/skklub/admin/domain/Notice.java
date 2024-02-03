@@ -1,8 +1,9 @@
 package com.skklub.admin.domain;
 
+import com.skklub.admin.domain.imagefile.ExtraFile;
+import com.skklub.admin.domain.imagefile.Thumbnail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
