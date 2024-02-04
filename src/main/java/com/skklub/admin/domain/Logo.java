@@ -18,7 +18,6 @@ public class Logo {
     private String originalName;
     private String uploadedName;
 
-
     public Logo(String originalName, String uploadedName) {
         this.originalName = originalName;
         this.uploadedName = uploadedName;
