@@ -48,6 +48,7 @@ public class FileNames {
     public FileNames(Thumbnail thumbnail) {
         this.id = thumbnail.getId();
         this.originalName = thumbnail.getOriginalName();
+
         this.savedName = thumbnail.getUploadedName();
     }
 
