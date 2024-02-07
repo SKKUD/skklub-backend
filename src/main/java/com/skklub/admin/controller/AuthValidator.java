@@ -13,6 +13,7 @@ import com.skklub.admin.exception.AuthException;
 import com.skklub.admin.exception.ErrorCode;
 import com.skklub.admin.repository.*;
 import com.skklub.admin.security.auth.PrincipalDetailsService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;

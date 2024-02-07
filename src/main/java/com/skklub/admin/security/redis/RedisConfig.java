@@ -1,5 +1,6 @@
 package com.skklub.admin.security.redis;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
@@ -23,6 +24,13 @@ public class RedisConfig {
     private String redisHost;//redis host
     @Value("${redis.port}")
     private int redisPort;//redis port
+
+
+    @PostConstruct
+    public void postConstruct() {
+        System.out.println("redisHost = " + redisHost);
+        System.out.println("redisPort = " + redisPort);
+    }
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
