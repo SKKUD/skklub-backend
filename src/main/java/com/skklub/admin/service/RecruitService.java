@@ -1,9 +1,9 @@
 package com.skklub.admin.service;
 
-import com.skklub.admin.error.exception.AlreadyRecruitingException;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.error.exception.NotRecruitingException;
-import com.skklub.admin.error.exception.RecruitIdMisMatchException;
+import com.skklub.admin.exception.deprecated.error.exception.AlreadyRecruitingException;
+import com.skklub.admin.exception.deprecated.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.exception.deprecated.error.exception.NotRecruitingException;
+import com.skklub.admin.exception.deprecated.error.exception.RecruitIdMisMatchException;
 import com.skklub.admin.domain.Recruit;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.RecruitRepository;

@@ -4,7 +4,7 @@ import com.skklub.admin.domain.ExtraFile;
 import com.skklub.admin.domain.Notice;
 import com.skklub.admin.domain.Thumbnail;
 import com.skklub.admin.domain.User;
-import com.skklub.admin.error.exception.NoticeIdMisMatchException;
+import com.skklub.admin.exception.deprecated.error.exception.NoticeIdMisMatchException;
 import com.skklub.admin.repository.ExtraFileRepository;
 import com.skklub.admin.repository.NoticeRepository;
 import com.skklub.admin.repository.UserRepository;

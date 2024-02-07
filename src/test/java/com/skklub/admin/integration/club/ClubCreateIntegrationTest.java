@@ -10,8 +10,8 @@ import com.skklub.admin.controller.dto.S3DownloadDto;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Club;
 import com.skklub.admin.domain.enums.Role;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.error.exception.InvalidBelongsException;
+import com.skklub.admin.exception.deprecated.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.exception.deprecated.error.exception.InvalidBelongsException;
 import com.skklub.admin.repository.ActivityImageRepository;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.LogoRepository;
@@ -25,7 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 

@@ -2,7 +2,6 @@ package com.skklub.admin.controller.club;
 
 import akka.protobuf.WireFormat;
 import com.skklub.admin.TestDataRepository;
-import com.skklub.admin.WithMockCustomUser;
 import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.RestDocsUtils;
@@ -14,17 +13,16 @@ import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import com.skklub.admin.domain.enums.Role;
-import com.skklub.admin.error.exception.AdminCannotHaveClubException;
-import com.skklub.admin.error.exception.ClubIdMisMatchException;
-import com.skklub.admin.error.exception.ClubNameMisMatchException;
-import com.skklub.admin.error.exception.InvalidBelongsException;
+import com.skklub.admin.exception.deprecated.error.exception.AdminCannotHaveClubException;
+import com.skklub.admin.exception.deprecated.error.exception.ClubIdMisMatchException;
+import com.skklub.admin.exception.deprecated.error.exception.ClubNameMisMatchException;
+import com.skklub.admin.exception.deprecated.error.exception.InvalidBelongsException;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.service.ClubService;
 import com.skklub.admin.service.dto.ClubDetailInfoDto;
 import com.skklub.admin.service.dto.FileNames;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -47,7 +45,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
