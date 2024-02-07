@@ -143,7 +143,6 @@ public class SecurityConfig  {
     private RequestMatcher masterEndpoints() {
         return new OrRequestMatcher(
                 new AntPathRequestMatcher("/master")
-
         );
     }
 
