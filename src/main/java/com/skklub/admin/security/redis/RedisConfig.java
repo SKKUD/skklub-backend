@@ -30,7 +30,6 @@ public class RedisConfig {
     public void postConstruct() {
         System.out.println("redisHost = " + redisHost);
         System.out.println("redisPort = " + redisPort);
-
     }
 
     @Bean
