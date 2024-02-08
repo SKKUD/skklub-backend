@@ -1,24 +1,234 @@
-drop trigger if exists toD$$
-drop trigger if exists toC$$
+drop table if exists recruit;
+drop table if exists extra_file;
+drop table if exists activity_image;
+drop table if exists club;
+drop table if exists logo;
+drop table if exists club_categorization;
+drop table if exists notice;
+drop table if exists user;
+drop table if exists thumbnail;
+drop table if exists file_name;
+drop table if exists pending_club;
 
-alter table notice modify column created_at datetime(6) default now()$$
+create table club (
+	club_id bigint primary key not null auto_increment,
+    
+    created_at datetime(6) not null default now(6),
+    last_modified_at datetime(6) not null default now(6),
+    created_by varchar(20) not null,
+    last_modified_by varchar(20) not null,
 
-create trigger toD
-    after delete on club
-    for each row
-begin
-    insert into deleted_club(
-        club_id, created_at, last_modified_at, created_by, last_modified_by, activity_description, belongs, brief_activity_description, campus, club_description, club_type, establish_at, head_line, logo_id, mandatory_activate_period, member_amount, name, recruit_id, regular_meeting_time, room_location, user_id, web_link1, web_link2
-    ) values (OLD.club_id, OLD.created_at, OLD.last_modified_at, OLD.created_by, OLD.last_modified_by, OLD.activity_description, OLD.belongs, OLD.brief_activity_description, OLD.campus, OLD.club_description, OLD.club_type, OLD.establish_at, OLD.head_line, OLD.logo_id, OLD.mandatory_activate_period, OLD.member_amount, OLD.name, NULL, OLD.regular_meeting_time, OLD.room_location, OLD.user_id, OLD.web_link1, OLD.web_link2)
-    ;
-    end$$
+    name varchar(30) not null,
+	activity_type varchar(20) not null,
+    description text not null,
+    activity_description text not null,
+    establish_at int check(establish_at >= 1398 and establish_at <= 2999),
+    head_line varchar(50),
+    mandatory_activate_period varchar(50),
+    member_amount int,
+    regular_meeting_time varchar(50),
+    room_location varchar(50),
 
-create trigger toC
-    after delete on deleted_club
-    for each row
-begin
-    insert into club(
-        club_id, created_at, last_modified_at, created_by, last_modified_by, activity_description, belongs, brief_activity_description, campus, club_description, club_type, establish_at, head_line, logo_id, mandatory_activate_period, member_amount, name, recruit_id, regular_meeting_time, room_location, user_id, web_link1, web_link2
-    ) values (OLD.club_id, OLD.created_at, OLD.last_modified_at, OLD.created_by, OLD.last_modified_by, OLD.activity_description, OLD.belongs, OLD.brief_activity_description, OLD.campus, OLD.club_description, OLD.club_type, OLD.establish_at, OLD.head_line, OLD.logo_id, OLD.mandatory_activate_period, OLD.member_amount, OLD.name, NULL, OLD.regular_meeting_time, OLD.room_location, OLD.user_id, OLD.web_link1, OLD.web_link2)
-    ;
-    end$$
+    visibility tinyint not null default 1,
+    alive tinyint not null default 1,
+
+    user_id bigint not null,
+    logo_id bigint not null,
+    club_categorization_id bigint not null
+);
+
+create table club_categorization(
+	club_categorization_id bigint primary key not null auto_increment,
+
+	campus varchar(2) not null check(campus in ('명륜', '율전')),
+	club_type varchar(10) not null check(club_type in ('동아리연합회', '중앙동아리', '준중앙동아리', '기타동아리', '소모임', '학회', '학생단체')),
+	belongs varchar(10) not null
+);
+
+create table user (
+	user_id bigint primary key not null auto_increment,
+
+    created_at datetime(6) not null default now(6),
+    last_modified_at datetime(6) not null default now(6),
+
+    name varchar(20) not null,
+    contact varchar(50),
+    
+    username varchar(20) not null,
+    password varchar(255) not null,
+    role varchar(50) not null default 'ROLE_USER' check(role in ('ROLE_MASTER', 'ROLE_ADMIN_SEOUL_CENTRAL', 'ROLE_ADMIN_SUWON_CENTRAL', 'ROLE_USER'))
+);
+
+create table recruit (
+	recruit_id bigint primary key not null auto_increment,
+
+    created_at datetime(6) not null default now(6),
+    last_modified_at datetime(6) not null default now(6),
+    created_by varchar(20) not null,
+    last_modified_by varchar(20) not null,
+
+    process_description varchar(255) not null,
+    contact varchar(255),
+
+    start_at datetime(6) not null,
+    end_at datetime(6) not null default '2999-12-31',
+    quota varchar(50) not null,
+
+    club_id bigint not null,
+    recruit_status_id bigint not null
+
+    constraint recruit_time_integrity check(start_at <= end_at)
+);
+
+create table recruit_status (
+    recruit_status_id bigint primary key not null auto_increment,
+
+    status varchar(10) not null default '상시모집' check(status in ('모집예정', '모집중', '상시모집', '모집종료'))
+);
+
+create table notice (
+	notice_id bigint primary key not null auto_increment,
+
+    created_at datetime(6) not null default now(6),
+    last_modified_at datetime(6) not null default now(6),
+    created_by varchar(20) not null,
+    last_modified_by varchar(20) not null,
+
+    title varchar(50) not null,
+    content text not null,
+
+    user_id bigint not null,
+    thumbnail_id bigint not null
+);
+
+
+create table file_name (
+    file_name_id bigint primary key not null,
+
+    dtype varchar(30) not null,
+
+    created_at datetime(6) not null default now(6),
+    last_modified_at datetime(6) not null default now(6),
+    
+    original_name varchar(255) not null,
+    uploaded_name varchar(255) not null
+);
+
+create table extra_file (
+    file_name_id bigint primary key not null,
+
+    notice_id bigint not null
+);
+
+create table thumbnail (
+    file_name_id bigint primary key not null
+);
+
+create table activity_image (
+    file_name_id bigint primary key not null,
+
+    club_id bigint not null
+);
+
+create table logo (
+    file_name_id bigint primary key not null
+);
+
+create table pending_club(
+	pending_club_id  bigint primary key not null auto_increment,
+	
+	-- 필수 입력 정보
+	request_username varchar(20) not null,
+	request_password varchar(255) not null,
+	president_name varchar(20) not null,
+	contact varchar(50) not null,
+
+	club_name varchar(30) not null,
+   	campus varchar(2) not null check(campus in ('명륜', '율전')),
+	brief_acitivity_description varchar(50) not null,
+
+	-- 선택 입력 정보
+	club_description text null,
+   	activity_type text null,
+    establish_at int default null check(establish_at >= 1398 and establish_at <= 2999),
+    head_line varchar(50) default null,
+
+    mandatory_activate_period varchar(50),
+    member_amount int,
+	regular_meeting_time varchar(50),
+    room_location varchar(50)
+);
+
+alter table club
+add constraint FK_club__logo
+foreign key (logo_id)
+references logo(file_name_id);
+
+alter table club 
+add constraint FK_club__user
+foreign key (user_id)
+references user(user_id);
+
+alter table recruit
+add constraint FK_recruit__club
+foreign key (club_id)
+references club(club_id);
+
+alter table club
+add constraint FK_club__club_categorization
+foreign key (club_categorization_id)
+references club_categorization(club_categorization_id);
+
+alter table notice 
+add constraint FK_notice__thumbnail
+foreign key (thumbnail_id)
+references thumbnail(file_name_id);
+
+alter table notice
+add constraint FK_notice__user
+foreign key (user_id)
+references user(user_id);
+
+alter table extra_file 
+add constraint FK_extra_file__notice
+foreign key (notice_id)
+references notice(notice_id);
+
+alter table activity_image
+add constraint FK_activity_image__club
+foreign key (club_id)
+references club(club_id);
+
+alter table extra_file 
+add constraint FK_extra_file__file_name
+foreign key (file_name_id)
+references file_name(file_name_id);
+
+alter table activity_image 
+add constraint FK_activity_image__file_name
+foreign key (file_name_id)
+references file_name(file_name_id);
+
+alter table thumbnail 
+add constraint FK_thumbnail__file_name
+foreign key (file_name_id)
+references file_name(file_name_id);
+
+alter table logo 
+add constraint FK_logo__file_name
+foreign key (file_name_id)
+references file_name(file_name_id);
+
+DELIMITER $$
+DROP EVENT IF EXISTS update_recruit_status$$
+CREATE EVENT IF NOT EXISTS update_recruit_status
+ON SCHEDULE EVERY 1 DAY STARTS TIMESTAMP(CURRENT_DATE, '00:00:00') 
+DO
+BEGIN
+    UPDATE recruit SET status = CASE
+        WHEN now() BETWEEN start_at AND end_at THEN '모집중'
+        WHEN now() > end_at THEN '모집종료'
+   WHEN now() < start_at THEN '모집예정'
+    END;
+END$$
+DELIMITER ;
