@@ -69,9 +69,6 @@ create table recruit (
 
     process_description varchar(255) not null,
     contact varchar(255),
-
-    start_at datetime(6) not null,
-    end_at datetime(6) not null default '2999-12-31',
     quota varchar(50) not null,
 
     club_id bigint not null,
@@ -83,7 +80,9 @@ create table recruit (
 create table recruit_status (
     recruit_status_id bigint primary key not null auto_increment,
 
-    status varchar(10) not null default '상시모집' check(status in ('모집예정', '모집중', '상시모집', '모집종료'))
+    status varchar(10) not null default '상시모집' check(status in ('모집예정', '모집중', '상시모집', '모집종료')),
+    start_at datetime(6) not null,
+    end_at datetime(6) not null default '2999-12-31'
 );
 
 create table notice (
