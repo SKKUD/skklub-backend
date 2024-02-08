@@ -10,8 +10,8 @@ drop table if exists thumbnail;
 drop table if exists file_name;
 drop table if exists pending_club;
 
-create table club (
-	club_id bigint primary key not null auto_increment,
+create table club_meta (
+	club_meta_id bigint primary key not null auto_increment,
     
     created_at datetime(6) not null default now(6),
     last_modified_at datetime(6) not null default now(6),
@@ -23,6 +23,14 @@ create table club (
     description text not null,
     activity_description text not null,
     establish_at int check(establish_at >= 1398 and establish_at <= 2999),
+
+    club_operation_id bigint not null,
+    logo_id bigint not null
+);
+
+create table club_operation(
+    club_operation_id bigint primary key not null auto_increment,
+
     head_line varchar(50),
     mandatory_activate_period varchar(50),
     member_amount int,
@@ -33,7 +41,6 @@ create table club (
     alive tinyint not null default 1,
 
     user_id bigint not null,
-    logo_id bigint not null,
     club_categorization_id bigint not null
 );
 
@@ -71,7 +78,7 @@ create table recruit (
     contact varchar(255),
     quota varchar(50) not null,
 
-    club_id bigint not null,
+    club_operation_id bigint not null,
     recruit_status_id bigint not null,
 
     constraint recruit_time_integrity check(start_at <= end_at)
@@ -126,7 +133,7 @@ create table thumbnail (
 create table activity_image (
     file_name_id bigint primary key not null,
 
-    club_id bigint not null
+    club_meta_id bigint not null
 );
 
 create table logo (
@@ -159,25 +166,30 @@ create table pending_club(
     web_link2 varchar(2000) default null
 );
 
-alter table club
-add constraint FK_club__logo
+alter table club_meta
+add constraint FK_club_meta__logo
 foreign key (logo_id)
 references logo(file_name_id);
 
-alter table club 
-add constraint FK_club__user
+alter table club_operation
+add constraint FK_club_operation__user
 foreign key (user_id)
 references user(user_id);
 
 alter table recruit
-add constraint FK_recruit__club
-foreign key (club_id)
-references club(club_id);
+add constraint FK_recruit__club_operation
+foreign key (club_operation_id)
+references club_operation(club_operation_id);
 
-alter table club
-add constraint FK_club__club_categorization
+alter table club_operation
+add constraint FK_club_operation__club_categorization
 foreign key (club_categorization_id)
 references club_categorization(club_categorization_id);
+
+alter table club_meta
+add constraint FK_club_meta__club_operation
+foreign key (club_operation_id)
+references club_operation (club_operation_id);
 
 alter table notice 
 add constraint FK_notice__thumbnail
@@ -195,9 +207,9 @@ foreign key (notice_id)
 references notice(notice_id);
 
 alter table activity_image
-add constraint FK_activity_image__club
-foreign key (club_id)
-references club(club_id);
+add constraint FK_activity_image__club_meta
+foreign key (club_meta_id)
+references club_meta(club_meta_id);
 
 alter table extra_file 
 add constraint FK_extra_file__file_name
