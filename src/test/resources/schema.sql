@@ -1,14 +1,18 @@
 drop table if exists recruit;
+drop table if exists recruit_status;
 drop table if exists extra_file;
 drop table if exists activity_image;
-drop table if exists club;
+drop table if exists club_meta;
+drop table if exists club_operation;
 drop table if exists logo;
 drop table if exists club_categorization;
 drop table if exists notice;
 drop table if exists user;
 drop table if exists thumbnail;
 drop table if exists file_name;
-drop table if exists pending_club;
+drop table if exists request_club_required;
+drop table if exists request_club_optional;
+drop table if exists request_user;
 
 # 동아리 고정 정보
 create table club_meta (
@@ -81,9 +85,7 @@ create table recruit (
     quota varchar(50) not null,
 
     club_operation_id bigint not null,
-    recruit_status_id bigint not null,
-
-    constraint recruit_time_integrity check(start_at <= end_at)
+    recruit_status_id bigint not null
 );
 
 create table recruit_status (
@@ -91,7 +93,9 @@ create table recruit_status (
 
     status varchar(10) not null default '상시모집' check(status in ('모집예정', '모집중', '상시모집', '모집종료')),
     start_at datetime(6) not null,
-    end_at datetime(6) not null default '2999-12-31'
+    end_at datetime(6) not null default '2999-12-31',
+
+    constraint recruit_time_integrity check(start_at <= end_at)
 );
 
 create table notice (
@@ -142,30 +146,37 @@ create table logo (
     file_name_id bigint primary key not null
 );
 
-create table pending_club(
-	pending_club_id  bigint primary key not null auto_increment,
-	
-	-- 필수 입력 정보
-	request_username varchar(20) not null,
-	request_password varchar(255) not null,
-	president_name varchar(20) not null,
-	contact varchar(11) not null,
+create table request_club_required (
+	request_club_required_id  bigint primary key not null auto_increment,
 
-	club_name varchar(30) not null,
+	name varchar(30) not null,
    	campus varchar(2) not null check(campus in ('명륜', '율전')),
 	brief_activity_description varchar(50) not null,
 
-	-- 선택 입력 정보
-	club_description text null,
-   	activity_type text null,
+    request_user_id bigint not null,
+    request_club_optional_id bigint not null
+);
+
+create table request_user (
+    request_user_id bigint primary key not null auto_increment,
+
+    username varchar(20) not null,
+    password varchar(255) not null,
+    name varchar(20) not null,
+    contact varchar(11) not null
+);
+
+create table request_club_optional (
+    request_club_optional_id bigint primary key not null auto_increment,
+
+    description text null,
+    activity_type text null,
     establish_at int default null check(establish_at >= 1398 and establish_at <= 2999),
     head_line varchar(50) default null,
     mandatory_activate_period varchar(50),
     member_amount int,
-	regular_meeting_time varchar(50),
-    room_location varchar(50),
-    web_link1 varchar(2000) default null,
-    web_link2 varchar(2000) default null
+    regular_meeting_time varchar(50),
+    room_location varchar(50)
 );
 
 alter table club_meta
@@ -233,10 +244,20 @@ add constraint FK_logo__file_name
 foreign key (file_name_id)
 references file_name(file_name_id);
 
-alter table recruit_status
-add constraint FK_recruit_status__recruit
+alter table recruit
+add constraint FK_recruit__recruit_status
 foreign key (recruit_status_id)
-references recruit(recruit_status_id);
+references recruit_status(recruit_status_id);
+
+alter table request_club_required
+add constraint FK_request_club_required__request_club_optional
+foreign key (request_club_optional_id)
+references request_club_optional(request_club_optional_id);
+
+alter table request_club_required
+add constraint FK_request_club_required__request_user
+foreign key (request_user_id)
+references request_user(request_user_id);
 
 DELIMITER $$
 DROP EVENT IF EXISTS update_recruit_status$$
@@ -244,7 +265,7 @@ CREATE EVENT IF NOT EXISTS update_recruit_status
 ON SCHEDULE EVERY 1 DAY STARTS TIMESTAMP(CURRENT_DATE, '00:00:00') 
 DO
 BEGIN
-    UPDATE recruit SET status = CASE
+    UPDATE recruit_status SET status = CASE
         WHEN now() BETWEEN start_at AND end_at THEN '모집중'
         WHEN now() > end_at THEN '모집종료'
    WHEN now() < start_at THEN '모집예정'
