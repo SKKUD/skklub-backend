@@ -70,15 +70,20 @@ create table recruit (
     process_description varchar(255) not null,
     contact varchar(255),
 
-    status varchar(10) not null default '상시모집' check(status in ('모집예정', '모집중', '상시모집', '모집종료')),
-    
     start_at datetime(6) not null,
     end_at datetime(6) not null default '2999-12-31',
     quota varchar(50) not null,
 
     club_id bigint not null,
+    recruit_status_id bigint not null,
 
     constraint recruit_time_integrity check(start_at <= end_at)
+);
+
+create table recruit_status (
+    recruit_status_id bigint primary key not null auto_increment,
+
+    status varchar(10) not null default '상시모집' check(status in ('모집예정', '모집중', '상시모집', '모집종료'))
 );
 
 create table notice (
@@ -135,12 +140,12 @@ create table pending_club(
 	-- 필수 입력 정보
 	request_username varchar(20) not null,
 	request_password varchar(255) not null,
-	president_name varchar(5) not null,
+	president_name varchar(20) not null,
 	contact varchar(11) not null,
 
 	club_name varchar(30) not null,
    	campus varchar(2) not null check(campus in ('명륜', '율전')),
-	brief_acitivity_description varchar(50) not null,
+	brief_activity_description varchar(50) not null,
 
 	-- 선택 입력 정보
 	club_description text null,
@@ -214,6 +219,11 @@ alter table logo
 add constraint FK_logo__file_name
 foreign key (file_name_id)
 references file_name(file_name_id);
+
+alter table recruit_status
+add constraint FK_recruit_status__recruit
+foreign key (recruit_status_id)
+references recruit(recruit_status_id);
 
 DELIMITER $$
 DROP EVENT IF EXISTS update_recruit_status$$
