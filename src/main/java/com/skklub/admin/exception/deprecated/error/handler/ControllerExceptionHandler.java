@@ -4,7 +4,6 @@ import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.NoticeController;
 import com.skklub.admin.controller.PendingClubController;
 import com.skklub.admin.controller.RecruitController;
-import com.skklub.admin.error.exception.*;
 import com.skklub.admin.exception.deprecated.error.handler.dto.BindingErrorResponse;
 import com.skklub.admin.exception.deprecated.error.handler.dto.ErrorDetail;
 import com.skklub.admin.exception.deprecated.error.handler.dto.ErrorResponse;
