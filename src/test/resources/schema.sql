@@ -10,6 +10,7 @@ drop table if exists thumbnail;
 drop table if exists file_name;
 drop table if exists pending_club;
 
+# 동아리 고정 정보
 create table club_meta (
 	club_meta_id bigint primary key not null auto_increment,
     
@@ -28,6 +29,7 @@ create table club_meta (
     logo_id bigint not null
 );
 
+# 동아리 운영 관련 유동 정보
 create table club_operation(
     club_operation_id bigint primary key not null auto_increment,
 
