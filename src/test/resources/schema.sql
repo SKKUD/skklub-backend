@@ -113,7 +113,6 @@ create table notice (
     thumbnail_id bigint not null
 );
 
-
 create table file_name (
     file_name_id bigint primary key not null,
 
