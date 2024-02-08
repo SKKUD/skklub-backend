@@ -5,7 +5,7 @@ import com.skklub.admin.controller.dto.UserLoginResponseDTO;
 import com.skklub.admin.controller.dto.UserUpdateRequestDTO;
 import com.skklub.admin.controller.dto.UserUpdateResponseDTO;
 import com.skklub.admin.domain.enums.Role;
-import com.skklub.admin.exception.UserUpdateFailedException;
+import com.skklub.admin.exception.deprecated.UserUpdateFailedException;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.service.UserService;
 import com.skklub.admin.service.dto.UserLoginDTO;

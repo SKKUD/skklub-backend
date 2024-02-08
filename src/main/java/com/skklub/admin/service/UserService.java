@@ -2,8 +2,8 @@ package com.skklub.admin.service;
 
 import com.skklub.admin.domain.User;
 import com.skklub.admin.domain.enums.Role;
-import com.skklub.admin.exception.AuthException;
-import com.skklub.admin.exception.ErrorCode;
+import com.skklub.admin.exception.deprecated.AuthException;
+import com.skklub.admin.exception.deprecated.ErrorCode;
 import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.security.jwt.TokenProvider;
 import com.skklub.admin.security.jwt.dto.JwtDTO;
