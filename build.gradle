@@ -36,8 +36,6 @@ asciidoctor {
 }
 
 dependencies {
-	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.420'
-	implementation 'com.amazonaws:aws-java-sdk-core:1.12.420'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -51,9 +49,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-	testImplementation 'io.findify:s3mock_2.13:0.2.6'
 	testImplementation "org.mockito:mockito-core"
 	testImplementation 'org.mockito:mockito-junit-jupiter'
+
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
@@ -70,6 +68,11 @@ dependencies {
 
 	//redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	//AWS
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.420'
+	implementation 'com.amazonaws:aws-java-sdk-core:1.12.420'
+	testImplementation 'io.findify:s3mock_2.13:0.2.6'
 }
 
 clean {

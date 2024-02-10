@@ -34,13 +34,13 @@ public class TestDataRepository {
     private final List<User> users = new ArrayList<>();
 
 
-    public TestDataRepository() {
-        readyUser();
-        readyRecruit();
-        readyLogo();
-        readyActivityImages();
-        readyClub();
-    }
+//    public TestDataRepository() {
+//        readyUser();
+//        readyRecruit();
+//        readyLogo();
+//        readyActivityImages();
+//        readyClub();
+//    }
 
     public ClubCreateRequestDTO getClubCreateRequestDTO() {
         String clubName = "testClubName";

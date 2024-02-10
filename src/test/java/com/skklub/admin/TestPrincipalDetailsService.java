@@ -9,11 +9,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
-@Service
+//@RequiredArgsConstructor
+//@Service
 public class TestPrincipalDetailsService implements UserDetailsService{
-    private final UserRepository userRepository;
-    private final TestDataRepository testDataRepository;
+    private UserRepository userRepository;
+    private TestDataRepository testDataRepository;
 
     //시큐리티 session(Authentication(UserDetails))
     @Override
