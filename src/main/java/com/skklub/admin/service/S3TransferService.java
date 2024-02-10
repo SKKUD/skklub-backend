@@ -7,17 +7,20 @@ import com.skklub.admin.exception.ServerSideException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FileUploader {
+public class S3TransferService {
     private final AmazonS3 amazonS3;
 
     @Value("${cloud.aws.s3.bucket}")
@@ -34,6 +37,7 @@ public class FileUploader {
         try {
             metadata.setContentLength(multipartFile.getInputStream().available());
             amazonS3.putObject(bucket, uploadName, multipartFile.getInputStream(), metadata);
+            log.info("파일 업로드 : {}", multipartFile.getName());
         } catch (IOException e) {
             log.error("S3 파일 업로드 중 MultipartFile 인식 오류 발생");
             throw new ServerSideException();
@@ -43,7 +47,9 @@ public class FileUploader {
 
 
     public List<FileName> uploadAll(List<MultipartFile> multipartFiles) {
-        return null;
+        return multipartFiles.stream()
+                .parallel()
+                .map(this::uploadOne)
+                .collect(Collectors.toList());
     }
-
 }

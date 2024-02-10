@@ -6,7 +6,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.skklub.admin.domain.FileName;
 import com.skklub.admin.s3.S3MockConfig;
-import com.skklub.admin.service.FileUploader;
+import com.skklub.admin.service.S3TransferService;
 import io.findify.s3mock.S3Mock;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -14,17 +14,14 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
-import scala.Int;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,25 +29,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(S3MockConfig.class)
-public class FileUploaderTest {
+@EnableAsync
+public class S3TransferServiceTest {
 
     private static final String bucket = "mock.s3";
-
     @Autowired
     private AmazonS3 amazonS3;
     @Autowired
-    private FileUploader fileUploader;
+    private S3TransferService s3TransferService;
     private Random random = new Random();
 
     @BeforeAll
@@ -102,7 +97,7 @@ public class FileUploaderTest {
         //mocking
 
         //when
-        FileName fileName = fileUploader.uploadOne(file);
+        FileName fileName = s3TransferService.uploadOne(file);
 
         //then
         assertThat("가상 파일명 생성 검증", fileName.getUploadedName(), containsString("." + extension));
@@ -132,7 +127,7 @@ public class FileUploaderTest {
         //mocking
 
         //when
-        List<FileName> fileNames = fileUploader.uploadAll(files);
+        List<FileName> fileNames = s3TransferService.uploadAll(files);
 
         //then
         assertThat("변환된 파일 총 개수 검증", fileNames.size(), equalTo(fileCount));
