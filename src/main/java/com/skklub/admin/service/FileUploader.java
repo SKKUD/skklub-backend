@@ -42,7 +42,7 @@ public class FileUploader {
     }
 
 
-    public List<FileName> uploadAll(MultipartFile... multipartFiles) {
+    public List<FileName> uploadAll(List<MultipartFile> multipartFiles) {
         return null;
     }
 

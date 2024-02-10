@@ -23,12 +23,17 @@ import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.multipart.MultipartFile;
+import scala.Int;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -81,7 +86,7 @@ public class FileUploaderTest {
 
     /**
      * input : Random Byte File
-     * expect result : Save Success & return Random UUID
+     * expect result : Save Success & return With Random UUID
      */
     @Test
     @DisplayName("파일 한개 업로드 - 정상")
@@ -92,8 +97,8 @@ public class FileUploaderTest {
         byte[] contents = new byte[1024];
         random.nextBytes(contents);
         MockMultipartFile file = new MockMultipartFile(name + "." + extension, contents);
+
         log.info("file : {}", file.getName());
-        log.info("file : {}", file.getContentType());
         //mocking
 
         //when
@@ -105,4 +110,49 @@ public class FileUploaderTest {
         assertThat("파일 저장 검증", amazonS3.doesObjectExist(bucket, fileName.getUploadedName()), equalTo(true));
     }
 
+    /**
+     * input : 100 Random Byte Files
+     * expect result : Save Success & return With Random UUID
+     */
+    @Test
+    @DisplayName("파일 여러개 업로드 - 정상")
+    public void uploadAll_Default_Success() throws Exception{
+        //given\
+        Integer fileCount = 100;
+        List<MultipartFile> files = new ArrayList<>();
+        String extension = "testFIleExtension";
+        byte[] contents = new byte[1024];
+        String testFIleNamePrefix = "testFIleName";
+        for (int i = 0; i < fileCount; i++) {
+            String name = testFIleNamePrefix + i;
+            random.nextBytes(contents);
+            files.add(new MockMultipartFile(name + "." + extension, contents));
+        }
+
+        //mocking
+
+        //when
+        List<FileName> fileNames = fileUploader.uploadAll(files);
+
+        //then
+        assertThat("변환된 파일 총 개수 검증", fileNames.size(), equalTo(fileCount));
+        List<String> multipartFileNames = files.stream()
+                .map(MultipartFile::getName)
+                .collect(Collectors.toList());
+        List<String> savedOriginalNames = fileNames.stream()
+                .map(FileName::getOriginalName)
+                .collect(Collectors.toList());
+        assertThat("원본 파일명 유지 검증 - List contains", multipartFileNames.containsAll(savedOriginalNames), equalTo(true));
+        savedOriginalNames
+                .forEach(originalFileName -> {
+                    assertThat("원본 파일명 유지 검증 - Prefix", originalFileName, containsString(testFIleNamePrefix));
+                });
+        fileNames.stream()
+                .map(FileName::getUploadedName)
+                .forEach(uploadFileName -> {
+                    assertThat("가상 파일명 생성 검증", uploadFileName, containsString("." + extension));
+                    assertThat("파일 저장 검증", amazonS3.doesObjectExist(bucket, uploadFileName), equalTo(true));
+                });
+
+    }
 }
