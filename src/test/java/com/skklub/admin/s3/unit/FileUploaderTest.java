@@ -4,21 +4,19 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.skklub.admin.controller.S3Transferer;
+import com.skklub.admin.domain.FileName;
 import com.skklub.admin.s3.S3MockConfig;
-import com.skklub.admin.service.dto.FileNames;
+import com.skklub.admin.service.FileUploader;
 import io.findify.s3mock.S3Mock;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import jakarta.persistence.PostRemove;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,24 +26,27 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
+import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
 
 @Import(S3MockConfig.class)
 @ActiveProfiles("test")
 @SpringBootTest
 public class FileUploaderTest {
-
+    private static final String bucket = "skklub.mock";
     @Autowired
     private AmazonS3 amazonS3;
-
-    @Autowired
-    private static final String BUCKET_NAME = "wedul";
+    @MockBean
+    private FileUploader fileUploader;
+    private Random random = new Random();
 
     @BeforeAll
     static void setUp(@Autowired S3Mock s3Mock, @Autowired AmazonS3 amazonS3) {
         s3Mock.start();
-        amazonS3.createBucket(BUCKET_NAME);
+        amazonS3.createBucket(bucket);
     }
 
     @AfterAll
@@ -62,32 +63,40 @@ public class FileUploaderTest {
         String contentType = "text/plain";
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(contentType);
-        PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET_NAME, path, new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8)), objectMetadata);
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, path, new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8)), objectMetadata);
         amazonS3.putObject(putObjectRequest);
 
         // when
-        S3Object s3Object = amazonS3.getObject(BUCKET_NAME, path);
+        S3Object s3Object = amazonS3.getObject(bucket, path);
 
         // then
-        assertThat(s3Object.getObjectMetadata().getContentType()).isEqualTo(contentType);
-        assertThat(new String(FileCopyUtils.copyToByteArray(s3Object.getObjectContent()))).isEqualTo("");
+        Assertions.assertThat(s3Object.getObjectMetadata().getContentType()).isEqualTo(contentType);
+        Assertions.assertThat(new String(FileCopyUtils.copyToByteArray(s3Object.getObjectContent()))).isEqualTo("");
     }
-    
+
     /**
-     * input :
-     * expect result :
+     * input : Random Byte File
+     * expect result : Save Success & return Random UUID
      */
     @Test
-    @DisplayName("")
-    public void () throws Exception{
+    @DisplayName("파일 한개 업로드 - 정상")
+    public void uploadOne_Default_Success() throws Exception{
         //given
-        
+        String name = "testFIleName";
+        String extension = "testFIleExtension";
+        byte[] contents = new byte[1024];
+        random.nextBytes(contents);
+        MockMultipartFile file = new MockMultipartFile(name + "." + extension, contents);
+
         //mocking
-        
+
         //when
-        
+        FileName fileName = fileUploader.uploadOne(file);
+
         //then
-        
+        assertThat("가상 파일명 생성 검증", fileName.getUploadedName(), containsString("." + extension));
+        assertThat("원본 파일명 유지 검증", fileName.getOriginalName(), equalTo(name + "." + extension));
+        assertThat("파일 저장 검증", amazonS3.doesObjectExist(bucket, fileName.getUploadedName()), equalTo(true));
     }
 
 }
