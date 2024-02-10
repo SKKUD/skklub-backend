@@ -64,35 +64,6 @@ class ClubServiceTest {
     }
 
     /**
-     * stub : save() id setting
-     * check : relation mapping
-     */
-    @Test
-    public void createClub_Default_Success() throws Exception {
-        //given
-        Long logoId = -9999L;
-        Long clubId = -1111L;
-        int clubIndex = 0;
-        Club club = testDataRepository.getClubs().get(clubIndex);
-        Logo logo = testDataRepository.getLogos().get(clubIndex);
-        Assertions.assertThat(logo.getId()).isNull();
-        doAnswer(invocation -> {
-            setIdReflection(clubId, club);
-            setIdReflection(logoId, logo);
-            return null;
-        }).when(clubRepository).save(club);
-
-
-        //when
-        Long returnId = clubService.createClub(club, logo);
-
-        //then
-        Assertions.assertThat(returnId).isEqualTo(clubId);
-        Assertions.assertThat(club.getLogo().getId()).isEqualTo(logoId);
-        Assertions.assertThat(club.getLogo()).isEqualTo(logo);
-    }
-
-    /**
      * @stub findById, saveAll id setting
      * @check return value, relation(id, count, names)
      */

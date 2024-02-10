@@ -35,13 +35,6 @@ public class ClubService {
     private final DeletedClubRepository deletedClubRepository;
     private final S3TransferService s3TransferService;
 
-
-    public Long createClub(Club club, Logo logo) {
-        club.changeLogo(logo);
-        clubRepository.save(club);
-        return club.getId();
-    }
-
     public Optional<String> appendActivityImages(Long clubId, List<ActivityImage> activityImages) {
         return clubRepository.findById(clubId)
                 .map(c -> {
