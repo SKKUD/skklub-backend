@@ -33,6 +33,7 @@ public class ClubService {
     private final LogoRepository logoRepository;
     private final ActivityImageRepository activityImageRepository;
     private final DeletedClubRepository deletedClubRepository;
+    private final S3TransferService s3TransferService;
 
 
     public Long createClub(Club club, Logo logo) {

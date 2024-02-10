@@ -233,20 +233,4 @@ public class ClubController {
                 .orElseThrow(MissingDeletedClubException::new);
     }
 
-
-//====DEPRECATED=====//
-
-    //추가
-//    @PostMapping(value = "/club")
-    public ClubNameAndIdDTO createClub(@ModelAttribute @Valid ClubCreateRequestDTO clubCreateRequestDTO, @RequestParam(required = false) MultipartFile logo) {
-        ClubValidator.validateBelongs(clubCreateRequestDTO.getCampus(), clubCreateRequestDTO.getClubType(), clubCreateRequestDTO.getBelongs());
-        FileNames uploadedLogo = Optional.ofNullable(logo)
-                .map(s3Transferer::uploadOne)
-                .orElse(new FileNames(DEFAULT_LOGO_NAME, DEFAULT_LOGO_NAME));
-        Club club = clubCreateRequestDTO.toEntity();
-        Logo logoAfterUpload = uploadedLogo.toLogoEntity();
-        Long id = clubService.createClub(club, logoAfterUpload);
-        return new ClubNameAndIdDTO(id, club.getName());
-    }
-
 }
