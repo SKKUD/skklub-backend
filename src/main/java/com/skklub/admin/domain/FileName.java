@@ -11,7 +11,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class FileName extends BaseTimeEntity{
+public class FileName extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "file_name_id")

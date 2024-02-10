@@ -8,6 +8,7 @@ import com.skklub.admin.domain.FileName;
 import com.skklub.admin.s3.S3MockConfig;
 import com.skklub.admin.service.FileUploader;
 import io.findify.s3mock.S3Mock;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -32,14 +34,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 
-@Import(S3MockConfig.class)
-@ActiveProfiles("test")
+@Slf4j
 @SpringBootTest
+@ActiveProfiles("test")
+@Import(S3MockConfig.class)
 public class FileUploaderTest {
-    private static final String bucket = "skklub.mock";
+
+    private static final String bucket = "mock.s3";
+
     @Autowired
     private AmazonS3 amazonS3;
-    @MockBean
+    @Autowired
     private FileUploader fileUploader;
     private Random random = new Random();
 
@@ -87,7 +92,8 @@ public class FileUploaderTest {
         byte[] contents = new byte[1024];
         random.nextBytes(contents);
         MockMultipartFile file = new MockMultipartFile(name + "." + extension, contents);
-
+        log.info("file : {}", file.getName());
+        log.info("file : {}", file.getContentType());
         //mocking
 
         //when
