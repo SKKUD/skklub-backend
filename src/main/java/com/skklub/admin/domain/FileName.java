@@ -24,4 +24,9 @@ public class FileName extends BaseTimeEntity{
         this.originalName = originalName;
         this.uploadedName = uploadedName;
     }
+
+    public void update(FileName fileName) {
+        this.originalName = fileName.getOriginalName();
+        this.uploadedName = fileName.getUploadedName();
+    }
 }

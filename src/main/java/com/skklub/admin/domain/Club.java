@@ -147,7 +147,7 @@ public class Club extends BaseEntity {
     public void appendActivityImages(List<ActivityImage> activityImages) {
         for (ActivityImage activityImage : activityImages) {
             this.activityImages.add(activityImage);
-            activityImage.setClub(this);
+            activityImage.matchToClub(this);
         }
     }
 
