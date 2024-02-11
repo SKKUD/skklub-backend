@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -14,4 +16,8 @@ public class ClubMetaDTO {
     private String description;
     private String activityDescription;
     private Integer establishAt;
+
+    public Optional<Integer> getEstablishAt() {
+        return Optional.ofNullable(establishAt);
+    }
 }

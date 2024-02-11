@@ -1,6 +1,8 @@
 package com.skklub.admin.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,12 +13,15 @@ import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
+@Builder(builderMethodName = "hiddenBuilder")
 @NoArgsConstructor(access = PROTECTED)
+@AllArgsConstructor
 public class ClubMeta extends BaseEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "club_meta_id")
-    private Long id;
+    @Builder.Default
+    private Long id = null;
 
     private String name;
     private String activityType;
@@ -40,24 +45,12 @@ public class ClubMeta extends BaseEntity {
         return Optional.ofNullable(logo);
     }
 
-    /**
-     * 생성자 Without 설립 연도
-     */
-    public ClubMeta(String name, String activityType, String description, String activityDescription) {
-        this.name = name;
-        this.activityType = activityType;
-        this.description = description;
-        this.activityDescription = activityDescription;
-    }
-
-    /**
-     * 생성자 With 설립 연도
-     */
-    public ClubMeta(String name, String activityType, String description, String activityDescription, Integer establishAt) {
-        this.name = name;
-        this.activityType = activityType;
-        this.description = description;
-        this.activityDescription = activityDescription;
-        this.establishAt = establishAt;
+    public static ClubMetaBuilder builder(String name, String activityType, String description, String activityDescription) {
+        return hiddenBuilder()
+                .id(null)
+                .name(name)
+                .activityType(activityType)
+                .description(description)
+                .activityDescription(activityDescription);
     }
 }

@@ -3,6 +3,9 @@ package com.skklub.admin.domain;
 import com.skklub.admin.domain.enums.Campus;
 import com.skklub.admin.domain.enums.ClubType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,7 +19,7 @@ public class ClubCategorization {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "club_categorization_id")
-    private Long id;
+    private Long id = null;
 
     @Enumerated(EnumType.STRING)
     private Campus campus;
@@ -29,4 +32,5 @@ public class ClubCategorization {
         this.clubType = clubType;
         this.belongs = belongs;
     }
+
 }

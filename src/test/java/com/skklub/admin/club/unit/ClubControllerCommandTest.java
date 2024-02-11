@@ -3,7 +3,12 @@ package com.skklub.admin.club.unit;
 import com.skklub.admin.controller.AuthValidator;
 import com.skklub.admin.controller.ClubController;
 import com.skklub.admin.controller.S3Transferer;
+import com.skklub.admin.controller.dto.news.ClubFullInformationDTO;
+import com.skklub.admin.controller.dto.news.ClubMetaDTO;
+import com.skklub.admin.controller.dto.news.ClubOperationDTO;
+import com.skklub.admin.controller.dto.news.UserPublicInformationDTO;
 import com.skklub.admin.domain.Club;
+import com.skklub.admin.domain.ClubOperation;
 import com.skklub.admin.repository.ClubRepository;
 import com.skklub.admin.repository.UserRepository;
 import com.skklub.admin.service.ClubService;
@@ -45,10 +50,34 @@ public class ClubControllerCommandTest {
     @DisplayName("Club Id를 이용한 단일 상세 조회 - 정상 흐름")
     public void getFullClubByOperationId_Default_Success() throws Exception{
         //given
-        Long clubId = 123L;
-        new Club()
+        Long clubOperationId = 123L;
+        ClubMetaDTO clubMetaDTO = ClubMetaDTO.builder()
+                .name("testClub")
+                .description("testClubDescription testClubDescription testClubDescription testClubDescription testClubDescription testClubDescription testClubDescription testClubDescription testClubDescription testClubDescription")
+                .activityDescription("테스트 클럽 활동 설명입니다. 테스트 클럽 활동 설명입니다. 테스트 클럽 활동 설명입니다. 테스트 클럽 활동 설명입니다. 테스트 클럽 활동 설명입니다. 테스트 클럽 활동 설명입니다. ")
+                .build();
+        ClubOperationDTO clubOperationDTO = ClubOperationDTO
+        UserPublicInformationDTO userPublicInformationDTO = UserPublicInformationDTO.builder()
+                .name("테스트 유저 이름")
+                .contact("010-1234-1234")
+                .build();
+
+        ClubFullInformationDTO clubFullInformationDTO = ClubFullInformationDTO.builder()
+                .club_operation_id(clubOperationId)
+                .clubMetaDTO(clubMetaDTO)
+                .userPublicInformationDTO(userPublicInformationDTO)
+                .build();
+        ClubOperation clubOperation = ClubOperation.builder()
+                .id(clubOperationId)
+                .headLine("테스트 클럽 한줄 설명")
+                .mandatoryActivatePeriod("테스트 클럽 의무 활동 기간")
+                .memberAmount(60) //테스트 클럽 정원
+                .regularMeetingTime("테스트 클럽 정규 모임 시간")
+                .roomLocation("테스트")
+                .build();
 
         //mocking
+        clubService.findClubFullInformationByClubOperationId(clubOperationId);
 
         //when
 

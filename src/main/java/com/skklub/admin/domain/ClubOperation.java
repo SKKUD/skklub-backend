@@ -1,6 +1,8 @@
 package com.skklub.admin.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Where;
@@ -12,13 +14,16 @@ import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
+@Builder(builderMethodName = "hiddenBuilder")
 @NoArgsConstructor(access = PROTECTED)
+@AllArgsConstructor
 @Where(clause = "alive = true and visibility = true")
 public class ClubOperation extends BaseEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "club_operation_id")
-    private Long id;
+    @Builder.Default
+    private Long id = null;
 
     private String headLine;
     private String mandatoryActivatePeriod;
@@ -26,8 +31,10 @@ public class ClubOperation extends BaseEntity {
     private String regularMeetingTime;
     private String roomLocation;
 
-    private Boolean alive;
-    private Boolean visibility;
+    @Builder.Default
+    private Boolean alive = true;
+    @Builder.Default
+    private Boolean visibility = true;
 
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -56,5 +63,12 @@ public class ClubOperation extends BaseEntity {
         return Optional.ofNullable(roomLocation);
     }
 
-
+    public static ClubOperationBuilder builder(User president, ClubCategorization clubCategorization) {
+        return hiddenBuilder()
+                .id(null)
+                .president(president)
+                .clubCategorization(clubCategorization)
+                .alive(true)
+                .visibility(true);
+    }
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClubFullInformationDTO {
-    private Long id;
+    private Long club_operation_id;
 
     private ClubMetaDTO clubMetaDTO;
     private ClubOperationDTO clubOperationDTO;
