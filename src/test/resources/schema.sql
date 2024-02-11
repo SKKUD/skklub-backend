@@ -29,7 +29,6 @@ create table club_meta (
     activity_description text not null,
     establish_at int check(establish_at >= 1398 and establish_at <= 2999),
 
-    club_operation_id bigint not null,
     logo_id bigint not null
 );
 
@@ -47,6 +46,7 @@ create table club_operation(
     alive tinyint not null default 1,
 
     user_id bigint not null,
+    club_meta_id bigint not null,
     club_categorization_id bigint not null
 );
 
@@ -198,10 +198,10 @@ add constraint FK_club_operation__club_categorization
 foreign key (club_categorization_id)
 references club_categorization(club_categorization_id);
 
-alter table club_meta
-add constraint FK_club_meta__club_operation
-foreign key (club_operation_id)
-references club_operation (club_operation_id);
+alter table club_operation
+add constraint FK_club_operation__club_meta
+foreign key (club_meta_id)
+references club_meta (club_meta_id);
 
 alter table notice 
 add constraint FK_notice__thumbnail

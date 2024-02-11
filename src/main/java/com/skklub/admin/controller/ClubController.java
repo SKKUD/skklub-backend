@@ -1,6 +1,7 @@
 package com.skklub.admin.controller;
 
 import com.skklub.admin.controller.dto.*;
+import com.skklub.admin.controller.dto.news.ClubFullInformationDTO;
 import com.skklub.admin.domain.ActivityImage;
 import com.skklub.admin.domain.Logo;
 import com.skklub.admin.domain.User;
@@ -66,13 +67,15 @@ public class ClubController {
 
     //세부 정보 조회 by ID
     @GetMapping("/club/{clubId}")
-    public ResponseEntity<ClubResponseDTO> getClubById(@PathVariable Long clubId) {
-        return clubRepository.findDetailClubById(clubId)
-                .map(ClubDetailInfoDto::new)
-                .map(this::convertClubImagesToFile)
-                .map(ResponseEntity::ok)
-                .orElseThrow(ClubIdMisMatchException::new);
+    public ClubFullInformationDTO getClubById(@PathVariable Long clubId) {
+        return null;
+//        return clubRepository.findDetailClubById(clubId)
+//                .map(ClubDetailInfoDto::new)
+//                .map(this::convertClubImagesToFile)
+//                .map(ResponseEntity::ok)
+//                .orElseThrow(ClubIdMisMatchException::new);
     }
+
     @GetMapping("/club/my")
     public ResponseEntity<ClubResponseDTO> getMyClubByLoginUser(@AuthenticationPrincipal UserDetails userDetails) {
         String username = TokenProvider.getAuthentication(userDetails).getName();
