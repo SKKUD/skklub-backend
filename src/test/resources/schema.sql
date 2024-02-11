@@ -36,6 +36,11 @@ create table club_meta (
 create table club_operation(
     club_operation_id bigint primary key not null auto_increment,
 
+    created_at datetime(6) not null default now(6),
+    last_modified_at datetime(6) not null default now(6),
+    created_by varchar(20) not null,
+    last_modified_by varchar(20) not null,
+
     head_line varchar(50),
     mandatory_activate_period varchar(50),
     member_amount int,

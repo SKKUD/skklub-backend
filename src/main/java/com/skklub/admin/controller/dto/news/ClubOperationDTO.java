@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClubOperationDTO {
     private String headLine;
-    private String mandatoryActivityPeriod;
+    private String mandatoryActivatePeriod;
     private Integer memberAmount;
     private String regularMeetingTime;
     private String roomLocation;

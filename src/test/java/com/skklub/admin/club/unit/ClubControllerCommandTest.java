@@ -43,7 +43,7 @@ public class ClubControllerCommandTest {
      */
     @Test
     @DisplayName("Club Id를 이용한 단일 상세 조회 - 정상 흐름")
-    public void getClubById_Default_Success() throws Exception{
+    public void getFullClubByOperationId_Default_Success() throws Exception{
         //given
         Long clubId = 123L;
         new Club()

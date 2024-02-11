@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -55,7 +54,7 @@ public class ClubReadIntegrationTest {
         //given
 
         //when
-        ClubResponseDTO response = clubController.getClubById(1L).getBody();
+        ClubResponseDTO response = clubController.getFullClubByOperationId(1L).getBody();
 
         //then
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO(0);
@@ -84,7 +83,7 @@ public class ClubReadIntegrationTest {
         //given
 
         //when
-        ClubResponseDTO response = clubController.getClubById(2L).getBody();
+        ClubResponseDTO response = clubController.getFullClubByOperationId(2L).getBody();
 
 
         //then
@@ -115,7 +114,7 @@ public class ClubReadIntegrationTest {
         int recruitIndex = 2;
 
         //when
-        ClubResponseDTO response = clubController.getClubById(3L).getBody();
+        ClubResponseDTO response = clubController.getFullClubByOperationId(3L).getBody();
 
         //then
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO(2);
@@ -155,7 +154,7 @@ public class ClubReadIntegrationTest {
         int recruitIndex = 1;
 
         //when
-        ClubResponseDTO response = clubController.getClubById(2L).getBody();
+        ClubResponseDTO response = clubController.getFullClubByOperationId(2L).getBody();
 
         //then
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO(1);
@@ -194,7 +193,7 @@ public class ClubReadIntegrationTest {
         //given
 
         //when
-        ClubResponseDTO response = clubController.getClubById(1L).getBody();
+        ClubResponseDTO response = clubController.getFullClubByOperationId(1L).getBody();
 
         //then
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO(0);
@@ -222,7 +221,7 @@ public class ClubReadIntegrationTest {
         //given
 
         //when
-        ClubResponseDTO response = clubController.getClubById(6L).getBody();
+        ClubResponseDTO response = clubController.getFullClubByOperationId(6L).getBody();
 
         //then
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO(5);
@@ -259,7 +258,7 @@ public class ClubReadIntegrationTest {
         //given
 
         //when
-        ClubResponseDTO response = clubController.getClubById(2L).getBody();
+        ClubResponseDTO response = clubController.getFullClubByOperationId(2L).getBody();
 
         //then
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO(1);
@@ -296,7 +295,7 @@ public class ClubReadIntegrationTest {
         //given
 
         //when
-        ClubResponseDTO response = clubController.getClubById(1L).getBody();
+        ClubResponseDTO response = clubController.getFullClubByOperationId(1L).getBody();
 
         //then
         ClubCreateRequestDTO clubCreateRequestDTO = testDataRepository.getClubCreateRequestDTO(0);

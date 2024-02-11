@@ -66,8 +66,8 @@ public class ClubController {
 //=====READ=====//
 
     //세부 정보 조회 by ID
-    @GetMapping("/club/{clubId}")
-    public ClubFullInformationDTO getClubById(@PathVariable Long clubId) {
+    @GetMapping("/club/{clubOperationId}")
+    public ClubFullInformationDTO getFullClubByOperationId(@PathVariable Long clubOperationId) {
         return null;
 //        return clubRepository.findDetailClubById(clubId)
 //                .map(ClubDetailInfoDto::new)
